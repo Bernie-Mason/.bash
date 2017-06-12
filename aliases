@@ -1,0 +1,55 @@
+# Listing alias list
+alias lh='ls .* --color=auto'
+alias ll='ls -ls --color=auto'
+alias l.='ls -la --color=auto'
+
+# Directory alias (computer specific)
+alias cdd='cd ~/Documents/'
+alias cdw='cd ~/Documents/Writings/'
+alias cd..='cd ..'
+
+# find alias list
+alias fn='find -name'
+alias ffn='find -type f -name'
+
+# text comparison alias list
+alias dif='diff -u'
+
+# 
+alias edit-bash-aliases="vim ~/.bash/aliases"
+alias edit-bash-config="vim ~/.bash/config"
+alias edit-bash-env="vim ~/.bash/env"
+alias edit-bashrc="vim ~/.bashrc"
+alias edit-bash-profile=" vim ~/.bash_profile"
+alias view-bash-aliases="cat ~/.bash/aliases"
+alias view-bash-config="cat ~/.bash/config"
+alias view-bash-env="cat ~/.bash/env"
+
+# random other alias
+alias ROT13='tr a-zA-Z n-za-mN-ZA-M'
+
+# Git alias list
+alias ga='git add'
+alias gaa='git add .'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gpus='git push'
+alias gpul='git pull'
+alias gs='git status'
+alias gr='git remote'
+alias gri='git remote -v'
+alias gres='git reset'
+
+# Git logging alias
+alias gl='git log'
+alias glod='git log --oneline --decorate'
+alias glodg='git log --oneline --decorate --graph'
+alias glodga='git log --oneline --decorate --graph --all'
+
+# Git branching alias
+alias gb='git branch'
+alias gbi='git branch -vv'
+alias gch='git checkout'
+alias gbch='git checkout -b'
+alias grbi='git remote -v show origin'
+
