@@ -1,0 +1,23 @@
+function update-remote-all(){
+	
+	local BASH_CORE_FILES=~/.bash/.bash_core
+	if [ ! -d $BASH_CORE_FILES ];then
+		mkdir $BASH_CORE_FILES
+	fi
+
+	local HOST=$hostname
+
+	cp ~/.bashrc ~/.bash/.bash_core/.bashrc.${HOSTNAME}
+	cp ~/.bash_profile ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
+	cd ~/.bash
+	git add .;
+	git commit -m 'Generic update';
+	git push;
+}
+
+ds() {
+    echo "Disk space for user $HOSTNAME"
+    df -h
+}
+
+
