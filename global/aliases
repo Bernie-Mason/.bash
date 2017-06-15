@@ -22,9 +22,9 @@ alias edit-bash-env="vim ~/.bash/global/env"
 alias edit-bash-scripts="vim ~/.bash/global/scripts"
 alias edit-bashrc="vim ~/.bashrc"
 alias edit-bash-profile=" vim ~/.bash_profile"
-alias view-bash-aliases="cat ~/.bash/global/aliases"
-alias view-bash-config="cat ~/.bash/global/config"
-alias view-bash-scripts="cat ~/.bash/global/scripts"
+alias view-bash-aliases="cat ~/.bash/global/aliases; cat ~/.bash/local/aliases"
+alias view-bash-config="cat ~/.bash/global/config; cat ~/.bash/local/config"
+alias view-bash-scripts="cat ~/.bash/global/scripts; cat ~/.bash/local/scripts"
 
 # random other alias
 alias ROT13='tr a-zA-Z n-za-mN-ZA-M'

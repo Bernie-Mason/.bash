@@ -4,6 +4,12 @@
 
 # Load Files #
 function sourceAllBashFiles(){
+	FOLDER_TO_BE_SOURCED=~/.bash/local/
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f) # -not -path "./.git*");
+	do
+		. $i
+	done;
+
 	FOLDER_TO_BE_SOURCED=~/.bash/global/
 	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
 	do

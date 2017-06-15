@@ -1,18 +1,1 @@
 . .bashrc
-
-# Directory alias (computer specific)
-alias cdd='cd ~/Documents/'
-alias cdp='cd ~/Documents/Visual\ Studio\ 2017/Projects/'
-alias cdmagic='cd ~/AppData/Local/Cockatrice/Cockatrice/decks' 
-alias cd..='cd ..'
-
-# find alias list
-alias fn='find -name'
-alias ffn='find -type f -name'
-
-update_magic() {
-	cdmagic
-	gpul
-	cd
-	return
-}
