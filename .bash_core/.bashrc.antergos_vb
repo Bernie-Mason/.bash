@@ -14,30 +14,19 @@ EDITOR=/usr/bin/nano
 
 # Load Files #
 function sourceAllBashFiles(){
-	FOLDER_TO_BE_SOURCED=~/.bash/local/
-	for i in $(find $FOLDER_TO_BE_SOURCED -type f) # -not -path "./.git*");
-	do
-		. $i
-	done;
+    local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}
+    if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
+        mkdir $FOLDER_TO_BE_SOURCED
+    fi
+    for i in $(find $FOLDER_TO_BE_SOURCED -type f)
+    do
+        . $i
+    done;
 
-	FOLDER_TO_BE_SOURCED=~/.bash/global/
-	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
-	do
-		. $i
-	done;
+    FOLDER_TO_BE_SOURCED=~/.bash/global/
+    for i in $(find $FOLDER_TO_BE_SOURCED -type f)
+    do
+        . $i
+    done;
 }
 sourceAllBashFiles
-
-# Change umask to make directory sharing easier
-umask 0002
-
-# Ignore duplicates in command line history and increase
-# history size to 1000 lines
-export HISTCONTROL=ignoredups
-export HISTSIZE=1000
-
-# Antergoes virtual box specific aliases
-alias bp='vim ~/.bashrc'
-alias bhelp='cat ~/gitconfigpref/useful-commands'
-alias vu='vim ~/.vimrc'
-alias bpu='source ~/.bashrc'
