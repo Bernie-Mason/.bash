@@ -11,9 +11,9 @@ function update-remote-all(){
 	cp ~/.bash_profile ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
 	cd ~/.bash
 	git pull
-	git add .;
-	git commit -m 'Generic update';
-	git push;
+	git add .
+	git commit -m 'Generic update'
+	git push
 }
 
 ds() {

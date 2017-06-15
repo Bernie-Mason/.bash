@@ -1,0 +1,7 @@
+update-magic() {
+	cdmagic
+	git pull
+	cd
+	return
+}
+
