@@ -1,6 +1,9 @@
 update-magic() {
 	cdmagic
 	git pull
+	git add .
+	git commit 'generic update'
+	git push
 	cd
 	return
 }

@@ -17,14 +17,17 @@ alias dif='diff -u'
 
 # 
 alias edit-bash-aliases="vim ~/.bash/global/aliases"
+alias edit-bash-aliases-local="vim ~/.bash/${HOSTNAME}OD/aliases"
 alias edit-bash-config="vim ~/.bash/global/config"
+alias edit-bash-config-local="vim ~/.bash/${HOSTNAME}/config"
 alias edit-bash-env="vim ~/.bash/global/env"
 alias edit-bash-scripts="vim ~/.bash/global/scripts"
+alias edit-bash-scripts-local="vim ~/.bash/${HOSTNAME}/scripts"
 alias edit-bashrc="vim ~/.bashrc"
 alias edit-bash-profile=" vim ~/.bash_profile"
-alias view-bash-aliases="cat ~/.bash/global/aliases; cat ~/.bash/local/aliases"
-alias view-bash-config="cat ~/.bash/global/config; cat ~/.bash/local/config"
-alias view-bash-scripts="cat ~/.bash/global/scripts; cat ~/.bash/local/scripts"
+alias view-bash-aliases="cat ~/.bash/global/aliases; cat ~/.bash/${HOSTNAME}/aliases"
+alias view-bash-config="cat ~/.bash/global/config; cat ~/.bash/l/${HOSTNAME}/config"
+alias view-bash-scripts="cat ~/.bash/global/scripts; cat ~/.bash/${HOSTNAME}/scripts"
 
 # random other alias
 alias ROT13='tr a-zA-Z n-za-mN-ZA-M'
@@ -32,9 +35,11 @@ alias ROT13='tr a-zA-Z n-za-mN-ZA-M'
 # Git alias list
 alias ga='git add'
 alias gaa='git add .'
+alias garo='git add remote origin'
 alias gc='git commit'
 alias gcm='git commit -m'
 alias gpus='git push'
+alias gpusom='git push -u origin master'
 alias gpul='git pull'
 alias gs='git status'
 alias gr='git remote'
