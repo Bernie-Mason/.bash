@@ -1,4 +1,4 @@
-function update-remote-all(){
+function update-bash-all(){
 	
 	local BASH_CORE_FILES=~/.bash/.bash_core
 	if [ ! -d $BASH_CORE_FILES ];then
