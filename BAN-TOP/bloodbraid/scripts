@@ -1,0 +1,11 @@
+function bloodbraid-update-jsonlib(){
+	cd ~/Documents/data_store/mtgjson
+	git pull
+	cd -
+}
+
+# To account for 
+function bloodbraid-full-update(){
+	
+
+}
