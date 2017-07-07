@@ -1,0 +1,63 @@
+# The purpose of this help file is so that I can remember commands I don't commonly use. Commands like cd and ls are therefore not found under navigational commands as I use them ferquently and am unlikely to forget them.
+# Commands that I commonly use may be included because if they have lots of options but may be removed later when I am comfortable with it.
+
+# Navigation commands (cd etc)
+pwd - prints working directory
+
+# Directory/file exploration (ls, less etc)
+file 		Gives the file type
+stat 		Display file or filesystem status
+locate 		Find a file by name (super basic)
+find 		Searches for files in a directory hierarchy (-type, -name "*.jpg")
+
+# File manipulation (rm, cp, mv and mkdir)
+ln (-s) file link 		Create a hard or symbolic (-s) link from a file.
+touch 					Change file times (will create new if doesn't exist)
+	# Common options			
+	-i --interactive  	Prompt user for confirmation (cp, rm and mv)
+	-r --recursive  	Perform action directories and contents (cp and rm)
+	-v --verbose 		Display info (cp, rm and mv)
+	-u --update 		Perform action on only files that don't exist or are newer than existing corresponding files (cp and mv).
+	-f --force 			Do not prompt, overrides -i. (rm)
+
+# Redirection Commands 
+cat [file..]	Concatenate files, can use wildcards
+xargs			Build and execute command lines from standard input
+tee 			Read from standard input and write to standard output and files
+wc 				Print newline, word, and byte counts for each file
+	# Filters
+	sort 			Sort lines of text, e.g ls -a | sort | uniq | less
+	uniq			Report or omit repeated lines
+	head 			Output the first part (tail for last part)
+
+# Shell related commands
+printenv 		Print a list of environmental variables
+clear 			Clear the screen (CTRL-L)
+history 		display history contents (CTRL-R for a reverse incremental search)
+shell [file]	Record the entire shell session in a file
+su 				Run the shell as another user
+sudo			Execute a command as a another user (like pacman)
+
+# Identifying Commands
+type 			Display a command's type (e.g. type cp)
+which			Display an executable's location (e.g which ls)
+help			Get help for shell builtins (e.g. help cd)
+man 			Display a programs manual page
+apropos 		Display appropriate commands
+whatis	 		A brief description
+
+# Permissions Commands
+id 				Display User identity
+chmod			Change a file's permissions (mode)
+umask 			Set the default file permissions
+chown			Change a file's owners
+chgrp 			Change a file's group ownership
+passwd 			Change a user's password
+
+# Process Commands
+ps 				Take a snapshot of current processes
+top 			Display tasks
+jobs			List active jobs
+bg 				Place a job in the background
+fg				Place a job in the foreground
+killall			Kill processes by name

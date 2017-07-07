@@ -1,12 +1,17 @@
+# Bernie help pages
+alias bhelp='vim ~/.bash/global/bhelp/bhelp'
+
 # Listing alias list
 alias lh='ls .* --color=auto'
 alias ll='ls -ls --color=auto'
 alias l.='ls -la --color=auto'
+alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'
 
 # Directory alias (computer specific)
 alias cdd='cd ~/Documents/'
 alias cdw='cd ~/Documents/Writings/'
 alias cd..='cd ..'
+alias cdb='cd ~/.bash/bhelp'
 
 # find alias list
 alias fn='find -name'
@@ -15,7 +20,7 @@ alias ffn='find -type f -name'
 # text comparison alias list
 alias dif='diff -u'
 
-# 
+# bash aliases 
 alias edit-bash-aliases="vim ~/.bash/global/aliases"
 alias edit-bash-aliases-local="vim ~/.bash/${HOSTNAME}OD/aliases"
 alias edit-bash-config="vim ~/.bash/global/config"
@@ -30,7 +35,7 @@ alias view-bash-config="cat ~/.bash/global/config; cat ~/.bash/l/${HOSTNAME}/con
 alias view-bash-scripts="cat ~/.bash/global/scripts; cat ~/.bash/${HOSTNAME}/scripts"
 
 # random other alias
-alias ROT13='tr a-zA-Z n-za-mN-ZA-M'
+# alias ROT13='tr a-zA-Z n-za-mN-ZA-M'
 
 # Git alias list
 alias ga='git add'

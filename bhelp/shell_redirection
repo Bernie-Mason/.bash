@@ -1,0 +1,52 @@
+# The purpose of this help file is to explain concepts about the terminal redirection and falls into the wider catagory of terminal help files
+
+Redirection
+
+With Input/Output (I/O) redirection we can redirect the input and output of commands to and from files, as well as connect multiple commands to make powerful commands called pipelines.
+
+# Redirection Commands
+cat         Concatenate files
+sort        Sort lines of text
+uniq        report or omit repeated lines
+wc          Print newline, word, and byte counts for each file
+head        Output the first part (tail for last part)
+tee         Read from standard input and write to standard output and files
+
+Everything is a file
+One of the thems of Unix is that everything is a file. Programs like ls actually send their results to a special file called standard output (stdout) and their status message to another file called standard error (stderr). These are, by default, linked to the screen and not saved to disk. 
+In addition, many programs (although not all) take input from a facility called standard input (stdin), which is, by default, linked to the keyboard.
+I/O redirection allows us to redefine where standard output and input go to.
+
+Redirecting standard ouput
+To redirect (and overwrite) to a file:
+	ls -l /usr/bin > ls-output.txt
+	cat * > all_files.txt
+To redirect (and append) to a file:
+	ls -l /usr/bin > ls-output.txt
+
+Redirecting standard error
+To redirect (and overwrite) the standard error to a file:
+	ls -l /usr/bin 2> ls-error.txt
+
+Redirecting both standard output and error
+To redirect both
+	ls -l /usr/bin > ls-output.txt 2>&1
+Two redirections with this method. Newer versions of bash allow this:
+	ls -l /usr/bin &> ls-output.txt
+
+Redirecting standard input
+	cat < output*.txt
+This is of course the same as:
+	cat output*.txt
+So it's not very useful but it demonstrates that the second is actually using the file as a source of standard input. There is actually redirection going on!
+
+
+Pipelines
+These can be used to pipe the stdout of one command to the stdin of another:
+	cat *.txt | less
+
+	Filters
+	Text can be filtered easily using commands like sort, uniq, head, tail and grep
+
+	Creating a T
+	Linux provides a command called tee that allows both redirection to both standard output and one or more files. This allows us to pick text off at a particular point in our pipe.

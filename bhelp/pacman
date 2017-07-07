@@ -1,0 +1,27 @@
+Pacman command notes
+
+Queries the local database with the -Q flag
+	$ pacman -Q [package_name]
+Sync databases -S
+	$ pacman -S [package_name]
+Update all packages on the system
+	$ pacman -Syu
+
+The main options are (from $ info  pacman)
+
+-S      --sync. Synchronise packages. Packages are installed directly from remote repositories, including all dependencies required to run the packages. For example, pacman -S qt will downlaoad and install qt and all the packages depends on. If a package name exists in more than one repository, the repository can be explicitly specified to clarify the package to install.
+        -Su will upgrade all packages that are out-of-date. When upgrading pacman, pacman performs comparison to determine which packages need upgrading. 
+-Q      --query. Query the package database. This operation allows you to view installed packages their files, as well as meta-information about individual packages. This can be run against the local package database or can be used on individual package files. In the first, if no package names are provided in the command line, all installed packages will be queried. This comes with many options
+        -c, --changelog: View the ChangeLog of a package if exists
+        -e, --explicit: Restrict or filter output to explicitly installed packages.
+		-i, --info: Display the info of a given package
+        -k, --check: Check that all files owned by the given package are present on the system.
+        -l, --list: List all files owned by a given package
+        -q, --quiet: Show less information for certain query operations. This is useful when pacman's output is processed in a script. Search will only show package names and not version, group, and description information.
+        -s, --search <regexp>: Search each locally-installed package for names or descriptions that match regexp.
+-D      --database. Operate on the package database. This option allows you to modify certain attributes of the installed packages in pacman's database. It also allows you to check the databases for internal consistency.
+-R      --remove. Remove package(s) from the system. Groups can also be specified to be removed. See info pacman for options.
+-T      --deptest. Check dependencies
+-U      --upgrade. Upgrade or add package(s) to the system and install the required dependencies from sync repositories. Either a URL or file path can be specified. This is a "remove-than-add" process.
+-F      --files. Query the files database. This operation allows you to look packages owning certain files or display files owned by certain packages. Only packages that are part of your sync database are searched.
+

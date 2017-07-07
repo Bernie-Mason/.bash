@@ -1,0 +1,21 @@
+Wildcard        Matches
+*               Any character
+?               Any single character
+[characters]    Any character that is a member of a set of characters i.e. [abef] or [a-z]
+[!characters]   Not case of above
+[[:class:]]     Where clas is alnum, alpha, digit, upper and lower
+
+The final classes are character classes and should be used instead of ranges like [A-Z] where possible.
+
+Pathname expansion
+The mechanism by which wildcards work is called pathname expansion.
+
+Uses:
+Use cp -u (update) *.html destination to copy
+ all html files from your current folder to a
+ destination folder.
+Use echo * to like ls. 
+
+
+Regex similarities
+A wildcard is a generic term referring to something that can be substituted for all possibilities; like a joker being a wildcard in poker. A regular expression includes such functionality but also has much, much more in terms of your ability to restrict characters and flexibility in the number of characters you want to match.
