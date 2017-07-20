@@ -3,7 +3,7 @@
 #
 
 # Load Files #
-function sourceAllBashFiles(){
+function source-all-bash-files(){
 	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}
 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
 		mkdir $FOLDER_TO_BE_SOURCED
@@ -19,4 +19,4 @@ function sourceAllBashFiles(){
 		. $i
 	done;
 }
-sourceAllBashFiles
+source-all-bash-files
