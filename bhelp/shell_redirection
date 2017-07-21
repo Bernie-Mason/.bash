@@ -1,5 +1,3 @@
-# The purpose of this help file is to explain concepts about the terminal redirection and falls into the wider catagory of terminal help files
-
 Redirection
 
 With Input/Output (I/O) redirection we can redirect the input and output of commands to and from files, as well as connect multiple commands to make powerful commands called pipelines.

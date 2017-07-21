@@ -13,7 +13,7 @@ EDITOR=/usr/bin/nano
 # <<< END ADDED BY CNCHI INSTALLER
 
 # Load Files #
-function sourceAllBashFiles(){
+function source_all_bash_files(){
     local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}
     if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
         mkdir $FOLDER_TO_BE_SOURCED
@@ -29,4 +29,4 @@ function sourceAllBashFiles(){
         . $i
     done;
 }
-sourceAllBashFiles
+source_all_bash_files

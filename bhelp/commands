@@ -37,6 +37,7 @@ history 		display history contents (CTRL-R for a reverse incremental search)
 shell [file]	Record the entire shell session in a file
 su 				Run the shell as another user
 sudo			Execute a command as a another user (like pacman)
+printf			Formatted print: printf "My %s variable" foo
 
 # Identifying Commands
 type 			Display a command's type (e.g. type cp)

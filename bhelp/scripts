@@ -1,0 +1,10 @@
+Shell scripts
+
+A shell script is a file containing a series of commands. The shell reads this file and carries out the command.
+
+Steps for making a script
+	1. Write the bugger. Ordinary text file. Needs to start with a shebang (i.e. #!/bin/bash) but otherwise can just be a series of commands and functions.
+	2. Make the script executable. Set file permissions using chmod (i.e. chmod 755 or 700).
+	3. Put the script somewhere the shell can find it. The shell automatically searches certain directories for executable files when no explicit path is specified.
+		For example in ~/.bash/antergos_vb/config: export PATH="${PATH}:/home/bernie/bin"
+

@@ -1,0 +1,73 @@
+#Regular Expressions
+
+Note: A description of regex in vi, grep, egrep, sed and awk are all talked about here.
+
+Definition: Regular expressions are symbolic notations used to identify patterns in text. They are similiar to the shell's wildcard method of matching file and pathnames but on a much grander scale. Regular expressions are supported in many places but vary slightly from tool to tool. Here I'll use grep command for most of the examples
+
+The syntax for the commands described here are as follows:
+grep [options] regex [file...]
+sed [options] commandtype/pattern/replacement/flags [file...]
+
+Metacharacters
+Different metacharacters have different meanings depending on their usage. Note that vi and sed have both a search pattern (on the left) and a replacement pattern on the right
+
+Common Metacharacters: sed, vi, grep, awk and egrep
+Symbol 		Meaning
+.			Match any single character
+* 			Match zero or more proceeding
+^ 			Match the beginning of a line
+$			Match the end of a line
+\ 			Escape the following character
+[ ]			Match one from a set
+
+Specific: sed, vi, grep
+\( \) 		Store a pattern to replay later (up to 9)
+\n			Replay subpattern (where n is a number!)
+\{ \} 		Match a range of instances 
+
+Specific: awk and egrep
++ 			Match one or more proceedung
+? 			Match zero or one
+| 			Or. Seperates choices to match
+( )	 		Group expressions to match
+
+Other options
+\b 			Boundary word. Specifies that the position is a word boundary i.e. \bline\b
+
+Replacement patterns: sed vi
+\ 			Escape following character
+\n 			Text matching pattern stored in \( \(
+&			Text matching search pattern
+
+Specifc replacement: vi
+- 			Reuse previous replacement pattern
+\u			Change character to uppercase (\U for all)
+\l 			Change character to lowercase (\L for all)uu8u9
+\e			Turn off previous \l or \u (\E)
+
+Extended vs Basic regex
+POSIX splits regular expression implementations into two kinds: basic regex (BRE) and extended (ERE). This is a matter of metacharacters as shown above. With ERE ( ), { }, ?, + and | are metacharacters. However, the characters {} and () are also treated as metacharacters in BRE if they're escaped with a backslash. In ERE, any character preceeded with a backslash is treated as a literal.
+
+grep options:
+	-i 		Ignore case
+	-v 		Invert match. Print lines that don't contain a match
+	-c 		Print number of matches (--count)
+	-l 		Print name of each file that contains a match
+	-L 		Inverted -l
+	-w 		Match a specific word
+	-n 		Prefix each matching line with the number of the line within the file
+	-h 		For mutifile searches, suppress the output of filenames
+	-E 		Use extended regex
+
+sed options
+	-e		Multiple commands e.g. sed -e 's/T/t/' -e 's/B/b'
+	-n 		No printing
+	-f 		Next argument is a file containing editing commands
+sed commandtype
+	s/ 		Substitute
+sed flags
+	/g 		global (performed on all lines)
+	/d 		delete lines containing pattern (also with !d)
+	/p 		print
+	/I 		Pattern match is case insensitive
+

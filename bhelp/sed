@@ -1,0 +1,27 @@
+
+sed [options] commandtype/pattern/replacement/flags [file...]
+
+
+sed options
+	-r 		Use regular extended expressions (no need to use escaping)
+    -e      Multiple commands e.g. sed -e 's/T/t/' -e 's/B/b'
+    -n      No printing
+    -f      Next argument is a file containing editing commands
+sed commandtype
+    s/      Substitute
+sed flags
+    /g      global (performed on all lines)
+    /d      delete lines containing pattern (also with !d)
+    /p      print
+    /I      Pattern match is case insensitive
+
+More on sed
+The stream editor, sed, is a non-interactive editor. It interprets a script and performs the actions in the script. sed is stream-oriented because, like many Unix-like programs, inputs flows through the program and is directed to standard output (making it ideal for pipes). Typical uses:
+    1. Editing one or more files automatically
+    2. Simplifying repetitive edits to multiple files
+    3. Writing conversion programs
+sed operates as follows
+    1. Each line of input is copied into a pattern space as an internal buffer where editing operations are performed. All editing commands in a sed script are applied, in order, to each line of input. Editing commands are applied to all lines globally unless addressing restricts the lines affected.
+    2. If a command changes the input, subsequent commands and address tests will be applied to the current line in the pattern space, not the original input line.
+
+
