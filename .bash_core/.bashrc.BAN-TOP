@@ -3,20 +3,41 @@
 #
 
 # Load Files #
-function source-all-bash-files(){
+function source_all_bash_files(){
 	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}
 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
 		mkdir $FOLDER_TO_BE_SOURCED
 	fi
-	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
-	do
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;
 
 	FOLDER_TO_BE_SOURCED=~/.bash/global/
-	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
-	do
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;
 }
-source-all-bash-files
+source_all_bash_files
+
+
+function find_bin_scripts(){
+ 	local FOLDER_TO_BE_SOURCED=~/bin
+ 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
+ 		mkdir $FOLDER_TO_BE_SOURCED
+ 	fi
+ 	for i in $(find $FOLDER_TO_BE_SOURCED -type d); do
+ 		export PATH+=":$i"
+ 	done;
+
+ 	FOLDER_TO_BE_SOURCED=~/.bash/core_bin/
+ 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
+ 		mkdir $FOLDER_TO_BE_SOURCED
+ 	fi
+ 	for i in $(find $FOLDER_TO_BE_SOURCED -type d); do
+ 		export PATH+=":$i"
+	done;
+}
+ 
+#Update PATH variable for my scripts:
+find_bin_scripts
+

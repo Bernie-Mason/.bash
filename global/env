@@ -1,3 +1,4 @@
+
 # Change umask to make directory sharing easier
 umask 0002
 
@@ -5,7 +6,4 @@ umask 0002
 # history size to 1000 lines
 export HISTCONTROL=ignoredups
 export HISTSIZE=1000
-
-#Update PATH variable for my scripts:
-export PATH="${PATH}:/home/bernie/bin"
 

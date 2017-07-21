@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function update-bash-all(){
 	
 	local BASH_CORE_FILES=~/.bash/.bash_core
