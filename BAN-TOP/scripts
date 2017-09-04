@@ -4,7 +4,7 @@ update-magic() {
 	git add .
 	git commit 'generic update'
 	git push
-	cd
+	cd -
+	ascii_ok
 	return
 }
-
