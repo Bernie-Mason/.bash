@@ -17,12 +17,15 @@ alias cdb='cd ~/.bash/bhelp'
 alias fn='find -name'
 alias ffn='find -type f -name'
 
+# grep alias
+alias gxr='grep -rn --color=always'
+
 # text comparison alias list
 alias dif='diff -u'
 
 # bash aliases 
 alias edit-bash-aliases="vim ~/.bash/global/aliases"
-alias edit-bash-aliases-local="vim ~/.bash/${HOSTNAME}OD/aliases"
+alias edit-bash-aliases-local="vim ~/.bash/${HOSTNAME}/aliases"
 alias edit-bash-config="vim ~/.bash/global/config"
 alias edit-bash-config-local="vim ~/.bash/${HOSTNAME}/config"
 alias edit-bash-env="vim ~/.bash/global/env"

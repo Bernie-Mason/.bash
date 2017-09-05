@@ -1,8 +1,20 @@
+#!/bin/bash
 update-magic() {
 	cdmagic
 	git pull
 	git add .
-	git commit 'generic update'
+	git commit -m'generic update'
+	git push
+	cd -
+	ascii_ok
+	return
+}
+
+update-sublime() {
+	cd 'C:/Users/BAN/AppData/Roaming/Sublime Text 3/Packages/User/'
+	git pull
+	git add .
+	git commit -m'generic update'
 	git push
 	cd -
 	ascii_ok
