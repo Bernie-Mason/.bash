@@ -17,6 +17,7 @@ function update-bash-all(){
 	git commit -m 'Generic update'
 	git push
 	cd -
+	ascii_ok
 }
 
 function backup-bashrc-bashprofile(){
