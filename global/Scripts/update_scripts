@@ -33,15 +33,4 @@ function backup-bashrc-bashprofile(){
 	cp ~/.bash_profile ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
 }
 
-ds() {
-    echo "Disk space for user $HOSTNAME"
-    df -h
-}
 
-function rmbin() {
-   echo "removing 'obj' directories";
-   find . -type d -name obj | xargs -I{} rm -rf "{}";
-   echo "removing 'bin' directories";
-   find . -type d -name bin | xargs -I{} rm -rf "{}";
-   echo "done.";
-}

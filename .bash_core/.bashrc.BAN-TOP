@@ -24,7 +24,7 @@ function source_all_bash_files(){
 }
 source_all_bash_files
 
-
+# All local binaries are sourced when source_all_bash_files is run
 function find_bin_scripts(){
  	local FOLDER_TO_BE_SOURCED=~/bin
  	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then

@@ -20,3 +20,14 @@ update-sublime() {
 	ascii_ok
 	return
 }
+
+update-writings() {
+	cd 'C:/Users/BAN/Documents/Writings/'
+	git pull
+	git add .
+	git commit -m'generic update'
+	git push
+	cd -
+	ascii_ok
+	return
+}
