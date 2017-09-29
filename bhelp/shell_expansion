@@ -58,6 +58,19 @@ Or for an entire pipeline:
 	[bernie@antergos_vb bhelp]$ file $(ls /usr/bin/* | grep bunzip)
 	/usr/bin/bunzip2: symbolic link to bzip2
 
+Pattern substitution
 
+	${parameter/pattern/string}
 
+	The pattern is expanded to produce a pattern just as in pathname expansion. Parameter is expanded and the longest match of pattern against its value is replace with the string. ONLY FIRST MATCH unless you being the patter with /:
 
+	${parameter//pattern/string}
+	
+	All matches replaced. This can modify the replacement behaviour:
+
+Pattern beings with:
+/						All matches replaced
+#						Pattern must match the beginning of the expanded value of the parameter
+%						Pattern must match the end of the expanded value of the parameter
+
+	If the parameter value is @ or *, i.e. an array: ${array[@]} then the substitution operation is applied to each positional parameter in turn and the expansion is the resultant list/array

@@ -1,0 +1,2 @@
+
+$ find . -name "aliases" | xargs grep -E '^alias'

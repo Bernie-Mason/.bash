@@ -1,0 +1,25 @@
+BASH - creating a new repo from existing file set
+
+nav to file in bash
+
+$git init 
+
+This initialises new repository. 
+
+$git add .
+$git commit 'commit message'
+
+Now we need to add a remote. Note that the remote HAS to be empty otherwise you're going to get issues. Not even a readme in the remote. If you haven't already created a remote, go to github and do this.
+
+Now get the url of the remote and do this
+
+$ git remote add origin <url>
+
+You won't be able to push yet as your branch (probably master) won't yet have an upstream branch. You'll get this error message
+
+$ git push
+fatal: The current branch master has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin master
+

@@ -1,5 +1,6 @@
 # Bernie help pages
 alias bhelp='vim ~/.bash/global/bhelp/bhelp'
+alias bashi='bash -c "help set"'
 
 # Listing alias list
 alias lh='ls .* --color=auto'

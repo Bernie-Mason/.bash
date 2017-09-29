@@ -25,6 +25,9 @@ Specific: sed, vi, grep
 \n			Replay subpattern (where n is a number!)
 \{ \} 		Match a range of instances 
 
+Backreferences - remembering patterns
+\(, \) and \1 	A pattern can be marked using \( \) and recall using \1 where 1 is the number of the pattern marked
+
 Specific: awk and egrep
 + 			Match one or more proceedung
 ? 			Match zero or one

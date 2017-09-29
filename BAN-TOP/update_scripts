@@ -31,3 +31,14 @@ update-writings() {
 	ascii_ok
 	return
 }
+
+update-python() {
+	cd 'C:/Users/BAN/Documents/Python/'
+	git pull
+	git add .
+	git commit -m'generic update'
+	git push
+	cd -
+	ascii_ok
+	return
+}

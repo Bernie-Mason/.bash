@@ -22,7 +22,6 @@ function source_all_bash_files(){
 		. $i
 	done;
 }
-source_all_bash_files
 
 # All local binaries are sourced when source_all_bash_files is run
 function find_bin_scripts(){
@@ -52,6 +51,29 @@ function find_bin_scripts(){
  
  
 function find_python_scripts(){
+	# ./AppData/Local/Programs/Python/Python36/Lib/venv/scripts
+	# ./AppData/Local/Programs/Python/Python36/Tools/scripts
+	# ./AppData/Local/Programs/Python/Python36-32/Lib/venv/scripts
+	
+
+	local FOLDER_TO_BE_SOURCED=~/AppData/Local/Programs/Python/Python36/Tools/scripts
+ 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
+ 		mkdir $FOLDER_TO_BE_SOURCED
+ 	fi
+ 	for i in $(find $FOLDER_TO_BE_SOURCED -type d); do
+ 		export PATH+=":$i"
+ 	done;
+
+ 	local FOLDER_TO_BE_SOURCED=~/AppData/Local/Programs/Python/Python36-32/Tools/scripts
+ 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
+ 		mkdir $FOLDER_TO_BE_SOURCED
+ 	fi
+ 	for i in $(find $FOLDER_TO_BE_SOURCED -type d); do
+ 		export PATH+=":$i"
+ 	done;
+
+ 	
+
  	local FOLDER_TO_BE_SOURCED=~/Documents/Python
  	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
  		mkdir $FOLDER_TO_BE_SOURCED
@@ -62,6 +84,7 @@ function find_python_scripts(){
 }
 
 #Update PATH variable for my scripts:
+source_all_bash_files
 find_bin_scripts
 find_python_scripts
 ascii_bernie_in_binary
