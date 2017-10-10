@@ -51,10 +51,6 @@ function find_bin_scripts(){
  
  
 function find_python_scripts(){
-	# ./AppData/Local/Programs/Python/Python36/Lib/venv/scripts
-	# ./AppData/Local/Programs/Python/Python36/Tools/scripts
-	# ./AppData/Local/Programs/Python/Python36-32/Lib/venv/scripts
-	
 
 	local FOLDER_TO_BE_SOURCED=~/AppData/Local/Programs/Python/Python36/Tools/scripts
  	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
