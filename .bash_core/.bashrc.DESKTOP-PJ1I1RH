@@ -1,0 +1,22 @@
+#
+# ~/.bashrc
+#
+
+# Load Files #
+function sourceAllBashFiles(){
+	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}
+	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
+		mkdir $FOLDER_TO_BE_SOURCED
+	fi
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
+	do
+		. $i
+	done;
+
+	FOLDER_TO_BE_SOURCED=~/.bash/global/
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
+	do
+		. $i
+	done;
+}
+sourceAllBashFiles
