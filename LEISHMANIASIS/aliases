@@ -1,0 +1,9 @@
+
+# Directory alias (computer specific)
+alias cd-localbash="cd ~/.bash/LEISHMANIASIS/"
+alias cdepro='cd /C/Dev/Epro'
+alias xh="explorer ."
+alias EproStart="start /C/Dev/Epro/Epro.sln"
+alias gcm_help="head -n 9 ~/.bash/bhelp/git_cm_help"
+
+
