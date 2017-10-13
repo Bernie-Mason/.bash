@@ -1,0 +1,13 @@
+[user]
+	name = Bernie Mason
+	email = bernie.mason@gmail.com
+[core]
+	autocrlf = false
+	whitespace = cr-at-eol
+[alias]
+    recent-branches = for-each-ref refs/heads/ \
+  --count=10 \
+  --sort=-committerdate \
+  --format='%(objectname:short) %(committerdate:short) %(refname:short)'
+[branch]
+	autosetuprebase = always
