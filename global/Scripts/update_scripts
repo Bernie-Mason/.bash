@@ -1,18 +1,5 @@
 #!/bin/bash
 
-function update-bash-all(){
-	
-	backup-bashrc-bashprofile
-
-	cd ~/.bash
-	git pull
-	git add .
-	git commit -m 'Generic update'
-	git push
-	cd -
-	ascii_ok
-}
-
 function backup-bashrc-bashprofile(){
 	echo 'making directory if doesnt exist'
 	local BASH_CORE_FILES=~/.bash/.bash_core
@@ -26,5 +13,19 @@ function backup-bashrc-bashprofile(){
 	cp ~/.bash_profile ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
 	cp ~/.gitconfig ~/.bash/.bash_core/.gitconfig.${HOSTNAME}
 }
+
+function update-bash-all(){
+	
+	backup-bashrc-bashprofile
+
+	cd ~/.bash
+	git pull
+	git add .
+	git commit -m 'Generic update'
+	git push
+	cd -
+	ascii_ok
+}
+
 
 
