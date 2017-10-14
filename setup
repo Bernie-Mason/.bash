@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Do you create .bashrc files and .bash_profile files using templates from previous computers?
+
+# If yes then give the selection of computer names to copy from. Have an option to print out the .bashrc file contains (head = 10) for each of the setup files
+
+# Create .bashrc and .bash_profile files. Reset bash
+
+# Do you want to include update scripts using templates from other computers?
+
+# Perform swapping of hostnames to correct update scripts
+
+# 
