@@ -12,7 +12,7 @@ alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'
 alias cdd='cd ~/Documents/'
 alias cdw='cd ~/Documents/Writings/'
 alias cd..='cd ..'
-alias cdb='cd ~/.bash/bhelp'
+alias cdb='cd ~/.bash/global/bhelp'
 
 # find alias list
 alias fn='find -name'
