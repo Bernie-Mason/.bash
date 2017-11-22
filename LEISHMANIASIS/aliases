@@ -1,9 +1,14 @@
 
 # Directory alias (computer specific)
 alias cd-localbash="cd ~/.bash/LEISHMANIASIS/"
-alias cdepro='cd /C/Dev/Epro'
+alias cd-epro='cd /C/Dev/Epro'
 alias xh="explorer ."
-alias EproStart="start /C/Dev/Epro/Epro.sln"
-alias gcm_help="head -n 9 ~/.bash/bhelp/git_cm_help"
+alias gcm-help="head -n 9 ~/.bash/bhelp/git_cm_help"
+alias sublime='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe'
+alias subl='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe'
 
-
+## Epro services and solutions
+alias epro-servers='/C/Dev/Epro/RUN_EPRO_SERVERS.bat'
+alias epro-metaparser-vs='start C/Dev/epro-metaparser' 
+alias epro-vs="start /C/Dev/Epro/Epro.sln"
+alias epro-speech-vs="start /C/Dev/Epro/Bluewire.Speech.sln"

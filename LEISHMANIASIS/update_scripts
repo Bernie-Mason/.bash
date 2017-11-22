@@ -1,6 +1,6 @@
 #!/bin/bash
 
-update-sublime() {
+update_sublime() {
 	cd 'C:/Users/bema/AppData/Roaming/Sublime Text 3/Packages/User/'
 	git pull
 	git add .
@@ -11,7 +11,7 @@ update-sublime() {
 	return
 }
 
-update-writings() {
+update_writings() {
 	cd 'C:/Users/bema/Documents/Writings/'
 	git pull
 	git add .
@@ -22,3 +22,38 @@ update-writings() {
 	return
 }
 
+epro_update() {
+	EPRO_WORKING_DIR=/C/Dev/Epro
+	CURRENT_WORKING_DIR=$(pwd)
+	if [ "$CURRENT_WORKING_DIR" != "$EPRO_WORKING_DIR" ];
+	then
+		echo 'Changing directories...'; cd '/C/Dev/Epro' 
+	fi
+
+	BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
+	echo "Current branch: $BRANCH"
+	if [ "$BRANCH" != "master" ];
+	then
+		git checkout master
+	fi
+
+	IS_UP_TO_DATE=$(git status | grep "Your branch is up-to-date with 'origin/master'.")
+
+	if [ -z ${IS_UP_TO_DATE+x} ];
+	then
+		git pull
+	else
+		echo $IS_UP_TO_DATE
+	fi
+
+	if [ "$BRANCH" != "master" ];
+	then
+		git checkout -
+	fi
+
+	if [ "$CURRENT_WORKING_DIR" != "$EPRO_WORKING_DIR" ];
+	then
+		echo 'Returning to previous directory...'; cd -
+	fi
+	return
+ }

@@ -25,20 +25,14 @@ function source_all_bash_files(){
 
 # All local binaries are sourced when source_all_bash_files is run
 function find_bin_scripts(){
- 	local FOLDER_TO_BE_SOURCED=~/bin
- 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
- 		mkdir $FOLDER_TO_BE_SOURCED
- 	fi
- 	for i in $(find $FOLDER_TO_BE_SOURCED -type d); do
- 		export PATH+=":$i"
- 	done;
-
- 	FOLDER_TO_BE_SOURCED=~/.bash/core_bin/
- 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
- 		mkdir $FOLDER_TO_BE_SOURCED
- 	fi
- 	for i in $(find $FOLDER_TO_BE_SOURCED -type d); do
- 		export PATH+=":$i"
+	declare -a arr=(~/bin ~/.bash/core_bin 'C:/Windows/Microsoft.NET/Framework/v4.0.30319')
+	for folder in "${arr[@]}"; do
+ 		if [ ! -d "$folder" ]; then
+ 			mkdir "$folder"
+ 		fi
+ 		for i in $(find "$folder" -type d); do
+ 			export PATH+=":$i"
+ 		done;
 	done;
 }
 
@@ -47,4 +41,5 @@ function find_bin_scripts(){
 #Update PATH variable for my scripts:
 source_all_bash_files
 find_bin_scripts
+cd-epro
 ascii_bernie_in_binary
