@@ -7,4 +7,6 @@ alias cd..='cd ..'
 alias cd-localbash="cd ~/.bash/BAN-TOP"
 alias xh="explorer ."
 
+# Executables
+alias vscode='/C/Program\ Files/Microsoft\ VS\ Code/Code.exe . &>/dev/null &'
 
