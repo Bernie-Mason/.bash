@@ -40,7 +40,7 @@ Second argument (optional): alternative output path"
 	    exit 0
 }
 
-function build_vs(){
+function build-vs(){
 	_arg_echo "$@"
 	if [ -z "$1" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ];
 	then
@@ -52,7 +52,8 @@ function build_vs(){
 	fi
 	if [ -z ${2+x} ]; then 
 		msbuild32 $1
-		_die 0 "No log file path given"
+		echo "No log file path given"
+		return
 	else 
 		echo 'Does logs file exist?'
 		_file_check $2
@@ -60,6 +61,7 @@ function build_vs(){
 		msbuild32 $1 > $2
 		echo 'Tail of output:'
 		_select_errors $2
+		return
 	fi
 }
 

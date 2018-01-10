@@ -1,6 +1,6 @@
 #!/bin/bash
 
-update_sublime() {
+update-sublime() {
 	cd 'C:/Users/bema/AppData/Roaming/Sublime Text 3/Packages/User/'
 	git pull
 	git add .
@@ -11,7 +11,7 @@ update_sublime() {
 	return
 }
 
-update_writings() {
+update-writings() {
 	cd 'C:/Users/bema/Documents/Writings/'
 	git pull
 	git add .
@@ -22,7 +22,18 @@ update_writings() {
 	return
 }
 
-epro_update() {
+update-javascript-playground() {
+	cd 'C:/Users/bema/Documents/JavaScript/'
+	git pull
+	git add .
+	git commit -m'generic update'
+	git push
+	cd -
+	ascii_ok
+	return
+}
+
+epro-update() {
 	EPRO_WORKING_DIR=/C/Dev/Epro
 	CURRENT_WORKING_DIR=$(pwd)
 	if [ "$CURRENT_WORKING_DIR" != "$EPRO_WORKING_DIR" ];
@@ -34,21 +45,21 @@ epro_update() {
 	echo "Current branch: $BRANCH"
 	if [ "$BRANCH" != "master" ];
 	then
-		git checkout master
+		echo 'Checking out master...'; git checkout master
 	fi
 
 	IS_UP_TO_DATE=$(git status | grep "Your branch is up-to-date with 'origin/master'.")
 
-	if [ -z ${IS_UP_TO_DATE+x} ];
+	if [ -z "$IS_UP_TO_DATE" ];
 	then
 		git pull
 	else
-		echo $IS_UP_TO_DATE
+		echo "Your branch is up-to-date with 'origin/master'."
 	fi
 
 	if [ "$BRANCH" != "master" ];
 	then
-		git checkout -
+		echo 'Checking out previous branch...'; git checkout -
 	fi
 
 	if [ "$CURRENT_WORKING_DIR" != "$EPRO_WORKING_DIR" ];

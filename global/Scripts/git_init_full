@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function git_init_full(){
+function git-init-full(){
 	read -p "Are you sure you want to create a new repository here? (Y|y)"
 
 	if [[ $REPLY =~ [yY] ]]; then

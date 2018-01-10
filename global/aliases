@@ -13,6 +13,7 @@ alias cdd='cd ~/Documents/'
 alias cdw='cd ~/Documents/Writings/'
 alias cd..='cd ..'
 alias cdb='cd ~/.bash/bhelp'
+alias xh="explorer ."
 
 # find alias list
 alias fn='find -name'
@@ -72,3 +73,5 @@ alias gch='git checkout'
 alias gbch='git checkout -b'
 alias grbi='git remote -v show origin'
 
+# Package managers
+alias npm-update='npm install -g npm'
