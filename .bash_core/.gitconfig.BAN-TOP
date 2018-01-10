@@ -1,0 +1,6 @@
+[user]
+	email = bernie.mason@gmail.com
+	name = Bernie
+[alias]
+	gcon = config --global
+	gconed = config --global --edit
