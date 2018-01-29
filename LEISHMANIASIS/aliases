@@ -2,6 +2,7 @@
 # Directory alias (computer specific)
 alias cd-localbash="cd ~/.bash/LEISHMANIASIS/"
 alias cd-roaming='cd /C/Users/bema/AppData/Roaming/'
+alias cd-javascript='cd ~/Documents/JavaScript'
 alias cd-epro='cd /C/Dev/Epro'
 alias gcm-help="head -n 9 ~/.bash/bhelp/git_cm_help"
 alias sublime='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &> /dev/null &'
