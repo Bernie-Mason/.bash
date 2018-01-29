@@ -8,16 +8,17 @@ alias sublime='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &> /dev/null 
 alias subl='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &> /dev/null &'
 
 ## Epro services 
-alias epro-servers='/C/Dev/Epro/RUN_EPRO_SERVERS.bat'
 alias epro-filedrop='start /C/Dev/epro-filedrop/Bluewire.FileDrop.Service/bin/Debug/Bluewire.FileDrop.Service.exe'
 alias epro-metaparser='start /C/Dev/epro-metaparser/Bluewire.MetaParser.Service/bin/Debug/Bluewire.MetaParser.Service.exe'
 alias epro-speech='start /C/Dev/epro/Bluewire.Speech.Service/bin/Debug/Bluewire.Speech.Service.exe'
+alias epro-dictation='start /C/Dev/epro/Dictation/Bluewire.Dictation.Service/bin/Debug/Bluewire.Dictation.Service.exe'
 
 ## Epro solutions
 alias epro-metaparser-vs='start /C/Dev/epro-metaparser/Bluewire.MetaParser.sln' 
 alias epro-filedrop-vs='start /C/Dev/epro-filedrop/Bluewire.FileDrop.sln' 
 alias epro-vs="start /C/Dev/Epro/Epro.sln"
 alias epro-speech-vs="start /C/Dev/Epro/Bluewire.Speech.sln"
+alias epro-dictation-vs="start /C/Dev/Epro/Bluewire.Dictation.sln"
 
 ## other binaries
 alias vscode='/C/Program\ Files\ \(x86\)/Microsoft\ VS\ Code/Code.exe . &> /dev/null &'
