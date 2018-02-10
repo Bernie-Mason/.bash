@@ -42,3 +42,14 @@ update-python() {
 	ascii_ok
 	return
 }
+
+update-javascript-playground() {
+	cd 'C:/Users/BAN/Documents/JavaScript/'
+	git pull
+	git add .
+	git commit -m'generic update'
+	git push
+	cd -
+	ascii_ok
+	return
+}

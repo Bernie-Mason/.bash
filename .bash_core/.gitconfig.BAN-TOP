@@ -2,5 +2,12 @@
 	email = bernie.mason@gmail.com
 	name = Bernie
 [alias]
-	gcon = config --global
-	gconed = config --global --edit
+	edit-config = config --global --edit
+[core]
+	autocrlf = false
+	whitespace = cr-at-eol
+[alias]
+    recent-branches = for-each-ref refs/heads/ \
+  --count=10 \
+  --sort=-committerdate \
+  --format='%(objectname:short) %(committerdate:short) %(refname:short)'
