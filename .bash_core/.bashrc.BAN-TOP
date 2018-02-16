@@ -6,6 +6,11 @@
 
 #
 # All bash environmental variables, custom aliases etc sourced in the following function
+# We don't add any folders to the PATH here. Historically, I used to recursively add all
+# folders within a folder to the PATH but Alex showed me the error of my ways. This had 
+# horrendous consquenses when shelling out to DOS. In windows machines, we add to PATH
+# via the environmental variables interface. These are registered in BASH without needing
+# to explicitly register them when the shell starts.
 #
 
 function source_all_bash_files(){
@@ -23,38 +28,6 @@ function source_all_bash_files(){
 	done;
 }
 
-# All local binaries are sourced when source_all_bash_files is run
-function find_bin_scripts(){
- 	declare -a arr=(~/bin ~/.bash/core_bin ~/dev-bin 'C:/Windows/Microsoft.NET/Framework/v4.0.30319')
-	for folder in "${arr[@]}"; do
- 		if [ ! -d "$folder" ]; then
- 			mkdir "$folder"
- 		fi
- 		for i in $(find "$folder" -type d); do
- 			export PATH+=":$i"
- 		done;
-	done;
-}
-
-###
-#
-# Python script and python interpreter at sourced at the following location
-#
-##
-function find_python_scripts(){
-	declare -a arr=(
-		~/Documents/Python
-		~/AppData/Local/Programs/Python/Python36-32/Tools/scripts
-		~/AppData/Local/Programs/Python/Python36/Tools/scripts)
-	for folder in "${arr[@]}"; do
-		for i in $(find $folder -type d); do
-			export PATH+=":$i"
-		done;
-	done;
-}
-
 #Update PATH variable for my scripts:
 source_all_bash_files
-find_bin_scripts
-find_python_scripts
 ascii_bernie_in_binary
