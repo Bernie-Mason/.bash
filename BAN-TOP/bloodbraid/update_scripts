@@ -14,7 +14,7 @@ function update-bloodbraid-jsonlib-full(){
 	git pull
 	cd json
 	printf "Getting list of CON.* files that WIN 10 doesn't like"
-	DELETEDLIST=$(git status | grep "deleted" | cut -d : -f 2)
+	local DELETEDLIST=$(git status | grep "deleted" | cut -d : -f 2)
 	
 	for i in $DELETEDLIST; do
 		NEWFILENAME="_$i"

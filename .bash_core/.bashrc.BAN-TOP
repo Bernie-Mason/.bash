@@ -30,4 +30,3 @@ function source_all_bash_files(){
 
 #Update PATH variable for my scripts:
 source_all_bash_files
-ascii_bernie_in_binary

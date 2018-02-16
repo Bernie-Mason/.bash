@@ -1,14 +1,17 @@
 #!bin/sh
+set -o
+set -e pipefail
 #
 # Build visual studio solution using msbuild32
 #
+
 
 _say() {
     echo "$@" >&2
 }
  
 _die() {
-    say "$2"
+    _say "$2"
     exit "$1"
 }
 
