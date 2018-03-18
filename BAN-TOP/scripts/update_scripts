@@ -14,7 +14,7 @@ update-all(){
 
 
 update-magic() {
-	generic-update '~/AppData/Local/Cockatrice/Cockatrice/decks'
+	generic-update 'C:/Users/BAN/AppData/Local/Cockatrice/Cockatrice/decks'
 }	
 
 update-sublime() {

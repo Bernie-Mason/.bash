@@ -1,12 +1,8 @@
 #!/bin/bash
 
-say() {
-	echo "$@" >&2
-}
-
-die() {
-	say "$2"
-	exit "$1"
+function update-bash-all(){
+	backup-bashrc-bashprofile
+	generic-update ~/.bash
 }
 
 function backup-bashrc-bashprofile(){
@@ -19,38 +15,4 @@ function backup-bashrc-bashprofile(){
 	cp ~/.bashrc ~/.bash/.bash_core/.bashrc.${HOSTNAME}
 	cp ~/.bash_profile ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
 	cp ~/.gitconfig ~/.bash/.bash_core/.gitconfig.${HOSTNAME}
-}
-
-function update-bash-all(){
-	backup-bashrc-bashprofile
-	cd ~/.bash
-	git pull || die 1 ""
-	git add .
-	git commit -m 'Generic update'
-	git push || die 1 ""
-	cd -
-	ascii_ok
-}
-
-function generic-update(){
-	cd "$1" || die 1 "Directory doesn't exist"
-	
-	local ISUPTODATE=$(git status | grep "Your branch is up-to-date with 'origin/master'.")
-	if [ -z "$ISUPTODATE" ];
-	then
-		git pull || die 1 ""
-	else
-		echo "Your branch is up-to-date with 'origin/master'."
-	fi
-	local ISWORKINGTREECLEAN=$(git status | grep "nothing to commit, working tree clean")
-	if [ -z "$ISUPTODATE" ];
-	then
-		git add .
-		git commit -m 'Generic update'
-		git push || die 1 ""
-	else
-		echo "Nothing to commit, working tree clean."
-	fi
-	cd -
-	ascii_ok
 }
