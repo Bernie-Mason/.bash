@@ -8,7 +8,7 @@
 # All bash environmental variables, custom aliases etc sourced in the following function
 # We don't add any folders to the PATH here. Historically, I used to recursively add all
 # folders within a folder to the PATH but Alex showed me the error of my ways. This had 
-# horrendous consequence when shelling out to DOS. In windows machines, we add to PATH
+# horrendous consquenses when shelling out to DOS. In windows machines, we add to PATH
 # via the environmental variables interface. These are registered in BASH without needing
 # to explicitly register them when the shell starts.
 #
