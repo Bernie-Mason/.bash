@@ -1,44 +1,16 @@
 #!/bin/bash
 update-magic() {
-	cdmagic
-	git pull
-	git add .
-	git commit -m'generic update'
-	git push
-	cd -
-	ascii_ok
-	return
+	generic-update '~/AppData/Local/Cockatrice/Cockatrice/decks'
 }
 
 update-sublime() {
-	cd 'C:/Users/Bernie/AppData/Roaming/Sublime Text 3/Packages/User/'
-	git pull
-	git add .
-	git commit -m'generic update'
-	git push
-	cd -
-	ascii_ok
-	return
+	generic-update '/C/Users/bema/AppData/Roaming/Sublime\ Text\ 3/Packages/User/'
 }
 
 update-writings() {
-	cd 'C:/Users/Bernie/Documents/Writings/'
-	git pull
-	git add .
-	git commit -m'generic update'
-	git push
-	cd -
-	ascii_ok
-	return
+	generic-update '/C/Users/Bernie/Documents/Writings/'
 }
 
 update-python() {
-	cd 'C:/Users/Bernie/Documents/Python/'
-	git pull
-	git add .
-	git commit -m'generic update'
-	git push
-	cd -
-	ascii_ok
-	return
+	generic-update '/C/Users/Bernie/Documents/Python/'
 }

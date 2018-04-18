@@ -11,15 +11,15 @@ update-all(){
 }
 
 update-sublime() {
-	generic-update 'C:/Users/bema/AppData/Roaming/Sublime Text 3/Packages/User/'
+	generic-update "/C/Users/bema/AppData/Roaming/Sublime\ Text\ 3/Packages/User/"
 }
 
 update-writings() {
-	generic-update 'C:/Users/bema/Documents/Writings/'
+	generic-update '/C/Users/bema/Documents/Writings/'
 }
 
 update-javascript-playground() {
-	generic-update 'C:/Users/bema/Documents/JavaScript/'
+	generic-update '/C/Users/bema/Documents/JavaScript/'
 }
 
 epro-update() {

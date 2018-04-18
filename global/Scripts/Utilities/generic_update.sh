@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function generic-update(){
-	cd $1 || die 1 "Directory doesn't exist"
+	cd "$1" || die 1 "Directory doesn't exist"
 	
 	local ISUPTODATE=$(git status | grep "Your branch is up-to-date with 'origin/master'.")
 	if [ -z "$ISUPTODATE" ];
@@ -20,5 +20,4 @@ function generic-update(){
 		echo "Nothing to commit, working tree clean."
 	fi
 	cd -
-	ascii_ok
 }

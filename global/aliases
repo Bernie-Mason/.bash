@@ -58,6 +58,8 @@ alias gpul='git pull'
 alias gs='git status'
 alias gr='git remote'
 alias gri='git remote -v'
+alias gitkba='gitk --all --remotes &'
+alias gitkb='gitk &'
 
 # Git logging alias
 alias glod='git log --oneline --decorate'
