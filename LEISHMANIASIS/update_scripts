@@ -56,4 +56,4 @@ epro-update() {
 		echo 'Returning to previous directory...'; cd -
 	fi
 	return
- }
+}

@@ -22,6 +22,7 @@ alias epro-dictation-import='start /C/Dev/Bluewire.Dictation/Bluewire.Dictation.
 alias epro-metaparser-vs='start /C/Dev/epro-metaparser/Bluewire.MetaParser.sln' 
 alias epro-filedrop-vs='start /C/Dev/epro-filedrop/Bluewire.FileDrop.sln' 
 alias epro-vs="start /C/Dev/Epro/Epro.sln"
+alias epro-everything-vs="start /C/Dev/Epro/Everything.sln"
 alias epro-speech-vs="start /C/Dev/Epro/Bluewire.Speech.sln"
 alias epro-dictation-vs="start /C/Dev/Epro/Bluewire.Dictation.sln"
 alias epro-dictation-import-vs='start /C/Dev/Bluewire.Dictation/Bluewire.Dictation.sln'
