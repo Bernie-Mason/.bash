@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function webhooks-creds-apply(){
 	dir=$(pwd)
 	git cherry-pick fd6bd211049303ff64eb783f5b89e052ccec6d34

@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # Build scripts for epro and epro everything solutions
 #
@@ -56,10 +57,5 @@ function epro-build-logs() {
 }
 
 function epro-servers(){
-	CURRENT_WD=$(PWD)
-	cd '/C/Dev/epro'
-	## ./ used to run via cmd.exe
-	./RUN_EPRO_SERVERS.bat
-
-	cd $CURRENT_WD
+	/C/Dev/epro/RUN_EPRO_SERVERS.bat
 }

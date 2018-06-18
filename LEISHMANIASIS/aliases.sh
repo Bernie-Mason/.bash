@@ -27,6 +27,9 @@ alias epro-speech-vs="start /C/Dev/Epro/Bluewire.Speech.sln"
 alias epro-dictation-vs="start /C/Dev/Epro/Bluewire.Dictation.sln"
 alias epro-dictation-import-vs='start /C/Dev/Bluewire.Dictation/Bluewire.Dictation.sln'
 
+## Test pr
+alias test-pr-pre-18-11='DEFAULT_MSBUILD_VERSION=vs2015 test-pr'
+
 ## other binaries
 alias vscode='/C/Program\ Files\ \(x86\)/Microsoft\ VS\ Code/Code.exe . &> /dev/null &'
 alias epro-modern-vscode='/C/Program\ Files\ \(x86\)/Microsoft\ VS\ Code/Code.exe /C/Dev/epro/Epro.Mobile &> /dev/null &'
