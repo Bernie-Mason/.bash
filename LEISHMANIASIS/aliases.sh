@@ -6,6 +6,7 @@ alias cd-roaming='cd /C/Users/bema/AppData/Roaming/'
 alias cd-javascript='cd ~/Documents/JavaScript'
 alias cd-epro='cd /C/Dev/Epro'
 alias cd-dev='cd /C/Dev'
+alias cd-webhooks='cd /C/Dev/Bluewire.Webhooks'
 alias cd-sublime="cd /C/Users/bema/AppData/Roaming/Sublime\ Text\ 3/Packages/User/"
 alias gcm-help="head -n 9 ~/.bash/bhelp/git_cm_help"
 alias sublime='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &> /dev/null &'
