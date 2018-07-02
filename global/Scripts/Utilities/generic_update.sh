@@ -1,4 +1,12 @@
 #!/bin/bash
+say() {
+	echo "$@" >&2
+}
+
+die() {
+	say "$2"
+	exit "$1"
+}
 
 function generic-update(){
 	cd "$1" || die 1 "Directory doesn't exist"

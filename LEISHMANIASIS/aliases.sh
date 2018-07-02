@@ -5,6 +5,7 @@ alias cd-keepass="cd ~/Documents/keepass"
 alias cd-roaming='cd /C/Users/bema/AppData/Roaming/'
 alias cd-javascript='cd ~/Documents/JavaScript'
 alias cd-epro='cd /C/Dev/Epro'
+alias cd-other-epro='cd /C/Dev/other-epro'
 alias cd-dev='cd /C/Dev'
 alias cd-webhooks='cd /C/Dev/Bluewire.Webhooks'
 alias cd-sublime="cd /C/Users/bema/AppData/Roaming/Sublime\ Text\ 3/Packages/User/"
@@ -27,6 +28,16 @@ alias epro-everything-vs="start /C/Dev/Epro/Everything.sln"
 alias epro-speech-vs="start /C/Dev/Epro/Bluewire.Speech.sln"
 alias epro-dictation-vs="start /C/Dev/Epro/Bluewire.Dictation.sln"
 alias epro-dictation-import-vs='start /C/Dev/Bluewire.Dictation/Bluewire.Dictation.sln'
+
+## Secondary Epro services 
+alias other-epro-speech='start /C/Dev/other-epro/Bluewire.Speech.Service/bin/Debug/Bluewire.Speech.Service.exe'
+alias other-epro-dictation='start /C/Dev/other-epro/Dictation/Bluewire.Dictation.Service/bin/Debug/Bluewire.Dictation.Service.exe'
+
+## Secondary Epro solutions
+alias other-epro-vs="start /C/Dev/other-epro/Epro.sln"
+alias other-epro-everything-vs="start /C/Dev/other-epro/Everything.sln"
+alias other-epro-speech-vs="start /C/Dev/other-epro/Bluewire.Speech.sln"
+alias other-epro-dictation-vs="start /C/Dev/other-epro/Bluewire.Dictation.sln"
 
 ## Test pr
 alias test-pr-pre-18-11='DEFAULT_MSBUILD_VERSION=vs2015 test-pr'

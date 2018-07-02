@@ -32,13 +32,26 @@ function epro-build() {
 	build-vs /c/Dev/epro/Epro.sln $FILE_PATH_BUILD_OUTPUT_EPRO
 }
 
+function other-epro-build() {
+	build-vs /c/Dev/other-epro/Epro.sln $FILE_PATH_BUILD_OUTPUT_EPRO
+}
+
 function epro-build-everything() {
 	build-vs /c/Dev/epro/Everything.sln $FILE_PATH_BUILD_OUTPUT_EPRO_EVERYTHING 
+}
+
+function other-epro-build-everything() {
+	build-vs /c/Dev/other-epro/Everything.sln $FILE_PATH_BUILD_OUTPUT_EPRO_EVERYTHING 
 }
 
 function epro-build-dictation() {
 	build-vs /c/Dev/epro/Bluewire.Dictation.sln $FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION 
 }
+
+function other-epro-build-dictation() {
+	build-vs /c/Dev/other-epro/Bluewire.Dictation.sln $FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION 
+}
+
 
 function epro-build-metaparser() {
 	build-vs /c/Dev/epro-metaparser/Bluewire.MetaParser.sln $FILE_PATH_BUILD_OUTPUT_EPRO_METAPARSER 
@@ -46,6 +59,10 @@ function epro-build-metaparser() {
 
 function epro-build-speech() {
 	build-vs /c/Dev/epro/Bluewire.Speech.sln $FILE_PATH_BUILD_OUTPUT_EPRO_SPEECH 
+}
+
+function other-epro-build-speech() {
+	build-vs /c/Dev/other-epro/Bluewire.Speech.sln $FILE_PATH_BUILD_OUTPUT_EPRO_SPEECH 
 }
 
 function epro-build-filedrop() {
