@@ -11,7 +11,7 @@ die() {
 function generic-update(){
 	cd "$1" || die 1 "Directory doesn't exist"
 
-	local ISUPTODATE=$(git status | grep "Your branch is up-to-date with 'origin/master'.")
+	local ISUPTODATE=$(git status | grep "Your branch is up-to-date with \'origin/master\'.")
 	if [ -z "$ISUPTODATE" ];
 	then
 		git pull || die 1 "Couldn't pull"
