@@ -5,11 +5,12 @@ alias cdp='cd ~/Documents/Visual\ Studio\ 2017/Projects/'
 alias cdmagic='cd ~/AppData/Local/Cockatrice/Cockatrice/decks' 
 alias cd..='cd ..'
 alias cd-localbash="cd ~/.bash/BAN-TOP"
-alias cd-dev="cd ~/dev"
+alias cd-dev="cd /C/Dev"
 alias cd-javascript="cd ~/Documents/JavaScript/"
 alias xh="explorer ."
 alias gcm-help="head -n 9 ~/.bash/bhelp/git_cm_help"
 alias cd-epro='cd /C/Dev/Epro'
+alias cd-webhooks='cd /C/Dev/Bluewire.Webhooks'
 alias sublime='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &> /dev/null &'
 alias subl='/C/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &> /dev/null &'
 
@@ -20,16 +21,20 @@ alias vscode='/C/Program\ Files/Microsoft\ VS\ Code/Code.exe . &>/dev/null &'
 alias cd-roaming='cd /C/Users/bema/AppData/Roaming/'
 
 ## Epro services 
-alias epro-servers='/C/Dev/Epro/RUN_EPRO_SERVERS.bat'
 alias epro-filedrop='start /C/Dev/epro-filedrop/Bluewire.FileDrop.Service/bin/Debug/Bluewire.FileDrop.Service.exe'
 alias epro-metaparser='start /C/Dev/epro-metaparser/Bluewire.MetaParser.Service/bin/Debug/Bluewire.MetaParser.Service.exe'
 alias epro-speech='start /C/Dev/epro/Bluewire.Speech.Service/bin/Debug/Bluewire.Speech.Service.exe'
+alias epro-dictation='start /C/Dev/epro/Dictation/Bluewire.Dictation.Service/bin/Debug/Bluewire.Dictation.Service.exe'
+alias epro-dictation-import='start /C/Dev/Bluewire.Dictation/Bluewire.Dictation.Import.Service/bin/Debug/Bluewire.Dictation.Import.Service.exe'
 
 ## Epro solutions
 alias epro-metaparser-vs='start /C/Dev/epro-metaparser/Bluewire.MetaParser.sln' 
 alias epro-filedrop-vs='start /C/Dev/epro-filedrop/Bluewire.FileDrop.sln' 
 alias epro-vs="start /C/Dev/Epro/Epro.sln"
+alias epro-everything-vs="start /C/Dev/Epro/Everything.sln"
 alias epro-speech-vs="start /C/Dev/Epro/Bluewire.Speech.sln"
+alias epro-dictation-vs="start /C/Dev/Epro/Bluewire.Dictation.sln"
+alias epro-dictation-import-vs='start /C/Dev/Bluewire.Dictation/Bluewire.Dictation.sln'
 
 ## other binaries
 alias vscode='/C/Program\ Files\ \(x86\)/Microsoft\ VS\ Code/Code.exe . &> /dev/null &'
