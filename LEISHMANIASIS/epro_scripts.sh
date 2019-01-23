@@ -7,9 +7,15 @@ LOGS_PATH=~/logs/dev/epro/
 FILE_PATH_BUILD_OUTPUT_EPRO_EVERYTHING=${LOGS_PATH}last_epro_build_all_output.txt
 FILE_PATH_BUILD_OUTPUT_EPRO_SPEECH=${LOGS_PATH}last_epro_build_speech_output.txt
 FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION=${LOGS_PATH}last_epro_build_dictation_output.txt
+FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION_IMPORT=${LOGS_PATH}last_epro_build_dictation_import_output.txt
 FILE_PATH_BUILD_OUTPUT_EPRO_METAPARSER=${LOGS_PATH}last_epro_build_metaparser_output.txt
 FILE_PATH_BUILD_OUTPUT_EPRO_FILEDROP=${LOGS_PATH}last_epro_build_filedrop_output.txt
 FILE_PATH_BUILD_OUTPUT_EPRO=${LOGS_PATH}last_epro_build_output.txt
+
+function epro-update() {
+	epropat update
+	epro-build
+}
 
 function epro-trans() {
 	epro-build-dictation
@@ -25,6 +31,23 @@ function epro-full() {
 	epro-build-speech
 	epro-dictation
 	epro-speech
+	vs
+}
+
+function other-epro-trans() {
+	other-epro-build-dictation
+	other-epro-build-speech
+	other-epro-dictation
+	other-epro-speech
+}
+
+function other-epro-full() {
+	epropat reset
+	other-epro-build
+	other-epro-build-dictation
+	other-epro-build-speech
+	other-epro-dictation
+	other-epro-speech
 	vs
 }
 
@@ -52,7 +75,10 @@ function other-epro-build-dictation() {
 	build-vs /c/Dev/other-epro/Bluewire.Dictation.sln $FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION 
 }
 
-
+function epro-build-dictation-import() {
+	build-vs /c/Dev/Bluewire.Dictation.sln $FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION_IMPORT
+}
+	
 function epro-build-metaparser() {
 	build-vs /c/Dev/epro-metaparser/Bluewire.MetaParser.sln $FILE_PATH_BUILD_OUTPUT_EPRO_METAPARSER 
 }
@@ -74,5 +100,7 @@ function epro-build-logs() {
 }
 
 function epro-servers(){
-	/C/Dev/epro/RUN_EPRO_SERVERS.bat
+	cd /C/Dev/epro
+	./RUN_EPRO_SERVERS.bat
+	cd -
 }
