@@ -26,11 +26,7 @@ function epro-trans() {
 
 function epro-full() {
 	epropat reset
-	epro-build
-	epro-build-dictation
-	epro-build-speech
-	epro-dictation
-	epro-speech
+	epro-build-everything
 	vs
 }
 
