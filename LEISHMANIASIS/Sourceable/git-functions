@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 function webhooks-creds-apply(){
 	dir=$(pwd)

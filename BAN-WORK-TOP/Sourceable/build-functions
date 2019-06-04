@@ -1,4 +1,4 @@
-
+#!/bin/sh
 
 function build-eyegaze(){
 	if [[ $1 -eq "--release" ]]; then

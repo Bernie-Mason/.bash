@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 update-magic() {
 	generic-update '~/AppData/Local/Cockatrice/Cockatrice/decks'
 }

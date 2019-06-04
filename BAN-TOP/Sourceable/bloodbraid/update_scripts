@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 
 function update-bloodbraid-jsonlib(){
 	cd ~/Documents/data_store/mtgjson
