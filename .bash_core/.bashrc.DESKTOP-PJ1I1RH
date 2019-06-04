@@ -4,18 +4,20 @@
 
 # Load Files #
 function source_all_bash_files(){
-	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}
+	local BASH_BIN_HOSTNAME_FOLDER=~/.bash/${HOSTNAME}
 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
 		mkdir $FOLDER_TO_BE_SOURCED
 	fi
-	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
-	do
+	local FOLDER_TO_BE_SOURCED="$BASH_BIN_HOSTNAME_FOLDER/sourceable"
+	if [ ! -d $BASH_BIN_HOSTNAME_FOLDER ]; then
+		mkdir $BASH_BIN_HOSTNAME_FOLDER
+	fi
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;
 
-	FOLDER_TO_BE_SOURCED=~/.bash/global/
-	for i in $(find $FOLDER_TO_BE_SOURCED -type f)
-	do
+	FOLDER_TO_BE_SOURCED=~/.bash/global/sourceable
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;
 }

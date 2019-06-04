@@ -1,0 +1,2 @@
+1. .bash_core/.bashrc duplication
+	It appears now that we're basically using the same core .bashrc. It might be worth having a single starting template but persist individual versions if they are edited. Need to think about this a bit more.
