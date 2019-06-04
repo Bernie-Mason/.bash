@@ -1,0 +1,13 @@
+#!/bin/bash
+
+function webhooks-creds-apply(){
+	dir=$(pwd)
+	git cherry-pick fd6bd211049303ff64eb783f5b89e052ccec6d34
+	git reset HEAD^
+}
+
+function webhooks-creds-remove(){
+	dir=$(pwd)
+	git cherry-pick 9be0fc69b170da6ccc4df23927b03ad4d72770a6
+	git reset HEAD^
+}

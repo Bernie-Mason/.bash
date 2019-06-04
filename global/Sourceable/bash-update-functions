@@ -1,0 +1,18 @@
+#!/bin/bash
+
+function update-bash-all(){
+	backup-bashrc-bashprofile
+	generic-update ~/.bash
+}
+
+function backup-bashrc-bashprofile(){
+	local BASH_CORE_FILES=~/.bash/.bash_core
+	if [ ! -d $BASH_CORE_FILES ];then
+		mkdir $BASH_CORE_FILES
+	fi
+
+	local HOST=$hostname
+	cp ~/.bash/.bash_core/.bashrc.${HOSTNAME} ~/.bashrc
+	cp ~/.bash/.bash_core/.bash_profile.${HOSTNAME} ~/.bash_profile
+	cp ~/.bash/.bash_core/.gitconfig.${HOSTNAME} ~/.gitconfig
+}

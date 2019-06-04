@@ -1,0 +1,28 @@
+#!/bin/sh
+
+say() {
+    echo "$@" >&1
+}
+ 
+die() {
+    say "$2"
+    exit "$1"
+}
+
+if [[ $1 = "" || $1 = "-h" || $1 = "help" ]]; then
+	die 2 "Please supply any number of project directories to pack. E.g. \"C:\Dev\MyRepo\MyProject.csproj\""
+	return
+fi
+
+NUGET_EXE="nuget.exe"
+LOCAL_PACKAGE_STORE='/c/dev/packages'
+if [[ ! -d  "$LOCAL_PACKAGE_STORE" ]]; then
+	say "No local package store. Creating one at $LOCAL_PACKAGE_STORE"
+	mkdir "$LOCAL_PACKAGE_STORE" 
+fi
+cd $LOCAL_PACKAGE_STORE
+for ARG in "$@"
+do
+    $NUGET_EXE pack $ARG
+done
+cd -

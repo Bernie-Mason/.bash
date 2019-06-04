@@ -1,3 +1,0 @@
-#Update PATH variable for my scripts:
-export PATH="${PATH}:/home/bernie/bin"
-

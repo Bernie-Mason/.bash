@@ -1,0 +1,73 @@
+redirection
+
+From: https://www.gnu.org/software/bash/manual/bashref.html#Redirections
+Before a command is executed, it's input and output may be redirected using a special notation interpreted by the shell. Redirection allows commands' file handles to be duplicated, opened, closed, made to refer to different files, and can change the files the command reads from and writes to.
+
+Redirections are processed in the order they appear from left to right. 
+
+0 - stdin
+1 - stout
+2 - sterr
+
+Examples:
+
+1. Significance of order
+
+ls > dirlist 2>&1
+directs both standard output (file descriptor 1) and standard error (file descriptor 2) to the file dirlist, while the command
+
+ls 2>&1 > dirlist
+directs only the standard output to file dirlist, because the standard error was made a copy of the standard output before the standard output was redirected to dirlist.
+
+2. The cmd >&2 form is described in section "3.6.8 Duplicating File Descriptors"
+
+[n]>&word
+
+
+Here, n is not specified so it defaults to "1" meaning stdout: we are redirecting stdout to file descriptor "2" meaning stderr. All normal output from the command will be sent to stderr.
+
+3.6.2. Redirecting input 
+
+[n]<word
+
+1>filename
+  # Redirect stdout to file "filename."
+1>>filename
+  # Redirect and append stdout to file "filename."
+2>filename
+  # Redirect stderr to file "filename."
+2>>filename
+  # Redirect and append stderr to file "filename."
+&>filename
+  # Redirect both stdout and stderr to file "filename."
+  # This operator is now functional, as of Bash 4, final release.
+
+2>&1
+  # Redirects stderr to stdout.
+  # Error messages get sent to same place as standard output.
+    >>filename 2>&1
+        bad_command >>filename 2>&1
+        # Appends both stdout and stderr to the file "filename" ...
+    2>&1 | [command(s)]
+        bad_command 2>&1 | awk '{print $5}'   # found
+        # Sends stderr through a pipe.
+        # |& was added to Bash 4 as an abbreviation for 2>&1 |.	
+
+1>&2
+  # Redirects stdout to stderr.
+
+3.6.3. Redirecting output
+
+[n]>[|]word
+
+3.6.4 Redirecting Standard Output and Standard Error
+
+This construct allows both the standard output (file descriptor 1) and the standard error output (file descriptor 2) to be redirected to the file whose name is the expansion of word. There are two formats for redirecting standard output and standard error:
+
+&>word
+and
+
+>&word
+Of the two forms, the first is preferred. This is semantically equivalent to
+
+>word 2>&1

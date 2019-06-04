@@ -1,0 +1,5 @@
+alias cd-grid="cd /c/dev/grid";
+alias cd-eyegaze="cd /c/dev/eyegaze";
+alias cd-shared="cd /c/dev/shared";
+alias cd-dev="cd /c/dev";
+alias cd-activate="cd /c/dev/web/activate";

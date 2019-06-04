@@ -1,0 +1,84 @@
+#!/bin/sh
+#
+# Visual Studio shortcut tool
+# 
+
+DEBUG=false
+
+say() {
+    echo "$@" >&2
+}
+
+debug() {
+    "${DEBUG}" && say "$@"
+}
+ 
+die() {
+    say "$2"
+    exit "$1"
+}
+
+validate_search_name() {
+    test -n "$1" && test "$1" != "." && test "$1" != "/"
+}
+
+resolve_filename_icase() {
+    find "${ROOT}" -maxdepth 1 -iname "$1" -type f -print
+}
+
+open_solution() {
+    say "Opening $1"
+    ABSOLUTE_PATH="$(absolute-windows-path "$1")"
+    start "${ABSOLUTE_PATH}"
+}
+
+try_candidate_solution_name() {
+    SOLUTION_NAME=$(resolve_filename_icase "$1" | head -n 1)
+    test -n "${SOLUTION_NAME}" && test -f "${SOLUTION_NAME}" && open_solution "${SOLUTION_NAME}"
+}
+
+# ROOT: The absolute 'containing' directory.
+# SEARCH_NAME: The (possibly partial) solution name requested by the user.
+
+if validate_search_name "$(dirname -- "$1")"; then
+    # User specified a (partial?) path containing a directory part.
+    ROOT="$PWD/$(dirname -- "$1")"
+else
+    # User specified a bare name.
+    ROOT="$PWD"
+fi
+SEARCH_NAME="$(basename -- "$1")"
+
+debug "Root: $ROOT"
+
+if [ -n "${SEARCH_NAME}" ]; then
+    # Name specified by the user.
+    debug "Trying name specified by user: ${SEARCH_NAME}"
+    if validate_search_name "${SEARCH_NAME}"; then
+        try_candidate_solution_name "${SEARCH_NAME}" && exit 0
+        try_candidate_solution_name "${SEARCH_NAME}sln" && exit 0
+        try_candidate_solution_name "${SEARCH_NAME}.sln" && exit 0
+    fi
+    # Try treating the search string as a directory name, if such
+    # a directory exists.
+    ROOT="$ROOT/$SEARCH_NAME"
+    test -d "$ROOT" || die 3 "Can't find solution file: ${SEARCH_NAME}"
+    debug "Falling back to dir name: ${ROOT}"
+fi
+
+# Guess the solution name from the containing directory.
+SEARCH_NAME="$(basename -- "${ROOT}")"
+debug "Search from dir name: $SEARCH_NAME"
+if validate_search_name "${SEARCH_NAME}"; then
+    try_candidate_solution_name "${SEARCH_NAME}" && exit 0
+    try_candidate_solution_name "${SEARCH_NAME}.sln" && exit 0
+fi
+
+# If only one solution file exists in the containing directory, open that.
+SOLUTION_COUNT=$(resolve_filename_icase "*.sln" | wc -l)
+if [ "$SOLUTION_COUNT" -gt 1 ]; then
+    die 2 "Multiple solution files found."
+else
+    try_candidate_solution_name "*.sln" && exit 0
+fi
+die 3 "Can't find solution file: ${SEARCH_NAME}"

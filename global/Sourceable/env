@@ -1,0 +1,9 @@
+
+# Change umask to make directory sharing easier
+umask 0002
+
+# Ignore duplicates in command line history and increase
+# history size to 1000 lines
+export HISTCONTROL=ignoredups
+export HISTSIZE=1000
+

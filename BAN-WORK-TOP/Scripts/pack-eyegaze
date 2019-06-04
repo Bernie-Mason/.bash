@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# Pack eyegaze and copy nuspec file to Local Packages
+#
+
+say() {
+	echo "$@" 1>&2 #redirect stdout to stderr
+}
+
+die() {
+	say "$2"
+	exit "$1"
+}
+
+# read  -p "Enter your package version number (i.e. 1.0.0.0): " PACKAGE_VERSION
+
+# echo " 
+# -- Change grid eyegaze version --
+# "
+
+# vim "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze\Properties\AssemblyInfo.cs" || die 2 "file or directory doesn't exist"
+
+# PACKAGE_VERSION=$(grep -oP 'AssemblyFileVersion\(\"\K([0-9]\.[0-9]\.[0-9]\.[0-9])' "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze\Properties\AssemblyInfo.cs")
+# echo "Your package version is {$PACKAGE_VERSION}"
+
+# echo " 
+# -- Change grid eyegaze.desktop version --
+# "
+
+# vim "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.Desktop\Properties\AssemblyInfo.cs" || die 2 "file or directory doesn't exist"
+
+# echo "
+# -- Package version : $PACKAGE_VERSION
+# "
+
+# echo " 
+# -- Building eyegaze --
+# "
+# build-eyegaze || die 2 "FAILURE: Building eyegaze failed"
+
+
+echo " 
+-- Creating packages --
+"
+EYEGAZE_PROJ_PATH="C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze\SensorySoftware.EyeGaze.csproj"
+EYEGAZE_DESKTOP_PROJ_PATH="C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.Desktop\SensorySoftware.EyeGaze.Desktop.csproj"
+nuget-pack $EYEGAZE_PROJ_PATH $EYEGAZE_DESKTOP_PROJ_PATH
+
+echo " 
+-- Removing cached packages --
+"
+PACKAGE_CACHE='/c/users/Bernie/.nuget/packages/'
+EYEGAZE_PACKAGES=('sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop')
+for PACKAGE in ${EYEGAZE_PACKAGES[@]}; do
+	FULL_PACKAGE_NAME="$PACKAGE_CACHE$PACKAGE"
+	if [[ -d  $FULL_PACKAGE_NAME ]]; then
+		say "Removing ${FULL_PACKAGE_NAME}"
+		rm -rd $FULL_PACKAGE_NAME
+	else
+		say "Could not remove ${FULL_PACKAGE_NAME}. Package not found."
+	fi
+done
+
+
+# echo " 
+# -- Change grid eyegaze version number to $PACKAGE_VERSION --
+# "
+# read  -n 1 -p "Press any key to enter Vim and change version number"
+# vim '/c/dev/grid/source/directory.build.props' || die 2 "directory doesn't exist"

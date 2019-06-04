@@ -1,0 +1,101 @@
+#
+# Build scripts for epro and epro everything solutions
+#
+
+LOGS_PATH=~/logs/dev/epro/
+FILE_PATH_BUILD_OUTPUT_EPRO_EVERYTHING=${LOGS_PATH}last_epro_build_all_output.txt
+FILE_PATH_BUILD_OUTPUT_EPRO_SPEECH=${LOGS_PATH}last_epro_build_speech_output.txt
+FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION=${LOGS_PATH}last_epro_build_dictation_output.txt
+FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION_IMPORT=${LOGS_PATH}last_epro_build_dictation_import_output.txt
+FILE_PATH_BUILD_OUTPUT_EPRO_METAPARSER=${LOGS_PATH}last_epro_build_metaparser_output.txt
+FILE_PATH_BUILD_OUTPUT_EPRO_FILEDROP=${LOGS_PATH}last_epro_build_filedrop_output.txt
+FILE_PATH_BUILD_OUTPUT_EPRO=${LOGS_PATH}last_epro_build_output.txt
+
+function epro-update() {
+	epropat update
+	epro-build
+}
+
+function epro-trans() {
+	epro-build-dictation
+	epro-build-speech
+	epro-dictation
+	epro-speech
+}
+
+function epro-full() {
+	epropat reset
+	epro-build-everything
+	vs
+}
+
+function other-epro-trans() {
+	other-epro-build-dictation
+	other-epro-build-speech
+	other-epro-dictation
+	other-epro-speech
+}
+
+function other-epro-full() {
+	epropat reset
+	other-epro-build
+	other-epro-build-dictation
+	other-epro-build-speech
+	other-epro-dictation
+	other-epro-speech
+	vs
+}
+
+function epro-build() {
+	build-vs /c/Dev/epro/Epro.sln $FILE_PATH_BUILD_OUTPUT_EPRO
+}
+
+function other-epro-build() {
+	build-vs /c/Dev/other-epro/Epro.sln $FILE_PATH_BUILD_OUTPUT_EPRO
+}
+
+function epro-build-everything() {
+	build-vs /c/Dev/epro/Everything.sln $FILE_PATH_BUILD_OUTPUT_EPRO_EVERYTHING 
+}
+
+function other-epro-build-everything() {
+	build-vs /c/Dev/other-epro/Everything.sln $FILE_PATH_BUILD_OUTPUT_EPRO_EVERYTHING 
+}
+
+function epro-build-dictation() {
+	build-vs /c/Dev/epro/Bluewire.Dictation.sln $FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION 
+}
+
+function other-epro-build-dictation() {
+	build-vs /c/Dev/other-epro/Bluewire.Dictation.sln $FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION 
+}
+
+function epro-build-dictation-import() {
+	build-vs /c/Dev/Bluewire.Dictation.sln $FILE_PATH_BUILD_OUTPUT_EPRO_DICTATION_IMPORT
+}
+	
+function epro-build-metaparser() {
+	build-vs /c/Dev/epro-metaparser/Bluewire.MetaParser.sln $FILE_PATH_BUILD_OUTPUT_EPRO_METAPARSER 
+}
+
+function epro-build-speech() {
+	build-vs /c/Dev/epro/Bluewire.Speech.sln $FILE_PATH_BUILD_OUTPUT_EPRO_SPEECH 
+}
+
+function other-epro-build-speech() {
+	build-vs /c/Dev/other-epro/Bluewire.Speech.sln $FILE_PATH_BUILD_OUTPUT_EPRO_SPEECH 
+}
+
+function epro-build-filedrop() {
+	build-vs /c/Dev/epro-filedrop/Bluewire.FileDrop.sln $FILE_PATH_BUILD_OUTPUT_EPRO_METAPARSER 
+}
+
+function epro-build-logs() {
+	cd LOGS_PATH
+}
+
+function epro-servers(){
+	cd /C/Dev/epro
+	./RUN_EPRO_SERVERS.bat
+	cd -
+}

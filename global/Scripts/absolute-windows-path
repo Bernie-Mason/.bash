@@ -1,0 +1,18 @@
+#!/bin/sh
+
+_absolute_windows_path_partial() {
+    if [ -d "$1" ];
+    then _absolute_existing_windows_path_partial "$1";
+    else (
+        DIR=$(dirname "$1")
+        BASE=$(basename "$1")
+        printf %s/%s "$(_absolute_windows_path_partial "$DIR")" "$BASE"
+    );
+    fi
+}
+_absolute_existing_windows_path_partial() {
+    cd "$1"
+    pwd -W
+}
+
+_absolute_windows_path_partial "$1" | sed -e 's/\//\\/g'

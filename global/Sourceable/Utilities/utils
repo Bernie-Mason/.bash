@@ -1,0 +1,15 @@
+# Handle graceful handling of errors
+
+function say() {
+	echo "$@" >&2
+}
+
+function die() {
+	say "$2"
+	exit "$1"
+}
+
+function loudReturn() {
+	say "$2"
+	return
+}

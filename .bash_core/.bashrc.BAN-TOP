@@ -14,7 +14,7 @@
 #
 
 function source_all_bash_files(){
-	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}
+	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}/Sourceable
 	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
 		mkdir $FOLDER_TO_BE_SOURCED
 	fi
@@ -22,7 +22,7 @@ function source_all_bash_files(){
 		. $i
 	done;
 
-	FOLDER_TO_BE_SOURCED=~/.bash/global/
+	FOLDER_TO_BE_SOURCED=~/.bash/global/Sourceable
 	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;

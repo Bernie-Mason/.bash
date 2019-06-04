@@ -1,5 +1,0 @@
-#! /bin/bash
-
-alias cd-bloodbraid="cd ~/Documents/Visual\ Studio\ 2017/Projects/Bloodbraid/"
-alias cd-mtgjson="cd ~/Documents/data_store/mtgjson/json/"
-

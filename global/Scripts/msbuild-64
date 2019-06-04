@@ -1,0 +1,123 @@
+#!/bin/sh
+#
+# MSBuild shortcut tool
+#
+# Locates and invokes the MSBuild binary. Optionally permits specifying
+# a version of the build tools.
+#
+# Usage:
+#   msbuild64 [version] <args...>
+#   msbuild32 [version] <args...>
+#
+# where version is one of the following:
+#   net40   - .NET 4.0 MSBuild, located under the Windows directory.
+#   vs2013  - Visual Studio 2013's MSBuild (v12), in Program Files (x86).
+#   vs2015  - Visual Studio 2015's MSBuild (v14), in Program Files (x86).
+#   vs2017  - Visual Studio 2017's MSBuild, in various places.
+#
+# If version is specified but cannot be found, the script reports failure.
+#
+# If version is not specified, a default will be assumed. If the default
+# cannot be found, the latest version will be used.
+#
+
+say() {
+    echo "$@" >&2
+}
+ 
+die() {
+    say "$2"
+    exit "$1"
+}
+
+# Should be taken from the environment, but the Windows var's name contains
+# illegal characters.
+PROGRAMFILESX86="C:\\Program Files (x86)"
+
+DEFAULT_MSBUILD_VERSION="${DEFAULT_MSBUILD_VERSION-vs2017}"
+REQUESTED_VERSION="$1"
+if [ "$(basename "$0")" = "msbuild32" ];
+    then USEX86=true
+    else USEX86=false
+fi
+
+has_msbuild() {
+    test -n "${MSBUILD}" && test -f "${MSBUILD}"
+}
+
+use_msbuild_net40() {
+    if "${USEX86}";
+        then MSBUILD="$(cygpath --windir)/Microsoft.NET/Framework/v4.0.30319/MSBuild.exe"
+        else MSBUILD="$(cygpath --windir)/Microsoft.NET/Framework64/v4.0.30319/MSBuild.exe"
+    fi
+}
+
+use_msbuild_vs2013() {
+    if "${USEX86}";
+        then MSBUILD="$(cygpath --unix "${PROGRAMFILESX86}")/MSBuild/12.0/Bin/MSBuild.exe"
+        else MSBUILD="$(cygpath --unix "${PROGRAMFILESX86}")/MSBuild/12.0/Bin/amd64/MSBuild.exe"
+    fi
+}
+
+use_msbuild_vs2015() {
+    if "${USEX86}";
+        then MSBUILD="$(cygpath --unix "${PROGRAMFILESX86}")/MSBuild/14.0/Bin/MSBuild.exe"
+        else MSBUILD="$(cygpath --unix "${PROGRAMFILESX86}")/MSBuild/14.0/Bin/amd64/MSBuild.exe"
+    fi
+}
+
+_get_msbuild_installation_root() {
+    _ROOT_WINPATH="$(vswhere -products "*" -version "$1" -requires Microsoft.Component.MSBuild -property installationPath)"
+    test -n "${_ROOT_WINPATH}" && cygpath --unix "${_ROOT_WINPATH}"
+}
+
+use_msbuild_vs2017() {
+    INSTALL_ROOT="$(_get_msbuild_installation_root "15")"
+    test -n "${INSTALL_ROOT}" || return
+    test -d "${INSTALL_ROOT}" || return
+    if "${USEX86}";
+        then MSBUILD="${INSTALL_ROOT}/MSBuild/15.0/Bin/MSBuild.exe"
+        else MSBUILD="${INSTALL_ROOT}/MSBuild/15.0/Bin/amd64/MSBuild.exe"
+    fi
+}
+
+run_msbuild() {
+    "$MSBUILD" "$@"
+}
+
+try_resolve_version() {
+    case "$1" in
+        net40|net4) use_msbuild_net40 && return ;;
+        vs2013) use_msbuild_vs2013 && return ;;
+        vs2015) use_msbuild_vs2015 && return ;;
+        vs2017) use_msbuild_vs2017 && return ;;
+        *) return 1 ;;
+    esac
+}
+
+if try_resolve_version "${REQUESTED_VERSION}"; then
+    shift
+    has_msbuild || die 2 "MSBuild '${REQUESTED_VERSION}' is unavailable. Executable not found at '${MSBUILD}'"
+    run_msbuild "$@"
+    exit
+fi
+
+if try_resolve_version "${DEFAULT_MSBUILD_VERSION}"; then
+    has_msbuild || die 2 "MSBuild '${DEFAULT_MSBUILD_VERSION}' is unavailable. Executable not found at '${MSBUILD}'"
+    run_msbuild "$@"
+    exit
+fi
+
+for FIND_MSBUILD in     \
+    use_msbuild_vs2017  \
+    use_msbuild_vs2015  \
+    use_msbuild_vs2013  \
+    use_msbuild_net40
+do
+    "${FIND_MSBUILD}"
+    has_msbuild && break
+done
+
+has_msbuild || die 2 "Unable to find any MSBuild.exe"
+say "Using MSBuild at '${MSBUILD}'"
+run_msbuild "$@"
