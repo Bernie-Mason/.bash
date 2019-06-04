@@ -3,3 +3,8 @@ alias cd-eyegaze="cd /c/dev/eyegaze";
 alias cd-shared="cd /c/dev/shared";
 alias cd-dev="cd /c/dev";
 alias cd-activate="cd /c/dev/web/activate";
+
+
+alias vs-grid="vs /c/dev/grid/Source/SensorySoftware.Grid3.sln"
+alias vs-activate="vs /c/dev/web/activate/activate/Activate.sln"
+alias vs-eyegaze="vs /c/dev/eyegaze/Source/SensorySoftware.EyeGaze.sln"

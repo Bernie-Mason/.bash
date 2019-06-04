@@ -1,0 +1,17 @@
+
+
+function build-eyegaze(){
+	if [[ $1 -eq "--release" ]]; then
+		msbuild64 "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.sln" /p:Configuration=Release
+	fi
+
+	msbuild64 "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.sln" -p:Configuration=Debug
+}
+
+function build-grid(){
+	if [[ $1 -eq "--release" ]]; then
+		msbuild32 "C:\Dev\grid\Source\SensorySoftware.Grid3.sln" /p:Configuration=Release
+	fi
+
+	msbuild32 "C:\Dev\grid\Source\SensorySoftware.Grid3.sln" -p:Configuration=Debug
+}
