@@ -62,3 +62,6 @@ jobs			List active jobs
 bg 				Place a job in the background
 fg				Place a job in the foreground
 killall			Kill processes by name
+
+# Windows
+start			Starts/runs a file using it's preferred program
