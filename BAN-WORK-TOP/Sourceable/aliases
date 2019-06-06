@@ -4,6 +4,6 @@ alias cd-shared="cd /c/dev/shared";
 alias cd-dev="cd /c/dev";
 alias cd-activate="cd /c/dev/web/activate";
 
-alias grid-vs='start /c/dev/grid/Source/SensorySoftware.Grid3.sln'
-alias activate-vs='start /c/dev/web/activate/Activate.sln'
-alias eyegaze-vs='start /c/dev/eyegaze/Source/SensorySoftware.EyeGaze.sln'
+alias vs-grid='start /c/dev/grid/Source/SensorySoftware.Grid3.sln'
+alias vs-activate='start /c/dev/web/activate/Activate.sln'
+alias vs-eyegaze='start /c/dev/eyegaze/Source/SensorySoftware.EyeGaze.sln'
