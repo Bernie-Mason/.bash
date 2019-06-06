@@ -64,4 +64,4 @@ fg				Place a job in the foreground
 killall			Kill processes by name
 
 # Windows
-start			Starts/runs a file using it's preferred program
+start			Starts/runs a file using it's preferred program. For executables this is the windows cmd by default
