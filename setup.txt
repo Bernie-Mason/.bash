@@ -1,13 +1,11 @@
 SETUP PROCESS
 
-1. Create bash configuration files. 
-	a. In .bash/.bash_core create .bashrc, .bash_profile and .gitconfig configuration files as desired.
-	b. You can run generate-bash-core-files to generate blank files with the correct naming
-	c. Copy/write config into these files as desired
-	d. Run propagate-bash-config to copy these files into your user folder
-	e. When making changes to configuration you can make changes to files in use and run backup-bash-config when you're done OR make changes to the files in .bash_core and run propagate-bash-config to propagate your changes out of the working directory.
-2. If on Windows, update your windows path to include the following: 
-	%USERPROFILE%\.bash\BAN-WORK-TOP\Scripts
+1. If on Windows, update your windows path to include the following: 
+	%USERPROFILE%\.bash\_ENTER_HOSTNAME_HERE_\Scripts
 	%USERPROFILE%\.bash\Global\Scripts
 	%USERPROFILE%\.bash\Global\Vendor
-3. 
+2. Create bash configuration files. 
+	a. In .bash/.bash_core create .bashrc, .bash_profile and .gitconfig configuration files as desired. You can run generate-bash-core-files to generate blank files with the correct naming
+	b. Copy/write config into these files as desired
+	c. Run propagate-bash-config to copy these files into your user folder
+	d. When making changes to configuration you can make changes to files in use and run backup-bash-config when you're done OR make changes to the files in .bash_core and run propagate-bash-config to propagate your changes out of the working directory.
