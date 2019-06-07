@@ -29,8 +29,4 @@ function backup-bash-config(){
 	cp ~/.gitconfig ~/.bash/.bash_core/.gitconfig.${HOSTNAME}
 }
 
-function generate-bash-core-files(){
-	touch ~/.bash/.bash_core/.bashrc.${HOSTNAME}
-	touch ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
-	touch ~/.bash/.bash_core/.gitconfig.${HOSTNAME}
-}
+
