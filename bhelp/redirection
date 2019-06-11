@@ -53,6 +53,8 @@ Here, n is not specified so it defaults to "1" meaning stdout: we are redirectin
         # Sends stderr through a pipe.
         # |& was added to Bash 4 as an abbreviation for 2>&1 |.	
 
+        
+
 1>&2
   # Redirects stdout to stderr.
 
