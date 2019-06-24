@@ -41,7 +41,7 @@ if [ "$(basename "$0")" = "msbuild32" ];
     else USEX86=false
 fi
 
-() {
+has_msbuild() {
     test -n "${MSBUILD}" && test -f "${MSBUILD}"
 }
 
