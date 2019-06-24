@@ -4,6 +4,7 @@ alias cd-shared="cd /c/dev/shared";
 alias cd-dev="cd /c/dev";
 alias cd-activate="cd /c/dev/web/activate";
 
+alias grid-debug="'/C/Dev/grid/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Debug/net45/Grid 3.exe' &"
 alias vs-grid='start /c/dev/grid/Source/SensorySoftware.Grid3.sln'
 alias vs-activate='start /c/dev/web/activate/Activate.sln'
 alias vs-eyegaze='start /c/dev/eyegaze/Source/SensorySoftware.EyeGaze.sln'
