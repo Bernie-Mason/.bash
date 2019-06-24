@@ -42,8 +42,8 @@ alias view-bash-aliases="cat ~/.bash/global/aliases; cat ~/.bash/${HOSTNAME}/ali
 alias view-bash-config="cat ~/.bash/global/config; cat ~/.bash/l/${HOSTNAME}/config"
 alias view-bash-scripts="cat ~/.bash/global/scripts; cat ~/.bash/${HOSTNAME}/scripts"
 
-# random other alias
-# alias ROT13='tr a-zA-Z n-za-mN-ZA-M'
+# Debugging aliases
+alias debug="#set -o nounset; set -o xtrace"
 
 # Git alias list
 alias ga='git add'
@@ -90,3 +90,6 @@ alias gstp='git stash pop'
 
 # Package managers
 alias npm-update='npm install -g npm'
+
+# random other alias
+# alias ROT13='tr a-zA-Z n-za-mN-ZA-M'
