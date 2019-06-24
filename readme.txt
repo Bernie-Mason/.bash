@@ -6,6 +6,9 @@ This is the bash configuration space for the work of Bernard Mason. It contains 
 
 The aim of this setup is to keep a global set of scripts, aliases and other settings that can be modified and used across any machine that I end up working on. In this way I'll only ever be using one set of naming conventions for all such shortcut commands, whether working on a Unix-like machine or on Windows.
 
+References
+https://en.wikibooks.org/wiki/Bash_Shell_Scripting
+
 15/06/2017 - First entry
 I have just set up this configuration folder, allowing me to work with easily with the same set of settings across my Windows Machine (BAN-TOP) and my Antergos Virtual Box machine (antergoes-vb).  
 Currently, I am mostly using aliases to navigate more easily (cdp, cdd), to find files (find -type f -name "etc" - ffn) and to perform git operations quickly. I am using scripts very simply to update folders (a set of git commands for example).
