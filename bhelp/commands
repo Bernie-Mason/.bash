@@ -9,6 +9,21 @@ file 		Gives the file type
 stat 		Display file or filesystem status
 locate 		Find a file by name (super basic)
 find 		Searches for files in a directory hierarchy (-type, -name "*.jpg")
+			Has some extremely powerful options. We have a function called ff which allows you to find a that will match any part of the string input.
+				find . -type f -iname '*'"$1"'*' -ls
+				# The test -iname does a case insensitive match
+				# the type test specifies for files
+				# -ls lists current file in 'ls -dils' format 
+
+# File listing
+ls
+	-a --all 			do not ignore entries starting with .
+	--color[=WHEN]		colorize the output; WHEN can be 'always' (default if omitted), 'auto', or 'never'; more info below
+	-d, --directory 	list directories themselves, not their contents
+	-i, --inode			print the index number of each file
+	-l     				use a long listing format
+	-r, --reverse 		reverse order while sorting
+	-s, --size 			print the allocated size of each file, in blocks
 
 # File manipulation (rm, cp, mv and mkdir)
 ln (-s) file link 		Create a hard or symbolic (-s) link from a file.

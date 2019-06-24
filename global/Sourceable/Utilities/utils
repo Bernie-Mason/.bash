@@ -16,3 +16,40 @@ function isdirectory() {
 		return 1
 	fi
 }
+
+function disk_color()
+{
+    if [ ! -w "${PWD}" ] ; then
+        echo -en ${Red}
+        # No 'write' privilege in the current directory.
+    elif [ -s "${PWD}" ] ; then
+        local used=$(command df -P "$PWD" |
+                   awk 'END {print $5} {sub(/%/,"")}')
+        if [ ${used} -gt 95 ]; then
+            echo -en ${ALERT}           # Disk almost full (>95%).
+        elif [ ${used} -gt 90 ]; then
+            echo -en ${BRed}            # Free disk space almost gone.
+        else
+            echo -en ${Green}           # Free disk space is ok.
+        fi
+    else
+        echo -en ${Cyan}
+        # Current directory is size '0' (like /proc, /sys etc).
+    fi
+}
+
+
+#-------------------------------------------------------------
+# File & strings related functions:
+#-------------------------------------------------------------
+
+# Find a file with a pattern in name:
+function ff() { 
+	find . -type f -iname '*'"$*"'*' -ls ; 
+}
+
+# Find a file with pattern $1 in name and Execute $2 on it:
+function fe() { 
+	find . -type f -iname '*'"${1:-}"'*' \
+	-exec ${2:-file} {} \;  ; 
+}
