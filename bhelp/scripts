@@ -8,3 +8,31 @@ Steps for making a script
 	3. Put the script somewhere the shell can find it. The shell automatically searches certain directories for executable files when no explicit path is specified.
 		For example in ~/.bash/antergos_vb/config: export PATH="${PATH}:/home/bernie/bin"
 
+exit vs return
+
+	return will cause the current function to go out of scope, while exit will cause the script to end at the point where it is called. Here is a sample program to help explain this:
+
+	#!/bin/bash
+
+	retfunc()
+	{
+	    echo "this is retfunc()"
+	    return 1
+	}
+
+	exitfunc()
+	{
+	    echo "this is exitfunc()"
+	    exit 1
+	}
+
+	retfunc
+	echo "We are still here"
+	exitfunc
+	echo "We will never see this"
+	
+	Output
+		$ ./test.sh
+		this is retfunc()
+		We are still here
+		this is exitfunc()
