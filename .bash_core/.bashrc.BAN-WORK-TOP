@@ -29,8 +29,7 @@ if [[ ${USER} == "root" ]]; then
     SU=${Red}           # User is root.
 elif [[ ${USER} != $(logname) ]]; then
     SU=${BRed}          # User is not login user.
-    echo "Hello"
-else
+	else
     SU=${BCyan}         # User is normal (well ... most of us are).
 fi
 
