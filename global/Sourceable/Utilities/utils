@@ -9,7 +9,10 @@ function die() {
 	exit "$1"
 }
 
-function loudReturn() {
-	say "$2"
-	return
+function isdirectory() {
+	if [ -d "$1" ]; then
+		return 0
+	else
+		return 1
+	fi
 }
