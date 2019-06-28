@@ -72,6 +72,7 @@ alias glodga='git log --oneline --decorate --graph --all'
 
 ## Git branching alias
 alias gb='git branch'
+alias gfb='git branch -a | grep '
 alias gbi='git branch -vv'
 alias gch='git checkout'
 alias gchh='git checkout .'
