@@ -15,3 +15,8 @@ function build-eyegaze(){
 function build-grid(){
 	msbuild32 "C:\Dev\grid\Source\SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86"
 }
+
+function build-grid-all(){
+	clear-eyegaze-cache
+	msbuild32 "C:\Dev\grid\Source\SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86"
+}
