@@ -49,17 +49,7 @@ nuget-pack $EYEGAZE_PROJ_PATH $EYEGAZE_DESKTOP_PROJ_PATH
 echo " 
 -- Removing cached packages --
 "
-PACKAGE_CACHE='/c/users/Bernie/.nuget/packages/'
-EYEGAZE_PACKAGES=('sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop')
-for PACKAGE in ${EYEGAZE_PACKAGES[@]}; do
-	FULL_PACKAGE_NAME="$PACKAGE_CACHE$PACKAGE"
-	if [[ -d  $FULL_PACKAGE_NAME ]]; then
-		say "Removing ${FULL_PACKAGE_NAME}"
-		rm -rd $FULL_PACKAGE_NAME
-	else
-		say "Could not remove ${FULL_PACKAGE_NAME}. Package not found."
-	fi
-done
+clear-eyegaze-cache
 
 
 # echo " 
