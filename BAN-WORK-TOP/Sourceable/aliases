@@ -1,3 +1,5 @@
+#!/bin/bash
+
 alias cd-grid="cd /c/dev/grid";
 alias cd-eyegaze="cd /c/dev/eyegaze";
 alias cd-shared="cd /c/dev/shared";
