@@ -14,14 +14,7 @@
 #
 
 function source_all_bash_files(){
-	local BASH_BIN_HOSTNAME_FOLDER="~/.bash/${HOSTNAME}"
-	if [ ! -d $FOLDER_TO_BE_SOURCED ]; then
-		mkdir $FOLDER_TO_BE_SOURCED
-	fi
-	local FOLDER_TO_BE_SOURCED="${BASH_BIN_HOSTNAME_FOLDER}/sourceable"
-	if [ ! -d $BASH_BIN_HOSTNAME_FOLDER ]; then
-		mkdir $BASH_BIN_HOSTNAME_FOLDER
-	fi
+	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}/sourceable
 	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;
