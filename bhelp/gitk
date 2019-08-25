@@ -1,0 +1,66 @@
+gitk
+
+rev-list options and arguments
+This manual page describes only the most frequently used options. See git-rev-list[1] for a complete list.
+
+--all
+Show all refs (branches, tags, etc.).
+
+--branches[=<pattern>]
+--tags[=<pattern>]
+--remotes[=<pattern>]
+Pretend as if all the branches (tags, remote branches, resp.) are listed on the command line as <commit>. If <pattern> is given, limit refs to ones matching given shell glob. If pattern lacks ?, *, or [, /* at the end is implied.
+
+--since=<date>
+Show commits more recent than a specific date.
+
+--until=<date>
+Show commits older than a specific date.
+
+--date-order
+Sort commits by date when possible.
+
+--merge
+After an attempt to merge stops with conflicts, show the commits on the history between two branches (i.e. the HEAD and the MERGE_HEAD) that modify the conflicted files and do not exist on all the heads being merged.
+
+--left-right
+Mark which side of a symmetric difference a commit is reachable from. Commits from the left side are prefixed with a < symbol and those from the right with a > symbol.
+
+--full-history
+When filtering history with <path>…​, does not prune some history. (See "History simplification" in git-log[1] for a more detailed explanation.)
+
+--simplify-merges
+Additional option to --full-history to remove some needless merges from the resulting history, as there are no selected commits contributing to this merge. (See "History simplification" in git-log[1] for a more detailed explanation.)
+
+--ancestry-path
+When given a range of commits to display (e.g. commit1..commit2 or commit2 ^commit1), only display commits that exist directly on the ancestry chain between the commit1 and commit2, i.e. commits that are both descendants of commit1, and ancestors of commit2. (See "History simplification" in git-log[1] for a more detailed explanation.)
+
+-L<start>,<end>:<file>
+-L:<funcname>:<file>
+Trace the evolution of the line range given by "<start>,<end>" (or the function name regex <funcname>) within the <file>. You may not give any pathspec limiters. This is currently limited to a walk starting from a single revision, i.e., you may only give zero or one positive revision arguments. You can specify this option more than once.
+
+Note: gitk (unlike git-log[1]) currently only understands this option if you specify it "glued together" with its argument. Do not put a space after -L.
+
+<start> and <end> can take one of these forms:
+
+number
+
+If <start> or <end> is a number, it specifies an absolute line number (lines count from 1).
+
+/regex/
+
+This form will use the first line matching the given POSIX regex. If <start> is a regex, it will search from the end of the previous -L range, if any, otherwise from the start of file. If <start> is “^/regex/”, it will search from the start of file. If <end> is a regex, it will search starting at the line given by <start>.
+
++offset or -offset
+
+This is only valid for <end> and will specify a number of lines before or after the line given by <start>.
+
+If “:<funcname>” is given in place of <start> and <end>, it is a regular expression that denotes the range from the first funcname line that matches <funcname>, up to the next funcname line. “:<funcname>” searches from the end of the previous -L range, if any, otherwise from the start of file. “^:<funcname>” searches from the start of file.
+
+<revision range>
+Limit the revisions to show. This can be either a single revision meaning show from the given revision and back, or it can be a range in the form "<from>..<to>" to show all revisions between <from> and back to <to>. Note, more advanced revision selection can be applied. For a more complete list of ways to spell object names, see gitrevisions[7].
+
+Example gitk be411fb68f8d6c064eae0b03fac31dea759b002..f76a699bfd104859ce8fbc66aa5549439425c274
+
+<path>…​
+Limit commits to the ones touching files in the given paths. Note, to avoid ambiguity with respect to revision names use "--" to separate the paths from any preceding options.

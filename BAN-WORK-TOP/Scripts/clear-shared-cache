@@ -1,0 +1,18 @@
+#!/bin/sh
+
+say() {
+	echo "$@" 1>&2 #redirect stdout to stderr
+}
+
+PACKAGE_CACHE='/c/users/Bernie/.nuget/packages/'
+SHARED_PACKAGES=('sensorysoftware.shared' 'sensorysoftware.shared.desktop' 'sensorysoftware.shared.fluentui')
+for PACKAGE in ${SHARED_PACKAGES[@]}; do
+	FULL_PACKAGE_NAME="$PACKAGE_CACHE$PACKAGE"
+	if [[ -d  $FULL_PACKAGE_NAME ]]; then
+		say "Removing ${FULL_PACKAGE_NAME}"
+		rm -rd $FULL_PACKAGE_NAME
+	else
+		say "Could not remove ${FULL_PACKAGE_NAME}. Package not found."
+	fi
+done
+
