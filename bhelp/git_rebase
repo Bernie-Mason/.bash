@@ -1,0 +1,23 @@
+git_rebase
+
+The interactive rebase is a powerful tool. 
+
+git rebase master <optional branch name>
+	will rebase your current branch (or branch specified) onto master.
+
+
+Situation: You have a branch based off master and want to rebase your branch onto another point off master or another branch
+
+           _D`-E` current_branch
+	      / 
+A-B-C-D-E-F master	
+	\
+     -D`` target_branch
+
+git rebase target_branch
+This doesn't quite work as we'll take all the commits from master and our current branch and replay them on top of the target branch. If rebasing the target branch onto master isn't an option then we need to exclude the commits in master. We could do an iteractive rebase and remove the commits we don't want (I did this for a long time) or we can exclude a branches commits. In this case we want to exclude master so we write:
+
+git rebase --onto target_branch master <current_branch>
+
+If we have the current_branch checked out we don't need to specify it.
+
