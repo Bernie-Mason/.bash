@@ -6,6 +6,7 @@ alias cd-shared="cd /c/dev/shared";
 alias cd-dev="cd /c/dev";
 alias cd-web="cd /c/dev/web";
 alias cd-activate="cd /c/dev/web/activate";
+alias cd-tools="cd /c/dev/tools";
 
 alias grid-debug="'/C/Dev/grid/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Debug/net45/Grid 3.exe' &"
 alias vs-grid='start /c/dev/grid/Source/SensorySoftware.Grid3.sln'
