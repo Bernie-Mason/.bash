@@ -110,3 +110,7 @@ alias lh='ls .* --color=auto'
 alias ll='ls -ls --color=auto'
 alias l.='ls -la --color=auto'
 alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'
+
+
+# powershell
+alias pstos='powershell turn-off-screen'

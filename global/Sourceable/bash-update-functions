@@ -28,5 +28,3 @@ function backup-bash-config(){
 	cp ~/.bash_profile ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
 	cp ~/.gitconfig ~/.bash/.bash_core/.gitconfig.${HOSTNAME}
 }
-
-
