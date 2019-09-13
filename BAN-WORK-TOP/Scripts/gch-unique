@@ -1,0 +1,5 @@
+#!/bin/sh
+
+TICKET_ID=$1
+
+git branch -l | grep .*$TICKET_ID.* | xargs git checkout
