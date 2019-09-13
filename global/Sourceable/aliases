@@ -52,6 +52,8 @@ alias gc='git commit'
 alias gca='git commit --amend'
 alias gcaa='git commit --amend -a'
 alias gcaan='git commit --amend -a --no-edit'
+alias gcawip='git add .; git commit -a -m WIP'
+alias gcm='git commit -m '
 alias gcl='git clean -fd'
 alias gd='git diff'
 alias gpfwl='git push --force-with-lease'
@@ -86,6 +88,7 @@ alias gchh='git checkout .'
 alias gchp='git checkout -'
 alias gchb='git checkout -b'
 alias gchm='git checkout master'
+alias gchr='git rev-parse --abbrev-ref --symbolic-full-name HEAD@{upstream} | xargs git checkout'
 alias grbi='git remote -v show origin'
 alias gst='git stash'
 alias gstp='git stash pop'
@@ -109,6 +112,8 @@ alias lu='ls -ltur'        #  Sort by/show access time,most recent last.
 alias lh='ls .* --color=auto'
 alias ll='ls -ls --color=auto'
 alias l.='ls -la --color=auto'
+
+# List of help topics
 alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'
 
 
