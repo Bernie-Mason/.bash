@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # Directory alias (computer specific)
 alias cd-localbash="cd ~/.bash/LEISHMANIASIS/"

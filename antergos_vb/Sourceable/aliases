@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Antergoes virtual box specific aliases
 alias bp='vim ~/.bashrc'
 alias bhelp='cat ~/gitconfigpref/useful-commands'
