@@ -2,4 +2,4 @@
 
 TICKET_ID=$1
 
-git branch -l | grep $TICKET_ID | xargs git checkout
+git branch -l | grep -m1 $TICKET_ID | xargs git checkout
