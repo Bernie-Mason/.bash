@@ -1,5 +1,49 @@
 #!/bin/sh
 
-TICKET_ID=$1
+function say() {
+	echo "$@" >&2
+}
 
-git branch -l | grep -m1 $TICKET_ID | xargs git checkout
+function die() {
+	say "$2"
+	exit "$1"
+}
+
+UNIQUE_ID="$1"
+MATCHING_BRANCH=$(git branch | grep ${UNIQUE_ID} | sed 's/\*//g' )
+BRANCHES=($MATCHING_BRANCH)
+MATCHCOUNT="${#BRANCHES[@]}"
+echo ""
+
+if [ "${MATCHCOUNT}" == 1 ]; then
+	git checkout $MATCHING_BRANCH
+	exit
+fi
+
+if [ "${MATCHCOUNT}" > 1 ]; then
+	echo "More than one matching branch. Type the number of the one you wish to checkout:"
+	echo "-------------------------------------------------------------------------------"
+	echo ""
+	i=1
+	for BRANCH in ${BRANCHES[@]}; do
+		echo "	$i  $BRANCH"
+		((++i))
+	done
+	echo ""
+	re='^[0-9]+$'
+	read SELECTED_NUMBER
+	echo "Value read in: ($SELECTED_BRANCH)"
+	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
+		die 1 "Not a valid option. Exiting..."
+	fi
+	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
+	echo "You have selected $SELECTED_BRANCH"
+	git checkout $SELECTED_BRANCH
+
+	exit
+fi
+
+die 1 "No matching branches. Exiting..."
+
+
+

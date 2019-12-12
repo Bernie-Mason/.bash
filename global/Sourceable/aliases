@@ -1,4 +1,4 @@
-#!/bin/bash
+##!/bin/bash
 
 # Bernie help pages
 alias bhelp='vim ~/.bash/global/bhelp/bhelp'
@@ -118,7 +118,6 @@ alias l.='ls -la --color=auto'
 
 # List of help topics
 alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'
-
 
 # powershell
 alias pstos='powershell turn-off-screen'

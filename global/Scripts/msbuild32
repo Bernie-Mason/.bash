@@ -72,9 +72,7 @@ _get_msbuild_installation_root() {
 }
 
 use_msbuild_vs2017() {
-    echo "2017 a"
     INSTALL_ROOT="$(_get_msbuild_installation_root "15")"
-    echo "2017 b"
     echo "$INSTALL_ROOT"
     test -n "${INSTALL_ROOT}" || return
     test -d "${INSTALL_ROOT}" || return

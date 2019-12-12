@@ -13,7 +13,7 @@ alias vs-grid='start /c/dev/grid/Source/SensorySoftware.Grid3.sln'
 alias vs-shared='start /c/dev/shared/Source/SensorySoftware.Shared.All.sln'
 alias vs-activate='start /c/dev/web/activate/Activate.sln'
 alias vs-eyegaze='start /c/dev/eyegaze/Source/SensorySoftware.EyeGaze.sln'
-alias vs-crashreporter='start /c/dev/Web/CrashReporting/CrashReporter.Site.sln'
+alias vs-crashreporter='start /c/dev/Web/CrashReporter/src/SensorySoftware.CrashReporter.Site.sln'
 
 #nuget
 alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
