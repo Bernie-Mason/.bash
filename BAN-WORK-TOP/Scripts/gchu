@@ -10,17 +10,42 @@ function die() {
 }
 
 UNIQUE_ID="$1"
-MATCHING_BRANCH=$(git branch | grep ${UNIQUE_ID} | sed 's/\*//g' )
+GIT_BRANCH_ACTIONS="--list"
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo "Unique checkout for git. First argument should be your unique identifier for the branch in question"
+      echo " "
+      echo "$gchu identifier [actions]"
+      echo " "
+      echo "actions:"
+      echo "-h, --help          show brief help"
+      echo "-a, --all       	select all branches (including remotes)"
+      exit 0
+      ;;
+    -a|--all)
+      GIT_BRANCH_ACTIONS="--all"
+      shift
+      ;;
+    *)
+	  shift
+      continue
+      ;;
+  esac
+done
+
+
+MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${UNIQUE_ID} | sed 's/\*//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
-if [ "${MATCHCOUNT}" == 1 ]; then
+if (("${MATCHCOUNT}" == 1)); then
 	git checkout $MATCHING_BRANCH
 	exit
 fi
 
-if [ "${MATCHCOUNT}" > 1 ]; then
+if (("$MATCHCOUNT" > 1)); then
 	echo "More than one matching branch. Type the number of the one you wish to checkout:"
 	echo "-------------------------------------------------------------------------------"
 	echo ""
