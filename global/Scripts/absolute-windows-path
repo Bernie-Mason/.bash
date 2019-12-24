@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 _absolute_windows_path_partial() {
     if [ -d "$1" ];

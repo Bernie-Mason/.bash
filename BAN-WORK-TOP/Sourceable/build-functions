@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function build-eyegaze-release(){
 	msbuild32 "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.sln" -p:Configuration=Release

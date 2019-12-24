@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 BASH_CORE_FILES=~/.bash/.bash_core
 if [ ! -d $BASH_CORE_FILES ];then
