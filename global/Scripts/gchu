@@ -82,6 +82,7 @@ if (("$MATCHCOUNT" > 1)); then
 	die 0
 fi
 
+
 die 1 "No matching branches. Exiting..."
 
 

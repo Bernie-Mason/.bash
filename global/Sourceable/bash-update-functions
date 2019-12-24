@@ -4,27 +4,3 @@ function update-bash-all(){
 	propagate-bash-config
 	generic-update ~/.bash
 }
-
-function propagate-bash-config(){
-	local BASH_CORE_FILES=~/.bash/.bash_core
-	if [ ! -d $BASH_CORE_FILES ];then
-		mkdir $BASH_CORE_FILES
-	fi
-
-	local HOST=$hostname
-	cp ~/.bash/.bash_core/.bashrc.${HOSTNAME} ~/.bashrc
-	cp ~/.bash/.bash_core/.bash_profile.${HOSTNAME} ~/.bash_profile
-	cp ~/.bash/.bash_core/.gitconfig.${HOSTNAME} ~/.gitconfig
-}
-
-function backup-bash-config(){
-	local BASH_CORE_FILES=~/.bash/.bash_core
-	if [ ! -d $BASH_CORE_FILES ];then
-		mkdir $BASH_CORE_FILES
-	fi
-
-	local HOST=$hostname
-	cp ~/.bashrc ~/.bash/.bash_core/.bashrc.${HOSTNAME}
-	cp ~/.bash_profile ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
-	cp ~/.gitconfig ~/.bash/.bash_core/.gitconfig.${HOSTNAME}
-}
