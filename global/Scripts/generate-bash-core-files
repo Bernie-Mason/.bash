@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 FILE_BASHRC="~/.bash/.bash_core/.bashrc.${HOSTNAME}"
 FILE_BASH_PROFILE="~/.bash/.bash_core/.bash_profile.${HOSTNAME}"

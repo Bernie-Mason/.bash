@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 say() {
 	echo "$@" 1>&2 #redirect stdout to stderr

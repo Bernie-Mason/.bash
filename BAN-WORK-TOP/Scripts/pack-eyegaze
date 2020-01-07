@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Pack eyegaze and copy nuspec file to Local Packages
 #

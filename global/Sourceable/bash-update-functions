@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function update-bash-all(){
 	propagate-bash-config
