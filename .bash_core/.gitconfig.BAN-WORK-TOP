@@ -1,13 +1,33 @@
 [user]
-	name = Bernie Mason
-	email = bernie.mason@gmail.com
+	name = Bernard Mason
+	email = bernard.mason@thinksmartbox.com
 [core]
 	autocrlf = false
 	whitespace = cr-at-eol
 [alias]
-    rb = for-each-ref refs/heads/ \
-  --count=10 \
-  --sort=-committerdate \
-  --format='%(objectname:short) %(committerdate:short) %(refname:short)'
+	rb = for-each-ref refs/heads/   --count=10   --sort=-committerdate   --format='%(objectname:short) %(committerdate:short) %(refname:short)'
 [branch]
 	autosetuprebase = always
+[merge]
+    tool = vscode
+[mergetool "vscode"]
+    cmd = code --wait $MERGED
+[diff]
+    tool = vscode
+[difftool "vscode"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+[pull]
+	rebase = false
+[fetch]
+	prune = false
+[rebase]
+	autoStash = false
+[http]
+	postBuffer = 157286400
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[credential]
+	helper = store
