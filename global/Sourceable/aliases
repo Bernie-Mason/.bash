@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 
 # Bernie help pages
 alias bhelp='vim ~/.bash/global/bhelp/bhelp'
@@ -63,7 +63,8 @@ alias gpusom='git push -u origin master'
 alias gphead='git push -u origin HEAD'
 alias gpul='git pull'
 alias gpulv='GIT_CURL_VERBOSE=1 GIT_TRACE=1 git pull'
-alias gs='git status -u'
+alias gs='git status -su'
+alias gsb='git status -sbu'
 alias gr='git reset'
 alias grp='git reset --patch'
 alias grem='git remote'
@@ -90,6 +91,7 @@ alias gch='git checkout'
 alias gchh='git checkout .'
 alias gchp='git checkout -'
 alias gchb='git checkout -b'
+alias gcht='git checkout --track' # provide origin/branchname to create branchname
 alias gchm='git checkout master'
 alias gchr='git rev-parse --abbrev-ref --symbolic-full-name HEAD@{upstream} | xargs git checkout'
 alias grbi='git remote -v show origin'
