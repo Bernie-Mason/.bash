@@ -24,8 +24,8 @@ function echo_help() {
     echo "$gchu identifier [actions]"
     echo " "
     echo "actions:"
-    echo "-h, --help          show brief help"
-    echo "-a, --all       	select all branches (including remotes)"
+    echo "-h, --help        show brief help"
+    echo "-a, --all         select all branches (including remotes)"
     die 0
 }
 
