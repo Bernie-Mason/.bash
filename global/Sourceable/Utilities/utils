@@ -54,3 +54,9 @@ function fe() {
 	find . -type f -iname '*'"${1:-}"'*' \
 	-exec ${2:-file} {} \;  ; 
 }
+
+# Show disk space
+function ds() {
+    echo "Disk space for user $HOSTNAME"
+    df -h
+}
