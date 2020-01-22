@@ -1,3 +1,5 @@
-Add persistance for vim config, colorschemes etc
-Install vim todo list stuff
-Move bash config folder onto a pen drive in addition to having a remote
+ ☐ Add persistance for vim config, colorschemes etc
+ ☐ Install vim todo list stuff
+ ☐ Move bash config folder onto a pen drive in addition to having a remote
+ ☐ Split global into windows/mac/linux/general directories and only source the ones you want on the right machine
+ ☐ Get git diff function (git_utils) working for untracked files
