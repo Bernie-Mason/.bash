@@ -81,7 +81,7 @@ alias grpu='git rev-parse --abbrev-ref --symbolic-full-name HEAD@{upstream}'
 alias ggc='git fsck && git gc --prune=now'
 
 ## Git diffing
-# alias gd='git diff'
+alias gd='git diff'
 alias gdn='git diff --no-index /dev/null'
 alias gdw='git diff --word-diff=color'
 
