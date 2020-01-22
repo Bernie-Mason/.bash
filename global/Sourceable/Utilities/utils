@@ -1,3 +1,4 @@
+#!/bin/bash
 # Handle graceful handling of errors
 
 function say() {
