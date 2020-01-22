@@ -11,14 +11,14 @@ die() {
 
 cd "$1" || die 1 "Directory doesn't exist"
 
-local ISUPTODATE=$(git status | grep "Your branch is up-to-date with \'origin/master\'.")
+ISUPTODATE=$(git status | grep "Your branch is up-to-date with \'origin/master\'.")
 if [ -z "$ISUPTODATE" ];
 then
 	git pull || die 1 "Couldn't pull"
 else
 	echo "Y'all already up-to-date."
 fi
-local ISWORKINGTREECLEAN=$(git status | grep "nothing to commit, working tree clean")
+ISWORKINGTREECLEAN=$(git status | grep "nothing to commit, working tree clean")
 if [ -z "$ISWORKINGTREECLEAN" ];
 then
 	git add .
