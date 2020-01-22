@@ -1,0 +1,20 @@
+[user]
+	email = bernie.mason@gmail.com
+	name = Bernie
+[alias]
+	edit-config = config --global --edit
+[core]
+	autocrlf = false
+	whitespace = cr-at-eol
+[alias]
+    recent-branches = for-each-ref refs/heads/ \
+  --count=10 \
+  --sort=-committerdate \
+  --format='%(objectname:short) %(committerdate:short) %(refname:short)'
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[branch]
+	autosetuprebase = always
