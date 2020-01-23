@@ -8,6 +8,7 @@ alias cd..='cd ..'
 alias cd-localbash="cd ~/.bash/BAN-TOP"
 alias cd-dev="cd /C/Dev"
 alias cd-javascript="cd ~/Documents/JavaScript/"
+alias cd-sublime='cd ~/appdata/roaming/sublime\ text\ 3/packages/user'
 alias xh="explorer ."
 alias gcm-help="head -n 9 ~/.bash/bhelp/git_cm_help"
 alias cd-epro='cd /C/Dev/Epro'
