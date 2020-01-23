@@ -19,5 +19,3 @@ alias vs-crashreporter='start /c/dev/Web/CrashReporter/src/SensorySoftware.Crash
 #nuget
 alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
 alias nuget-restore="nuget restore -nocache"
-
-
