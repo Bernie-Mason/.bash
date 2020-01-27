@@ -7,7 +7,7 @@ alias cd-dev="cd /c/dev"
 alias cd-web="cd /c/dev/web"
 alias cd-activate="cd /c/dev/web/activate"
 alias cd-tools="cd /c/dev/tools"
-alias cd-sublime='cd /c/users/bernie/appdata/roaming/sublime\ text\ 3/packages/user'
+alias cd-sublime='cd ~/appdata/roaming/sublime\ text\ 3/packages/user'
 
 alias grid-debug="'/C/Dev/grid/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Debug/net45/Grid 3.exe' &"
 alias vs-grid='start /c/dev/grid/Source/SensorySoftware.Grid3.sln'
@@ -19,5 +19,3 @@ alias vs-crashreporter='start /c/dev/Web/CrashReporter/src/SensorySoftware.Crash
 #nuget
 alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
 alias nuget-restore="nuget restore -nocache"
-
-
