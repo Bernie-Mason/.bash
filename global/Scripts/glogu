@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-# git unique checkout tool
+# git unique log tool
 #
 # Checks out a branch in git based on a unique identifier.
 # If more than one match is found, the tool provides a list of options that may be selected.
@@ -56,12 +56,12 @@ MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
 if (("${MATCHCOUNT}" == 1)); then
-	git checkout $MATCHING_BRANCH
+	git log --oneline master..$MATCHING_BRANCH
 	die 0
 fi
 
 if (("$MATCHCOUNT" > 1)); then
-	echo "More than one match. Select the one you want e.g. type \"1\" to checkout the first item in the list:"
+	echo "More than one match. Select the one you want e.g. type \"1\" to git log the first item in the list:"
 	echo "-------------------------------------------------------------------------------"
 	echo ""
 	i=1
@@ -78,7 +78,7 @@ if (("$MATCHCOUNT" > 1)); then
 	fi
 	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
 	echo "You have selected $SELECTED_BRANCH"
-	git checkout $SELECTED_BRANCH
+	git log --oneline master..$SELECTED_BRANCH
 	die 0
 fi
 

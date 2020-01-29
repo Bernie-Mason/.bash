@@ -3,3 +3,4 @@
  ☐ Move bash config folder onto a pen drive in addition to having a remote
  ☐ Split global into windows/mac/linux/general directories and only source the ones you want on the right machine
  ☐ Get git diff function (git_utils) working for untracked files
+ ☐ refactor gchu and glogu to make common code
