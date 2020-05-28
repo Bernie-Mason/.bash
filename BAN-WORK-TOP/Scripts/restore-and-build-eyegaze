@@ -1,0 +1,21 @@
+#!/bin/bash
+
+function say() {
+	echo "$@" >&2
+}
+
+function title() {
+  echo ""
+  echo "<--- $1 --->" 
+}
+
+function die() {
+	test -z "$2" || say "$2"
+	exit "$1"
+}
+
+title "Restoring solution packages"
+msbuild32 "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln" -t:restore -verbosity:q -consoleloggerparameters:ErrorsOnly || die 1 "== package restore failed =="
+
+title "Building solution"
+msbuild32 "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln" -p:Configuration=Debug || die 1 "== build failed =="

@@ -67,13 +67,13 @@ use_msbuild_vs2015() {
 }
 
 _get_msbuild_installation_root() {
-    _ROOT_WINPATH="$(vswhere -products "*" -version "$1" -requires Microsoft.Component.MSBuild -property installationPath)"
-    test -n "${_ROOT_WINPATH}" && cygpath --unix "${_ROOT_WINPATH}"
+    _ROOT_WINPATH="$(vswhere -products "*" -version "$1" -requires Microsoft.Component.MSBuild -property installationPath | grep "$2")" 
+    test -n "${_ROOT_WINPATH}" && cygpath.exe --unix "${_ROOT_WINPATH}"
 }
 
 use_msbuild_vs2017() {
-    INSTALL_ROOT="$(_get_msbuild_installation_root "15")"
-    echo "$INSTALL_ROOT"
+    INSTALL_ROOT="$(_get_msbuild_installation_root "15" "2017")"
+    say "$INSTALL_ROOT $USEX86"
     test -n "${INSTALL_ROOT}" || return
     test -d "${INSTALL_ROOT}" || return
     if "${USEX86}";

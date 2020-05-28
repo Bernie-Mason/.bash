@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+# Script to output the ticket list for a particular release
+#
+# Assumption. All tickets have a merge commit which also contains the ticket name (and thus the case ID)
+# Input
+# 1 => The tip of the branch corresponding to the starting point. E.g. release/3.0.1.0
+# 2 => The tip of the branch corresponding to the end point. e.g. release/3.0.2.0
+#
+# Output
+# A list of of branches in between the start and end
+
+
+#ASD=$(find -type f -name *.csproj | grep -v "/CefSharp/" | grep -v "/third_party_dlls")
+#value=$(<config.txt)
+#array=($ASD)
+#
+#echo "${#array[@]}"
+#for f in "${array[@]}";  do 
+#	#"${f}" >> filelist.txt
+#	echo "${f}" >> filelist.txt
+#	cat "${f}" >> temp.txt
+#
+#done;
+
+if [ -d "Source" ]; then
+
+	START_TIP=$1
+	END_TIP=$2
+	git log $START_TIP..$END_TIP --pretty=format:"%s" --merges | cut -d " " -f 8 | cut -d "/" -f 2
+
+	#LOGS=$(git log $START_TIP..$END_TIP --pretty=format:"%s" --merges  | cut -d " " -f 8 | cut -d "/" -f 2 | grep GRID )
+	#echo $LOGS
+	#TOTALCOUNT="${#LOGS[@]}"
+
+	#echo $TOTALCOUNT
+else
+	echo "Not in the correct dir"
+fi

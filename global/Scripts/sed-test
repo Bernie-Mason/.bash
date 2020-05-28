@@ -6,4 +6,4 @@
 set -vx
 
 read  -p "Enter your package version number (i.e. 1.0.0.0): " PACKAGE_VERSION
-sed -ir 's/\[assembly: AssemblyFileVersion\(1.0.0.0/${PACKAGE_VERSION}/g' "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.Desktop\Properties\AssemblyInfo.cs"
+sed -ir 's/\[assembly: AssemblyFileVersion\(1.0.0.0/${PACKAGE_VERSION}/g' "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.Desktop/Properties/AssemblyInfo.cs"

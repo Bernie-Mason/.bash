@@ -39,7 +39,11 @@ while test $# -gt 0; do
       echo_help
       ;;
     -a|--all)
-      GIT_BRANCH_ACTIONS="--all"
+      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --all"
+      shift
+      ;;
+  	-r|--remotes)
+      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
       shift
       ;;
     *)
@@ -49,8 +53,7 @@ while test $# -gt 0; do
   esac
 done
 
-
-MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${UNIQUE_ID} | sed 's/\*//g' )
+MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${UNIQUE_ID} | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""

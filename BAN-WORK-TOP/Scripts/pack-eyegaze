@@ -12,38 +12,56 @@ die() {
 	exit "$1"
 }
 
-# read  -p "Enter your package version number (i.e. 1.0.0.0): " PACKAGE_VERSION
 
-# echo " 
-# -- Change grid eyegaze version --
-# "
+function echo_help() {
+	echo "Pack nuget eyegaze."
+    echo " "
+    echo "actions:"
+    echo "-h, --help        					show brief help"
+    echo "-s, --set-directory-build-props       set directory build props to 1.0.0.0"
+    echo "-b, --build       					build package before packing"
+    die 0
+}
 
-# vim "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze\Properties\AssemblyInfo.cs" || die 2 "file or directory doesn't exist"
+SET_DIRECTORY_BUILD_PROPS=false
+BUILD_BEFORE_PACKING=false
 
-# PACKAGE_VERSION=$(grep -oP 'AssemblyFileVersion\(\"\K([0-9]\.[0-9]\.[0-9]\.[0-9])' "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze\Properties\AssemblyInfo.cs")
-# echo "Your package version is {$PACKAGE_VERSION}"
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    -s|--set-directory-build-props)
+      SET_DIRECTORY_BUILD_PROPS=true
+      shift
+      ;;
+    -b|--build)
+      BUILD_BEFORE_PACKING=true
+      shift
+      ;;
+	-sb|-bs)
+      SET_DIRECTORY_BUILD_PROPS=true
+      BUILD_BEFORE_PACKING=true
+      shift
+      ;;
+    *)
+	  shift
+      continue
+      ;;
+  esac
+done
 
-# echo " 
-# -- Change grid eyegaze.desktop version --
-# "
+if $BUILD_BEFORE_PACKING; then
+	restore-and-build-eyegaze || exit 0
+fi
 
-# vim "C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.Desktop\Properties\AssemblyInfo.cs" || die 2 "file or directory doesn't exist"
-
-# echo "
-# -- Package version : $PACKAGE_VERSION
-# "
-
-# echo " 
-# -- Building eyegaze --
-# "
-# build-eyegaze || die 2 "FAILURE: Building eyegaze failed"
-
+die 0 "test"
 
 echo " 
 -- Creating packages --
 "
-EYEGAZE_PROJ_PATH="C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze\SensorySoftware.EyeGaze.csproj"
-EYEGAZE_DESKTOP_PROJ_PATH="C:\Dev\eyegaze\Source\SensorySoftware.EyeGaze.Desktop\SensorySoftware.EyeGaze.Desktop.csproj"
+EYEGAZE_PROJ_PATH="${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze\SensorySoftware.EyeGaze.csproj"
+EYEGAZE_DESKTOP_PROJ_PATH="${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.Desktop\SensorySoftware.EyeGaze.Desktop.csproj"
 nuget-pack $EYEGAZE_PROJ_PATH $EYEGAZE_DESKTOP_PROJ_PATH
 
 echo " 
@@ -51,9 +69,17 @@ echo "
 "
 clear-eyegaze-cache
 
+if $SET_DIRECTORY_BUILD_PROPS; then
+	echo "
+	-- Setting Directory.Build.Props EyeGazeVersion --
+	"
+	ASSEMBLY_INFO_DIR="${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze/Properties/AssemblyInfo.cs"
+	PACKAGE_VERSION=$(grep -oP 'AssemblyFileVersion\(\"\K([0-9]\.[0-9]\.[0-9]\.[0-9])' "${ASSEMBLY_INFO_DIR}")
+ 	test "$PACKAGE_VERSION" == "" && PACKAGE_VERSION="${DEFAULT_PACKAGE_VERSION}" && echo "No package version obtained from ${ASSEMBLY_INFO_DIR}"
+ 	echo "Setting package version to ${PACKAGE_VERSION}"
+	grep EyeGazeVersion ${grid_repository_dir}/Source/Directory.Build.props | sed --silent s_"1\.1\.[0-9]\.[0-9][0-9][0-9]"_${PACKAGE_VERSION}_g
 
-# echo " 
-# -- Change grid eyegaze version number to $PACKAGE_VERSION --
-# "
-# read  -n 1 -p "Press any key to enter Vim and change version number"
-# vim '/c/dev/grid/source/directory.build.props' || die 2 "directory doesn't exist"
+fi
+
+$SET_DIRECTORY_BUILD_PROPS && 
+

@@ -14,12 +14,12 @@
 #
 
 function source_all_bash_files(){
-	local FOLDER_TO_BE_SOURCED=~/.bash/${HOSTNAME}/sourceable
+	local FOLDER_TO_BE_SOURCED=${HOME}/.bash/${HOSTNAME}/sourceable
 	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;
 
-	FOLDER_TO_BE_SOURCED=~/.bash/global/sourceable
+	FOLDER_TO_BE_SOURCED=${HOME}/.bash/global/sourceable
 	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;

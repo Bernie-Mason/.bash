@@ -30,6 +30,9 @@ alias vsdevcmd="/C/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/Profes
 # text comparison alias list
 alias dif='diff -u'
 
+# XML lintiing
+alias xmllint='xmllint --noout'
+
 # bash aliases 
 alias edit-bash-aliases="vim ~/.bash/global/aliases"
 alias edit-bash-aliases-local="vim ~/.bash/${HOSTNAME}/aliases"
@@ -81,8 +84,10 @@ alias ggc='git fsck && git gc --prune=now'
 
 ## Git diffing
 alias gd='git diff'
+alias gdc='git diff --cached'
 alias gdn='git diff --no-index /dev/null'
 alias gdw='git diff --word-diff=color'
+alias gdmin='git diff --word-diff=color -U0'
 
 ## Git logging alias
 alias glod='git log --oneline --decorate'
