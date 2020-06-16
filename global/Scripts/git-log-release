@@ -10,6 +10,14 @@
 # Output
 # A list of of branches in between the start and end
 
+function say() {
+	echo "$@" >&2
+}
+
+function die() {
+	test -z "$2" || say "$2"
+	exit "$1"
+}
 
 #ASD=$(find -type f -name *.csproj | grep -v "/CefSharp/" | grep -v "/third_party_dlls")
 #value=$(<config.txt)
@@ -23,11 +31,41 @@
 #
 #done;
 
+function echo_help() {
+	echo "Log of issues in a release"
+	echo "Basic wrapper for \"git log first_commit..second_commit\" including some tidy up of the output"
+    echo " "
+    echo "actions:"
+    echo "-h, --help        show brief help"
+    die 0
+}
+
+test -z $1 && die 1 "Please provide the oldest commit as your first argument"
+test -z $2 && die 1 "Please provide the newest commit as your second argument"
+
+FIRST_COMMIT="$1"
+SECOND_COMMIT="$2"
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    *)
+	  shift
+      continue
+      ;;
+  esac
+done
+
+[[ $(git cat-file -t ${FIRST_COMMIT}) == "commit" ]] || die 1 "${FIRST_COMMIT} is not a valid commit"
+[[ $(git cat-file -t ${SECOND_COMMIT}) == "commit" ]] || die 1 "${SECOND_COMMIT} is not a valid commit"
+
+# test "$UNIQUE_ID" && echo_help
+
 if [ -d "Source" ]; then
 
-	START_TIP=$1
-	END_TIP=$2
-	git log $START_TIP..$END_TIP --pretty=format:"%s" --merges | cut -d " " -f 8 | cut -d "/" -f 2
+	git log $FIRST_COMMIT..$SECOND_COMMIT --pretty=format:"%s" --merges #| cut -d " " -f 8 | cut -d "/" -f 2
 
 	#LOGS=$(git log $START_TIP..$END_TIP --pretty=format:"%s" --merges  | cut -d " " -f 8 | cut -d "/" -f 2 | grep GRID )
 	#echo $LOGS
