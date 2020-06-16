@@ -4,7 +4,7 @@
 #
 
 say() {
-	echo "$@" 1>&2 #redirect stdout to stderr
+	echo "$@" 1>&2 # redirect stdout to stderr
 }
 
 die() {
@@ -17,9 +17,9 @@ function echo_help() {
 	echo "Pack nuget eyegaze."
     echo " "
     echo "actions:"
-    echo "-h, --help        					show brief help"
+    echo "-h, --help        					          show brief help"
     echo "-s, --set-directory-build-props       set directory build props to 1.0.0.0"
-    echo "-b, --build       					build package before packing"
+    echo "-b, --build       					          build package before packing"
     die 0
 }
 
@@ -60,8 +60,8 @@ die 0 "test"
 echo " 
 -- Creating packages --
 "
-EYEGAZE_PROJ_PATH="${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze\SensorySoftware.EyeGaze.csproj"
-EYEGAZE_DESKTOP_PROJ_PATH="${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.Desktop\SensorySoftware.EyeGaze.Desktop.csproj"
+EYEGAZE_PROJ_PATH="${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze/SensorySoftware.EyeGaze.csproj"
+EYEGAZE_DESKTOP_PROJ_PATH="${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.Desktop/SensorySoftware.EyeGaze.Desktop.csproj"
 nuget-pack $EYEGAZE_PROJ_PATH $EYEGAZE_DESKTOP_PROJ_PATH
 
 echo " 
