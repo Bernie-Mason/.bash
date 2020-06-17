@@ -20,3 +20,8 @@ q  show pane numbers
 x  kill pane
 +  break pane into window (e.g. to select text by mouse to copy)
 -  restore pane from window
+
+:resize-pane -D 10 (Resizes the current pane down by 10 cells)
+:resize-pane -U 10 (Resizes the current pane upward by 10 cells)
+:resize-pane -L 10 (Resizes the current pane left by 10 cells)
+:resize-pane -R 10 (Resizes the current pane right by 10 cells)
