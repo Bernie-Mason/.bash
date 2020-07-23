@@ -1,0 +1,16 @@
+# You start a bisect with:
+
+$ git bisect start
+
+# If you're on a commit with the bug/error you can do: 
+$ git bisect bad                 # Current version is bad
+
+# Then reference the commit hash or tag where the bug/error doesn't exist
+$ git bisect good v2.6.13-rc2    # v2.6.13-rc2 is known to be good
+
+
+# We then work through each commit that the bisect selects, marking them as good or bad.
+
+# To end the bisect run
+
+$ git bisect reset

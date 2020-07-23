@@ -1,26 +1,26 @@
 #!/bin/bash
 
 function build-eyegaze-release(){
-	msbuild32 "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln" -p:Configuration=Release
+	msbuild32 "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln" -p:Configuration=Release -p:nodereuse=false
 }
 
 function build-grid-release(){
-	msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Release -p:Platform="x86"
+	msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Release -p:Platform="x86" -p:nodereuse=false
 }
 
 function build-eyegaze(){
-	msbuild32 "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln" -p:Configuration=Debug 
+	msbuild32 "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln" -p:Configuration=Debug -p:nodereuse=false
 }
 
 function build-shared(){
-	msbuild32 "${shared_repository_dir}/Source/SensorySoftware.Shared.All.sln" -p:Configuration=Debug 
+	msbuild32 "${shared_repository_dir}/Source/SensorySoftware.Shared.All.sln" -p:Configuration=Debug -p:nodereuse=false
 }
 
 function build-grid(){
-	msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86"
+	msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86" -p:nodereuse=false
 }
 
 function build-grid-all(){
 	clear-eyegaze-cache
-	msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86"
+	msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86" -p:nodereuse=false
 }

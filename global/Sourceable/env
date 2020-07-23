@@ -7,3 +7,4 @@ umask 0002
 export HISTCONTROL=ignoredups
 export HISTSIZE=1000
 
+alias SCRIPT_PATH='$(dirname $(realpath -s $0))'

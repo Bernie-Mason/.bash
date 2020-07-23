@@ -91,6 +91,14 @@ alias gdc='git diff --cached'
 alias gdn='git diff --no-index /dev/null'
 alias gdw='git diff --word-diff=color'
 alias gdmin='git diff --word-diff=color -U0'
+alias gdf='git diff --name-only'
+alias gdfm='git diff --name-only master..HEAD'
+
+alias gsh='git show'
+alias gshw='git show --word-diff=color'
+alias gshmin='git show --word-diff=color -U0'
+
+
 
 ## Git logging alias
 alias glom='git log --oneline master..HEAD'
