@@ -71,8 +71,7 @@ title "CLEANING GIT"
 git clean -fxd -e "*.vs" -e "*.vscode" || die 1 "== git clean failed =="
 
 title "RESTORING PACKAGES"
-#msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -t:restore -p:Platform="x86" -verbosity:q -consoleloggerparameters:ErrorsOnly  || die 1 "== package restore failed =="
-nuget restore "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" #|| die 1 "== package restore failed =="
+msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -t:restore -p:Platform="x86" -verbosity:q -consoleloggerparameters:ErrorsOnly  || die 1 "== package restore failed =="
 
 title "BUILDING GRID"
 msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86" -verbosity:q -consoleloggerparameters:ErrorsOnly || die 1 "== build failed =="

@@ -24,5 +24,5 @@ cd $LOCAL_PACKAGE_STORE
 for ARG in "$@"
 do
     $NUGET_EXE pack $ARG
-done
+done 
 cd -

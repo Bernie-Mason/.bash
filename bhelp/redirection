@@ -38,9 +38,12 @@ Here, n is not specified so it defaults to "1" meaning stdout: we are redirectin
   # Redirect stderr to file "filename."
 2>>filename
   # Redirect and append stderr to file "filename."
-&>filename
+&>filename OR >filename 2>&1
   # Redirect both stdout and stderr to file "filename."
-  # This operator is now functional, as of Bash 4, final release.
+&>>filename OR >>filename 2>&1
+  # Redirect and append stdout and stderr to file "filename."
+
+  # Redirect and append stdout and stderr to file "filename."
 
 2>&1
   # Redirects stderr to stdout.

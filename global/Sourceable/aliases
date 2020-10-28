@@ -33,6 +33,11 @@ alias dif='diff -u'
 # XML lintiing
 alias xmllint='xmllint --noout'
 
+# nuget
+alias nuget-locals='nuget locals all -list'
+alias nuget-sources='nuget sources list'
+alias edit-global-nuget='vim ~/AppData/Roaming/NuGet/NuGet.config'
+
 # bash aliases 
 alias edit-bash-aliases="vim ~/.bash/global/sourceable/aliases"
 alias edit-bash-aliases-local="vim ~/.bash/${HOSTNAME}/sourceable/aliases"
@@ -94,11 +99,11 @@ alias gdmin='git diff --word-diff=color -U0'
 alias gdf='git diff --name-only'
 alias gdfm='git diff --name-only master..HEAD'
 
-alias gsh='git show'
-alias gshw='git show --word-diff=color'
-alias gshmin='git show --word-diff=color -U0'
-
-
+# show and blame
+alias gsh='git show -w'
+alias gshw='git show -w --word-diff=color'
+alias gshmin='git show -w --word-diff=color -U0'
+alias gbl='git blame -c'
 
 ## Git logging alias
 alias glom='git log --oneline master..HEAD'
@@ -121,6 +126,12 @@ alias grbi='git remote -v show origin'
 alias gst='git stash'
 alias gstp='git stash pop'
 
+# tmux aliases
+alias tma='tmux attach'
+alias tmas='tmux attach-session -t'
+alias tmls='tmux list-sessions'
+alias tmd='tmux detach'
+
 # Package managers
 alias npm-update='npm install -g npm'
 
@@ -140,6 +151,10 @@ alias lu='ls -ltur'        #  Sort by/show access time,most recent last.
 alias lh='ls .* --color=auto'
 alias ll='ls -ls --color=auto'
 alias l.='ls -la --color=auto'
+
+# disk usage
+alias du1='du -h -d 1'
+alias du2='du -h -d 2'
 
 # List of help topics
 alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'

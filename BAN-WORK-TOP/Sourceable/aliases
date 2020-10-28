@@ -1,5 +1,3 @@
-#!/bin/bash
-
 alias cd-grid="cd ${grid_repository_dir}"
 alias cd-eyegaze="cd ${eyegaze_repository_dir}"
 alias cd-shared="cd ${shared_repository_dir}"

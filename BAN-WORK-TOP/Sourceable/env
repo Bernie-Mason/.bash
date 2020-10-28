@@ -1,6 +1,19 @@
-#!/bin/bash
+# Source this file from your .bash_profile or paste the contents directly
 
+# For example:
+# export grid_repository_dir='/c/dev/grid'
+# export eyegaze_repository_dir='/c/dev/eyegaze'
 export grid_repository_dir='/c/dev/grid'
 export eyegaze_repository_dir='/c/dev/eyegaze'
 export web_repository_dir='/c/dev/web'
 export shared_repository_dir='/c/dev/shared'
+
+# To get the list of nuget caches run: nuget locals all -list 
+# http-cache: C:\Users\USERNAME\AppData\Local\NuGet\v3-cache
+# global-packages: C:\Users\USERNAME\.nuget\packages\
+# temp: C:\Users\USERNAME\AppData\Local\Temp\NuGetScratch
+# plugins-cache: C:\Users\USERNAME\AppData\Local\NuGet\plugins-cache
+export nuget_http_cache='C:\Users\Bernie\AppData\Local\NuGet\v3-cache'
+export nuget_global_packages='C:\Users\Bernie\.nuget\packages\'
+export nuget_temp='C:\Users\Bernie\AppData\Local\Temp\NuGetScratch'
+export nuget_plugins_cache='C:\Users\Bernie\AppData\Local\NuGet\plugins-cache'

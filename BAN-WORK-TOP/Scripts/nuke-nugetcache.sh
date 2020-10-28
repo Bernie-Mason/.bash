@@ -5,4 +5,5 @@ say() {
 }
 
 PACKAGE_CACHE='/c/users/Bernie/.nuget/packages/'
-rm -rf PACKAGE_CACHE || echo "Could not remove cache"
+say "Removing all files from ${PACKAGE_CACHE}"
+rm -rf ${PACKAGE_CACHE} || echo "Could not remove cache"

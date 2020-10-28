@@ -1,0 +1,38 @@
+ssh_key
+
+Adding a key
+
+Step 1. Set up your default identity
+
+$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/c/Users/emmap1/.ssh/id_rsa):
+
+Step 2. Add the key to the ssh-agent
+
+2.1 To start the agent, run the following:
+$ eval $(ssh-agent)
+Agent pid 9700
+
+2.2 Enter ssh-add followed by the path to the private key file:
+$ ssh-add ~/.ssh/<private_key_file>
+
+Step 3. Add the public key to your Account settings (github/bitbucket etc)
+
+Step 4. Verify it worked. For example:
+$ ssh -v git@bitbucket.thinksmartbox.com
+
+And check that ~/.ssh/config is configurated correctly. 
+* The host has to be the correct domain
+* The hostname can either be the domain or local ip address (if you're on a VPN for example)
+* The port number by default is 22 for ssh. If this is different (I'm looking at you bitbucket) then you'll need to change this.
+
+Step 5. If you were using ssh previously, you'll need to change the url of your remote. You can see your current remote thus:
+$ git remote -vv
+origin  https://bitbucket.thinksmartbox.com/scm/libs/shared.git (fetch)
+origin  https://bitbucket.thinksmartbox.com/scm/libs/shared.git (push)
+
+You can change the remote thus:
+$ git remote set-url origin ssh://git@bitbucket.thinksmartbox.com:7999/libs/shared.git
+
+Bitbucket: Note that you'll need to consult bitbucket for the exact url of the ssh remote. The urls for https and ssh don't always simply differ by the protocol.
