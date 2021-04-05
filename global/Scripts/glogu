@@ -21,7 +21,7 @@ function echo_help() {
 	echo "Unique branch finder for git."
 	echo "First argument should be your unique identifier for the branch in question."
     echo " "
-    echo "$gchu identifier [actions]"
+    echo "\$gchu identifier [actions]"
     echo " "
     echo "actions:"
     echo "-h, --help        show brief help"

@@ -21,17 +21,20 @@ function echo_help() {
 	echo "Unique branch finder for git."
 	echo "First argument should be your unique identifier for the branch in question."
     echo " "
-    echo "$gchu identifier [actions]"
+    echo "\$gchu identifier [actions]"
     echo " "
     echo "actions:"
     echo "-h, --help        show brief help"
+    echo "-r, --remotes     select remote branches"
     echo "-a, --all         select all branches (including remotes)"
+    echo "-t, --track         select all branches (including remotes)"
     die 0
 }
 
 UNIQUE_ID="$1"
 test -z "$UNIQUE_ID" && echo_help
 GIT_BRANCH_ACTIONS="--list"
+GIT_CHECKOUT_ACTIONS=""
 
 while test $# -gt 0; do
   case "$1" in
@@ -44,6 +47,15 @@ while test $# -gt 0; do
       ;;
   	-r|--remotes)
       GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
+      shift
+      ;;
+  	-t|--track)
+      GIT_CHECKOUT_ACTIONS=" --track"
+      shift
+      ;;
+    -tr|-rt)
+      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
+      GIT_CHECKOUT_ACTIONS=" --track"
       shift
       ;;
     *)
@@ -59,7 +71,7 @@ MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
 if (("${MATCHCOUNT}" == 1)); then
-	git checkout $MATCHING_BRANCH
+	git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
 	die 0
 fi
 
@@ -81,7 +93,7 @@ if (("$MATCHCOUNT" > 1)); then
 	fi
 	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
 	echo "You have selected $SELECTED_BRANCH"
-	git checkout $SELECTED_BRANCH
+	git checkout$GIT_CHECKOUT_ACTIONS $SELECTED_BRANCH
 	die 0
 fi
 

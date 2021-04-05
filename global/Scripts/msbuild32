@@ -34,7 +34,7 @@ die() {
 # illegal characters.
 PROGRAMFILESX86="C:\\Program Files (x86)"
 
-DEFAULT_MSBUILD_VERSION="${DEFAULT_MSBUILD_VERSION-vs2017}"
+DEFAULT_MSBUILD_VERSION="${DEFAULT_MSBUILD_VERSION-vs2019}"
 REQUESTED_VERSION="$1"
 if [ "$(basename "$0")" = "msbuild32" ];
     then USEX86=true
@@ -82,6 +82,17 @@ use_msbuild_vs2017() {
     fi
 }
 
+use_msbuild_vs2019() {
+    INSTALL_ROOT="$(_get_msbuild_installation_root "15" "2019")"
+    say "$INSTALL_ROOT $USEX86"
+    test -n "${INSTALL_ROOT}" || return
+    test -d "${INSTALL_ROOT}" || return
+    if "${USEX86}";
+        then MSBUILD="${INSTALL_ROOT}/MSBuild/Current/Bin/MSBuild.exe"
+        else MSBUILD="${INSTALL_ROOT}/MSBuild/Current/Bin/amd64/MSBuild.exe"
+    fi
+}
+
 run_msbuild() {
     "$MSBUILD" "$@"
 }
@@ -92,6 +103,7 @@ try_resolve_version() {
         vs2013) use_msbuild_vs2013 && return ;;
         vs2015) use_msbuild_vs2015 && return ;;
         vs2017) use_msbuild_vs2017 && return ;;
+        vs2019) use_msbuild_vs2019 && return ;;
         *) return 1 ;;
     esac
 }

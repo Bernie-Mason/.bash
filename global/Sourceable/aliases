@@ -35,6 +35,7 @@ alias xmllint='xmllint --noout'
 
 # nuget
 alias nuget-locals='nuget locals all -list'
+alias nuget-clear-all-caches='nuget locals all -clear'
 alias nuget-sources='nuget sources list'
 alias edit-global-nuget='vim ~/AppData/Roaming/NuGet/NuGet.config'
 
@@ -81,7 +82,9 @@ alias gr='git reset'
 alias grp='git reset --patch'
 alias grem='git remote'
 alias gremi='git remote -v'
-alias grem='git rebase -i master'
+alias grepo='git remote prune origin'
+alias grem='git rebase -i origin/master'
+alias grefm='git fetch && git rebase -i origin/master'
 alias grec='git rebase --continue'
 alias grea='git rebase --abort'
 alias gitkba='gitk --all --remotes &'

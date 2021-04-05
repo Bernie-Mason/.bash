@@ -24,3 +24,22 @@ function build-grid-all(){
 	clear-eyegaze-cache
 	msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86" -p:nodereuse=false
 }
+
+
+#!/bin/bash
+
+function restore-eyegaze(){
+	echo "Restoring eyegaze..."
+	nuget restore "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln"
+}
+
+function restore-shared(){
+	echo "Restoring shared..."
+	nuget restore "${shared_repository_dir}/Source/SensorySoftware.Shared.All.sln"
+}
+
+function restore-grid(){
+	echo "Restoring grid..."
+	nuget restore "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" 
+}
+

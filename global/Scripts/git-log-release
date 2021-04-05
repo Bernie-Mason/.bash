@@ -4,11 +4,16 @@
 #
 # Assumption. All tickets have a merge commit which also contains the ticket name (and thus the case ID)
 # Input
-# 1 => The tip of the branch corresponding to the starting point. E.g. release/3.0.1.0
-# 2 => The tip of the branch corresponding to the end point. e.g. release/3.0.2.0
+# 1 => The tip of the branch (or tag) corresponding to the starting point. E.g. release/3.0.1.0.
+# 2 => The tip of the branch (tag) corresponding to the end point. e.g. release/3.0.2.0. Can also specific HEAD.
 #
 # Output
 # A list of of branches in between the start and end
+#
+# Example(s):
+# $ git-log-release origin/release/3.0.57.0 origin/release/3.0.58.0 
+# $ git-log-release GRID_3.0.60.0 HEAD 
+
 
 function say() {
 	echo "$@" >&2
@@ -19,24 +24,13 @@ function die() {
 	exit "$1"
 }
 
-#ASD=$(find -type f -name *.csproj | grep -v "/CefSharp/" | grep -v "/third_party_dlls")
-#value=$(<config.txt)
-#array=($ASD)
-#
-#echo "${#array[@]}"
-#for f in "${array[@]}";  do 
-#	#"${f}" >> filelist.txt
-#	echo "${f}" >> filelist.txt
-#	cat "${f}" >> temp.txt
-#
-#done;
-
 function echo_help() {
 	echo "Log of issues in a release"
 	echo "Basic wrapper for \"git log first_commit..second_commit\" including some tidy up of the output"
     echo " "
     echo "actions:"
     echo "-h, --help        show brief help"
+    echo "-p, --pretty      attempt to trim the output to just show the branch name after the branch type identifier"
     die 0
 }
 
@@ -45,11 +39,16 @@ test -z $2 && die 1 "Please provide the newest commit as your second argument"
 
 FIRST_COMMIT="$1"
 SECOND_COMMIT="$2"
+PRETTY=false
 
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
       echo_help
+      ;;
+    -p|--pretty)
+	  PRETTY=true;
+	  shift
       ;;
     *)
 	  shift
@@ -61,17 +60,8 @@ done
 [[ $(git cat-file -t ${FIRST_COMMIT}) == "commit" ]] || die 1 "${FIRST_COMMIT} is not a valid commit"
 [[ $(git cat-file -t ${SECOND_COMMIT}) == "commit" ]] || die 1 "${SECOND_COMMIT} is not a valid commit"
 
-# test "$UNIQUE_ID" && echo_help
-
-if [ -d "Source" ]; then
-
-	git log $FIRST_COMMIT..$SECOND_COMMIT --pretty=format:"%s" --merges #| cut -d " " -f 8 | cut -d "/" -f 2
-
-	#LOGS=$(git log $START_TIP..$END_TIP --pretty=format:"%s" --merges  | cut -d " " -f 8 | cut -d "/" -f 2 | grep GRID )
-	#echo $LOGS
-	#TOTALCOUNT="${#LOGS[@]}"
-
-	#echo $TOTALCOUNT
+if ${PRETTY}; then
+	git log $FIRST_COMMIT..$SECOND_COMMIT --pretty=format:"%s" --merges | cut -d " " -f 8 | cut -d "/" -f 2 
 else
-	echo "Not in the correct dir"
+	git log $FIRST_COMMIT..$SECOND_COMMIT --pretty=format:"%s" --merges
 fi

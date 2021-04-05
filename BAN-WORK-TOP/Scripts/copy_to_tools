@@ -1,0 +1,15 @@
+#!/bin/bash
+BIN_COPY_PATH='C:\Dev\tools\scripts\bash\bin\'
+SOURCEABLE_COPY_PATH='C:\Dev\tools\scripts\bash\sourceable\'
+cp 'C:\Users\Bernie\.bash\global\scripts\git-log-release' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\global\scripts\glogu' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\global\scripts\gchu' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\global\scripts\nuget-pack' $BIN_COPY_PATH
+
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\clear-shared-cache' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\clear-eyegaze-cache' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\pack-eyegaze' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\pack-shared' $BIN_COPY_PATH
+
+#cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\sourceable\env' $SOURCEABLE_COPY_PATH
+#cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\sourceable\aliases' $SOURCEABLE_COPY_PATH

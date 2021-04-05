@@ -22,7 +22,7 @@ x  kill pane
 -  restore pane from window
 
 Moving and swapping
-[  Enable scrolling and selectioni (q to exit)
+[  Enable scrolling and selection (q to exit)
 {  swap-pane -U
 {  swap-pane -D
 

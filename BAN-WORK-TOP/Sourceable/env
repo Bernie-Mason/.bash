@@ -13,7 +13,11 @@ export shared_repository_dir='/c/dev/shared'
 # global-packages: C:\Users\USERNAME\.nuget\packages\
 # temp: C:\Users\USERNAME\AppData\Local\Temp\NuGetScratch
 # plugins-cache: C:\Users\USERNAME\AppData\Local\NuGet\plugins-cache
-export nuget_http_cache='C:\Users\Bernie\AppData\Local\NuGet\v3-cache'
-export nuget_global_packages='C:\Users\Bernie\.nuget\packages\'
+export nuget_http_cache='/C/Users/Bernie/AppData/Local/NuGet/v3-cache/'
+# It's frustrating that the 'nuget locals global-packages -list' doesn't just return this
+export nuget_global_packages='/C/Users/Bernie/.nuget/packages/'
 export nuget_temp='C:\Users\Bernie\AppData\Local\Temp\NuGetScratch'
 export nuget_plugins_cache='C:\Users\Bernie\AppData\Local\NuGet\plugins-cache'
+
+# Your local package store. 
+export local_package_store='/c/dev/packages'
