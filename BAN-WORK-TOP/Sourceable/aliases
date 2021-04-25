@@ -3,6 +3,7 @@ alias cd-eyegaze="cd ${eyegaze_repository_dir}"
 alias cd-shared="cd ${shared_repository_dir}"
 alias cd-dev="cd /c/dev"
 alias cd-web="cd ${web_repository_dir}"
+alias cd-javascript="cd ${smartbox_js_repository_dir}"
 alias cd-activate="cd ${web_repository_dir}/activate"
 alias cd-tools="cd /c/dev/tools"
 alias cd-sublime='cd ~/appdata/roaming/sublime\ text\ 3/packages/user'

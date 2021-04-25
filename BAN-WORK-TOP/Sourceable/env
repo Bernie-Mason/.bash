@@ -4,6 +4,7 @@
 # export grid_repository_dir='/c/dev/grid'
 # export eyegaze_repository_dir='/c/dev/eyegaze'
 export grid_repository_dir='/c/dev/grid'
+export smartbox_js_repository_dir='/c/dev/smartbox-grid-js'
 export eyegaze_repository_dir='/c/dev/eyegaze'
 export web_repository_dir='/c/dev/web'
 export shared_repository_dir='/c/dev/shared'

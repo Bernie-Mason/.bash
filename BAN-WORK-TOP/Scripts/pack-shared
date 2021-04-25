@@ -61,10 +61,11 @@ echo "
 -- Creating packages --
 "
 SHARED_PROJ_PATH="${shared_repository_dir}/Source/SensorySoftware.Shared/SensorySoftware.Shared.csproj"
+METAFILE_NUSPEC_PATH="${shared_repository_dir}/Source/SensorySoftware.Symbols.MetafileReader.Desktop/SensorySoftware.Symbols.MetafileReader.Desktop.csproj"
 SHARED_DESKTOP_PROJ_PATH="${shared_repository_dir}/Source/SensorySoftware.Shared.Desktop/SensorySoftware.Shared.Desktop.csproj"
 SHARED_FLUENTUI_PROJ_PATH="${shared_repository_dir}/Source/SensorySoftware.Shared.FluentUI/SensorySoftware.Shared.FluentUI.csproj"
 
-nuget-pack $SHARED_PROJ_PATH $SHARED_DESKTOP_PROJ_PATH $SHARED_FLUENTUI_PROJ_PATH $SHARED_IOS_PROJ_PATH
+nuget-pack $SHARED_PROJ_PATH $SHARED_DESKTOP_PROJ_PATH $SHARED_FLUENTUI_PROJ_PATH $SHARED_IOS_PROJ_PATH $METAFILE_NUSPEC_PATH
 
 echo " 
 -- Removing cached packages --

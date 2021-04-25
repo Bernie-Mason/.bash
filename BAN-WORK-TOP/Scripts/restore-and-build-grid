@@ -15,7 +15,7 @@ function die() {
 }
 
 title "Restoring solution packages"
-nuget restore "${grid_repository_dir}SensorySoftware.Grid3.sln"  || die 1 "== package restore failed =="
+nuget restore "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln"  || die 1 "== package restore failed =="
 
 title "Building solution"
 msbuild32 "${grid_repository_dir}/Source/SensorySoftware.Grid3.sln" -p:Configuration=Debug -p:Platform="x86" -verbosity:q -consoleloggerparameters:ErrorsOnly || die 1 "== build failed =="

@@ -1,5 +1,5 @@
 #!/bin/bash
-BIN_COPY_PATH='C:\Dev\tools\scripts\bash\bin\'
+BIN_COPY_PATH='C:\Dev\tools\scripts\bash\scripts\'
 SOURCEABLE_COPY_PATH='C:\Dev\tools\scripts\bash\sourceable\'
 cp 'C:\Users\Bernie\.bash\global\scripts\git-log-release' $BIN_COPY_PATH
 cp 'C:\Users\Bernie\.bash\global\scripts\glogu' $BIN_COPY_PATH

@@ -11,7 +11,7 @@ say() {
 }
 
 PACKAGE_CACHE=${nuget_global_packages}
-SHARED_PACKAGES=('sensorysoftware.shared' 'sensorysoftware.shared.desktop' 'sensorysoftware.shared.iOS' 'sensorysoftware.shared.fluentui')
+SHARED_PACKAGES=('sensorysoftware.shared' 'sensorysoftware.shared.desktop' 'sensorysoftware.shared.iOS'  'sensorysoftware.symbols.metafilereader.desktop' 'sensorysoftware.shared.fluentui')
 for PACKAGE in ${SHARED_PACKAGES[@]}; do
 	FULL_PACKAGE_NAME="$PACKAGE_CACHE$PACKAGE"
 	if [[ -d  $FULL_PACKAGE_NAME ]]; then

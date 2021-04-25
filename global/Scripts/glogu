@@ -20,6 +20,7 @@ function die() {
 function echo_help() {
 	echo "Unique branch finder for git."
 	echo "First argument should be your unique identifier for the branch in question."
+	echo "If you provide no argument, it will show the log between your HEAD commit and master"
     echo " "
     echo "\$gchu identifier [actions]"
     echo " "
@@ -30,7 +31,12 @@ function echo_help() {
 }
 
 UNIQUE_ID="$1"
-test -z "$UNIQUE_ID" && echo_help
+
+if [ -z "$UNIQUE_ID" ]; then 
+  	git log --oneline origin/master..HEAD
+	die 0
+fi
+
 GIT_BRANCH_ACTIONS="--list"
 
 while test $# -gt 0; do
@@ -48,15 +54,13 @@ while test $# -gt 0; do
       ;;
   esac
 done
-
-
 MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${UNIQUE_ID} | sed 's/\*//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
 if (("${MATCHCOUNT}" == 1)); then
-	git log --oneline master..$MATCHING_BRANCH
+	git log --oneline origin/master..$MATCHING_BRANCH
 	die 0
 fi
 
@@ -78,7 +82,7 @@ if (("$MATCHCOUNT" > 1)); then
 	fi
 	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
 	echo "You have selected $SELECTED_BRANCH"
-	git log --oneline master..$SELECTED_BRANCH
+	git log --oneline origin/master..$SELECTED_BRANCH
 	die 0
 fi
 
