@@ -1,12 +1,14 @@
 #!/bin/bash
 # 
-# git unique checkout tool
+# git checkout tool
 #
-# Checks out a branch in git based on a unique identifier.
+# Checks out a branch in git based on an identifier.
 # If more than one match is found, the tool provides a list of options that may be selected.
 #
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all action.
+#
+# No required env variables or scripts
 
 function say() {
 	echo "$@" >&2
@@ -18,8 +20,8 @@ function die() {
 }
 
 function echo_help() {
-	echo "Unique branch finder for git."
-	echo "First argument should be your unique identifier for the branch in question."
+  echo "Checkout a branch with a identifier."
+  echo "First argument should be your string pattern for the branch in question. Supports regex operations."
     echo " "
     echo "\$gchu identifier [actions]"
     echo " "
@@ -31,8 +33,8 @@ function echo_help() {
     die 0
 }
 
-UNIQUE_ID="$1"
-test -z "$UNIQUE_ID" && echo_help
+PATTERN="$1"
+test -z "$PATTERN" && echo_help
 GIT_BRANCH_ACTIONS="--list"
 GIT_CHECKOUT_ACTIONS=""
 
@@ -65,7 +67,7 @@ while test $# -gt 0; do
   esac
 done
 
-MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${UNIQUE_ID} | sed -E 's/\* (\(HEAD detached at )?//g' )
+MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${PATTERN} | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""

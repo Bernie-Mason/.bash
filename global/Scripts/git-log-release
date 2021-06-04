@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script to output the ticket list for a particular release
+# Script to output the ticket list for a particular Grid release
 #
 # Assumption. All tickets have a merge commit which also contains the ticket name (and thus the case ID)
 # Input
@@ -8,11 +8,13 @@
 # 2 => The tip of the branch (tag) corresponding to the end point. e.g. release/3.0.2.0. Can also specific HEAD.
 #
 # Output
-# A list of of branches in between the start and end
+# A list of of branches in between the first and last commit
 #
 # Example(s):
-# $ git-log-release origin/release/3.0.57.0 origin/release/3.0.58.0 
-# $ git-log-release GRID_3.0.60.0 HEAD 
+# To see the work in a release before it is initially tagged/released
+# $ git-log-release Grid_3.0.60.0 HEAD
+# To see the total progress of a release that has been branched
+# $ git-log-release Grid_3.0.60.0 origin/release/3.0.61 
 
 
 function say() {

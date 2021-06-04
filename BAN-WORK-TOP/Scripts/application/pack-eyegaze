@@ -1,7 +1,17 @@
 #!/bin/bash
 #
-# Pack eyegaze and copy nuspec file to Local Packages
+# For packaging eyegaze distributing to local package cache
 #
+# Required env variables: 
+#   grid_repository_dir - absolute path to directory of the grid repository
+#   eyegaze_repository_dir - absolute path to directory of the eyegaze repository
+#
+# Required scripts: 
+#   nuget-pack
+#   clear-eyegaze-cache
+#
+# Optional scripts: 
+#   eyegaze - for pre-building
 
 say() {
 	echo "$@" 1>&2 # redirect stdout to stderr
@@ -23,7 +33,7 @@ function echo_help() {
 }
 
 DEFAULT_PACKAGE_VERSION=1.0.0.0 # In the case that the version of the package cannot be found from the assembly file, this is the default we'll use.
-SET_DIRECTORY_BUILD_PROPS=false
+SET_GRID_CONFIG=false
 BUILD_BEFORE_PACKING=false
 
 while test $# -gt 0; do
@@ -32,7 +42,7 @@ while test $# -gt 0; do
       echo_help
       ;;
     -s|--set-directory-build-props)
-      SET_DIRECTORY_BUILD_PROPS=true
+      SET_GRID_CONFIG=true
       shift
       ;;
     -b|--build)
@@ -40,7 +50,7 @@ while test $# -gt 0; do
       shift
       ;;
 	  -sb|-bs)
-      SET_DIRECTORY_BUILD_PROPS=true
+      SET_GRID_CONFIG=true
       BUILD_BEFORE_PACKING=true
       shift
       ;;
@@ -53,7 +63,7 @@ done
 
 if $BUILD_BEFORE_PACKING; then
   # The below script will echo any errors in the case that it fails
-	restore-and-build-eyegaze || exit 0
+	eyegaze -b || exit 0
 fi
 
 echo " 
@@ -68,7 +78,7 @@ echo "
 "
 clear-eyegaze-cache
 
-if $SET_DIRECTORY_BUILD_PROPS; then
+if $SET_GRID_CONFIG; then
 	echo "
 	-- Setting Directory.Build.Props EyeGazeVersion --
 	"

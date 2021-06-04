@@ -1,12 +1,14 @@
 #!/bin/bash
 # 
-# git unique log tool
+# git rebase tool
 #
-# Finds a branch in git based on a unique identifier and outputs the log for that branch between its tip and master.
+# Rebases onto a branch in git based on an identifier.
 # If more than one match is found, the tool provides a list of options that may be selected.
 #
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all action.
+#
+# No required env variables or scripts
 
 function say() {
 	echo "$@" >&2
@@ -18,22 +20,20 @@ function die() {
 }
 
 function echo_help() {
-	echo "Log printing tool between a specified branch and your remote master branch"
-	echo "First argument should be your unique identifier for the branch in question."
-	echo "If you provide no argument, it will show the log between your HEAD commit and master"
+	echo "Rebase onto a branch with a identifier."
+	echo "First argument should be your string pattern for the branch in question. Supports regex operations."
     echo " "
-    echo "\$glogu identifier [actions]"
+    echo "\$griu identifier [actions]"
     echo " "
     echo "actions:"
-    echo "-h, --help           show brief help"
-    echo "-a, --all            select all branches (including remotes)"
-    echo "-r, --remote-master  show log between remote master (e.g. origin/master"
+    echo "-h, --help        show brief help"
+    echo "-r, --remotes     select from just remote branches"
+    echo "-a, --all         select from local and remote branches"
     die 0
 }
 
-UNIQUE_ID="$1"
-GIT_REMOTE="$(git remote)/"
-
+PATTERN="$1"
+test -z "$PATTERN" && echo_help
 GIT_BRANCH_ACTIONS="--list"
 
 while test $# -gt 0; do
@@ -42,11 +42,11 @@ while test $# -gt 0; do
       echo_help
       ;;
     -a|--all)
-      GIT_BRANCH_ACTIONS="--all"
+      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --all"
       shift
       ;;
-    -r|--remote-master)
-      GIT_REMOTE=""
+  	-r|--remotes)
+      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
       shift
       ;;
     *)
@@ -56,23 +56,18 @@ while test $# -gt 0; do
   esac
 done
 
-if [ -z "$UNIQUE_ID" ]; then 
-  	git log --oneline ${GIT_REMOTE}master..HEAD
-	die 0
-fi
-
-MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${UNIQUE_ID} | sed 's/\*//g' )
+MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${PATTERN} | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
 if (("${MATCHCOUNT}" == 1)); then
-	git log --oneline ${GIT_REMOTE}master..$MATCHING_BRANCH
+	git rebase -i $MATCHING_BRANCH
 	die 0
 fi
 
 if (("$MATCHCOUNT" > 1)); then
-	echo "More than one match. Select the one you want e.g. type \"1\" to git log the first item in the list:"
+	echo "More than one match. Select the one you want e.g. type \"1\" to rebase onto the first item in the list:"
 	echo "-------------------------------------------------------------------------------"
 	echo ""
 	i=1
@@ -89,7 +84,7 @@ if (("$MATCHCOUNT" > 1)); then
 	fi
 	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
 	echo "You have selected $SELECTED_BRANCH"
-	git log --oneline ${GIT_REMOTE}master..$SELECTED_BRANCH
+	git rebase -i $SELECTED_BRANCH
 	die 0
 fi
 

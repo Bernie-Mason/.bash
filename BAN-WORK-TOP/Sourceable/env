@@ -8,6 +8,8 @@ export smartbox_js_repository_dir='/c/dev/smartbox-grid-js'
 export eyegaze_repository_dir='/c/dev/eyegaze'
 export web_repository_dir='/c/dev/web'
 export shared_repository_dir='/c/dev/shared'
+export text_repository_dir='/c/dev/text'
+export logfile_analyser_exe='/c/Dev/tools/LogFileAnalyser/LogFileAnalyser/bin/Release/LogFileAnalyser.exe'
 
 # To get the list of nuget caches run: nuget locals all -list 
 # http-cache: C:\Users\USERNAME\AppData\Local\NuGet\v3-cache

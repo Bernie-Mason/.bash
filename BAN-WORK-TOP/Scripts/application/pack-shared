@@ -2,6 +2,16 @@
 #
 # Pack shared and copy nuspec file to Local Packages
 #
+# Required env variables: 
+#   grid_repository_dir - absolute path to directory of the grid repository
+#   shared_repository_dir - absolute path to directory of the shared repository
+#
+# Required scripts: 
+#   nuget-pack
+#   clear-shared-cache
+#
+# Optional scripts: 
+#   shared - for pre-building
 
 say() {
 	echo "$@" 1>&2 # redirect stdout to stderr
@@ -17,13 +27,13 @@ function echo_help() {
     echo " "
     echo "actions:"
     echo "-h, --help        					          show brief help"
-    echo "-s, --set-directory-build-props       set directory build props to 1.0.0.0"
-    echo "-b, --build       					          build package before packing"
+    echo "-s, --set-config       set Grid 3 directory build props to 1.0.0.0"
+    echo "-b, --build       					          build solution before packing"
     die 0
 }
 
 DEFAULT_PACKAGE_VERSION=1.0.0.0 # In the case that the version of the package cannot be found from the assembly file, this is the default we'll use.
-SET_DIRECTORY_BUILD_PROPS=false
+SET_GRID_CONFIG=false
 BUILD_BEFORE_PACKING=false
 
 while test $# -gt 0; do
@@ -31,8 +41,8 @@ while test $# -gt 0; do
     -h|--help)
       echo_help
       ;;
-    -s|--set-directory-build-props)
-      SET_DIRECTORY_BUILD_PROPS=true
+    -s|--set-config)
+      SET_GRID_CONFIG=true
       shift
       ;;
     -b|--build)
@@ -40,7 +50,7 @@ while test $# -gt 0; do
       shift
       ;;
   	-sb|-bs)
-      SET_DIRECTORY_BUILD_PROPS=true
+      SET_GRID_CONFIG=true
       BUILD_BEFORE_PACKING=true
       shift
       ;;
@@ -52,8 +62,7 @@ while test $# -gt 0; do
 done
 
 if $BUILD_BEFORE_PACKING; then
-  # The below script will echo any errors in the case that it fails
-	restore-and-build-shared || exit 1
+	shared -b || exit 1
 fi
 
 
@@ -72,7 +81,7 @@ echo "
 "
 clear-shared-cache
 
-if $SET_DIRECTORY_BUILD_PROPS; then
+if $SET_GRID_CONFIG; then
 	echo "
 	-- Setting Directory.Build.Props SharedVersion --
 	"

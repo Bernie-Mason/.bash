@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# Pack text and copy nuspec file to Local Packages
+#
+# Required env variables: 
+#   grid_repository_dir - absolute path to directory of the grid repository
+#   text
+_repository_dir - absolute path to directory of the text repository
+#
+# Required scripts: 
+#   nuget-pack
+#   clear-text-cache
+#
+# Optional scripts: 
+#   text - for pre-building
+
+say() {
+	echo "$@" 1>&2 # redirect stdout to stderr
+}
+
+die() {
+	say "$2"
+	exit "$1"
+}
+
+function echo_help() {
+	echo "Pack nuget text."
+    echo " "
+    echo "actions:"
+    echo "-h, --help        					          show brief help"
+    echo "-s, --set-config       set Grid 3 directory build props to 1.0.0.0"
+    echo "-b, --build       					          build solution before packing"
+    die 0
+}
+
+DEFAULT_PACKAGE_VERSION=1.0.0.0 # In the case that the version of the package cannot be found from the assembly file, this is the default we'll use.
+SET_GRID_CONFIG=false
+BUILD_BEFORE_PACKING=false
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    -s|--set-config)
+      SET_GRID_CONFIG=true
+      shift
+      ;;
+    -b|--build)
+      BUILD_BEFORE_PACKING=true
+      shift
+      ;;
+  	-sb|-bs)
+      SET_GRID_CONFIG=true
+      BUILD_BEFORE_PACKING=true
+      shift
+      ;;
+    *)
+	  shift
+      continue
+      ;;
+  esac
+done
+
+if $BUILD_BEFORE_PACKING; then
+  die 1 "Build of text not supported"
+	# text -b || exit 1
+fi
+
+
+echo " 
+-- Creating packages --
+"
+TEXT_PROJ_PATH="${text_repository_dir}/Source/SensorySoftware.Text/SensorySoftware.Text.csproj"
+TEXT_DESKTOP_PROJ_PATH="${text_repository_dir}/Source/SensorySoftware.Text.Desktop/SensorySoftware.Text.Desktop.csproj"
+
+nuget-pack $TEXT_PROJ_PATH $TEXT_DESKTOP_PROJ_PATH
+
+echo " 
+-- Removing cached packages --
+"
+clear-text-cache
+
+if $SET_GRID_CONFIG; then
+	echo "
+	-- Setting Directory.Build.Props TextVersion --
+	"
+	ASSEMBLY_INFO_DIR="${text_repository_dir}/Source/SensorySoftware.Text/Properties/AssemblyInfo.cs"
+	PACKAGE_VERSION=$(grep -oP 'AssemblyFileVersion\(\"\K([0-9]\.[0-9]\.[0-9]\.[0-9])' "${ASSEMBLY_INFO_DIR}")
+ 	test "$PACKAGE_VERSION" == "" && PACKAGE_VERSION="${DEFAULT_PACKAGE_VERSION}" && echo "No package version obtained from ${ASSEMBLY_INFO_DIR}"
+ 	echo "Setting package version to ${PACKAGE_VERSION}"
+	sed --in-place s_"TextVersion>1\.[0-1]\.[0-9]\.[0-9][0-9][0-9]"_"TextVersion>${PACKAGE_VERSION}"_g ${grid_repository_dir}/Source/Directory.Build.props
+  echo "Show TextVersion now in Directory.Build.props:"
+  grep SharedVersion ${grid_repository_dir}/Source/Directory.Build.props
+fi
+

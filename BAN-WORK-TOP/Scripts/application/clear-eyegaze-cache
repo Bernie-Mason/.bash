@@ -1,0 +1,25 @@
+#!/bin/bash
+# Remove local cached copies of the eyegaze packages
+#
+# There appears to be no way to specify a package with the nuget locals command
+# so instead we manually remove the offending folders.
+#
+# Only clears from the global package cache as the http, temp and plugins cache do not apparently store packages from custom feeds.
+#
+# Required env variables: 
+#   nuget_global_packages - absolute path to directory of the global nuget package cache
+
+say() {
+	echo "$@" 1>&2 #redirect stdout to stderr
+}
+
+PACKAGE_CACHE=${nuget_global_packages}
+EYEGAZE_PACKAGES=('sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop')
+for PACKAGE in ${EYEGAZE_PACKAGES[@]}; do
+	FULL_PACKAGE_NAME="$PACKAGE_CACHE$PACKAGE"
+	if [[ -d  $FULL_PACKAGE_NAME ]]; then
+		rm -rd $FULL_PACKAGE_NAME && say "Removed ${FULL_PACKAGE_NAME}"
+	else
+		say "Could not remove ${FULL_PACKAGE_NAME}. Package not found."
+	fi
+done

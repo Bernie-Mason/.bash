@@ -1,3 +1,0 @@
-#!/bin/bash
-
-'${grid_repository_dir}/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Release/net45/Grid 3.exe' &

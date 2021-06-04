@@ -2,9 +2,8 @@
 # 
 # Nuget pack wrapper. 
 #
-# Prerequisites:
-# You must either define LOCAL_PACKAGE_STORE here or globally in your env file.
-# You must install nuget for command line
+# Required env variables: 
+#   local_package_store - absolute path to directory of your personal local nuget package cache
 
 
 say() {
@@ -21,12 +20,12 @@ if [[ $1 = "" || $1 = "-h" || $1 = "help" ]]; then
 	return
 fi
 
-if [[ ! -d  "$local_package_store" ]]; then
-	say "No local package store. Creating one at $local_package_store"
-	mkdir "$local_package_store" 
+if [[ ! -d  "${local_package_store}" ]]; then
+	say "No local package store. Creating one at ${local_package_store}"
+	mkdir "${local_package_store}" 
 fi
 
-cd $local_package_store
+cd ${local_package_store}
 for ARG in "$@"
 do
 	echo "Packing $ARG"

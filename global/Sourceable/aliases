@@ -164,3 +164,6 @@ alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'
 
 # powershell
 alias pstos='powershell turn-off-screen'
+
+# Windows
+alias kill-msbuild='taskkill //IM msbuild.exe //F'	

@@ -2,14 +2,19 @@
 BIN_COPY_PATH='C:\Dev\tools\scripts\bash\scripts\'
 SOURCEABLE_COPY_PATH='C:\Dev\tools\scripts\bash\sourceable\'
 cp 'C:\Users\Bernie\.bash\global\scripts\git-log-release' $BIN_COPY_PATH
-cp 'C:\Users\Bernie\.bash\global\scripts\glogu' $BIN_COPY_PATH
-cp 'C:\Users\Bernie\.bash\global\scripts\gchu' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\global\scripts\glogu' "${BIN_COPY_PATH}\git-unique-log"
+cp 'C:\Users\Bernie\.bash\global\scripts\gchu' "${BIN_COPY_PATH}\git-unique-checkout"
 cp 'C:\Users\Bernie\.bash\global\scripts\nuget-pack' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\global\scripts\msbuild32' $BIN_COPY_PATH
 
-cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\clear-shared-cache' $BIN_COPY_PATH
-cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\clear-eyegaze-cache' $BIN_COPY_PATH
-cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\pack-eyegaze' $BIN_COPY_PATH
-cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\pack-shared' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\application\clear-shared-cache' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\application\clear-eyegaze-cache' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\application\pack-eyegaze' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\application\pack-shared' $BIN_COPY_PATH
+
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\application\build\shared' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\application\build\grid' $BIN_COPY_PATH
+cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\scripts\application\build\eyegaze' $BIN_COPY_PATH
 
 #cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\sourceable\env' $SOURCEABLE_COPY_PATH
-#cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\sourceable\aliases' $SOURCEABLE_COPY_PATH
+#cp 'C:\Users\Bernie\.bash\BAN-WORK-TOP\sourceable\aliases' $SOURCEABLE_COPY_PATHgs

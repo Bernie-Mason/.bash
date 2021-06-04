@@ -17,3 +17,11 @@ alias vs-crashreporter='start ${web_repository_dir}/CrashReporter/src/SensorySof
 #nuget
 alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
 alias nuget-restore="nuget restore -nocache"
+
+
+# Application builds
+alias grid-debug="grid -d"
+alias grid-release='"${grid_repository_dir}/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Release/net452/Grid 3.exe" &'
+
+# logfile analyser
+alias lfa="${logfile_analyser_exe}"
