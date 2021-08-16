@@ -32,7 +32,7 @@ function echo_help() {
     echo " "
     echo "actions:"
     echo "-h, --help        show brief help"
-    echo "-p, --pretty      attempt to trim the output to just show the branch name after the branch type identifier"
+    echo "-p, --pretty      attempt to trim the output to just show the branch name after the branch type identifier (works best for merge commit messages)"
     die 0
 }
 

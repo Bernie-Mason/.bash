@@ -89,7 +89,13 @@ if $SET_GRID_CONFIG; then
 	PACKAGE_VERSION=$(grep -oP 'AssemblyFileVersion\(\"\K([0-9]\.[0-9]\.[0-9]\.[0-9])' "${ASSEMBLY_INFO_DIR}")
  	test "$PACKAGE_VERSION" == "" && PACKAGE_VERSION="${DEFAULT_PACKAGE_VERSION}" && echo "No package version obtained from ${ASSEMBLY_INFO_DIR}"
  	echo "Setting package version to ${PACKAGE_VERSION}"
+	
+	# sed for the old props format: if it can't find it, it won't change anything
 	sed --in-place s_"SharedVersion>1\.[0-1]\.[0-9]\.[0-9][0-9][0-9]"_"SharedVersion>${PACKAGE_VERSION}"_g ${grid_repository_dir}/Source/Directory.Build.props
+	
+	# sed for the new range props format: if it can't find it, it won't change anything
+	sed --in-place s_"SharedVersion>\[1\.[0-1]\.[0-9]\.[0-9][0-9][0-9]"_"SharedVersion>\[${PACKAGE_VERSION}"_g ${grid_repository_dir}/Source/Directory.Build.props
+	
   echo "Show SharedVersion now in Directory.Build.props:"
   grep SharedVersion ${grid_repository_dir}/Source/Directory.Build.props
 fi

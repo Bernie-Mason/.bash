@@ -34,7 +34,7 @@ function echo_help() {
     echo "msbuild32 script"
     echo " "
     echo "args:"
-    echo "1 - Optional: Try to use the msbuild associated with a particular of Visual Studio. "
+    echo "1 - Optional: Try to use the msbuild associated with a particular version of Visual Studio. "
     echo "      Valid arguments: net40, net4, vs2013, vs2015, vs2017, vs2019"
     echo "All other arguments should be msbuild arguments"
     die 0
@@ -124,7 +124,6 @@ try_resolve_version() {
     esac
 }
 
-echo "${REQUESTED_VERSION}"
 if try_resolve_version "${REQUESTED_VERSION}"; then
     shift
     has_msbuild || die 2 "MSBuild '${REQUESTED_VERSION}' is unavailable. Executable not found at '${MSBUILD}'"
