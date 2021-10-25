@@ -2,13 +2,13 @@
 # 
 # git rebase tool
 #
-# Rebases onto a branch in git based on an identifier.
+# Rebases onto a branch based on a provided pattern.
 # If more than one match is found, the tool provides a list of options that may be selected.
 #
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all action.
 #
-# No required env variables or scripts
+# No external dependencies (env variables or scripts)
 
 function say() {
 	echo "$@" >&2
@@ -19,22 +19,39 @@ function die() {
 	exit "$1"
 }
 
+function fetchForRemotes() {
+      echo "$1 branches selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
+      git fetch
+}
+
+function rebaseBranchOntoMaster() {
+    echo "Rebasing $1 branch onto origin/master."
+    $2 && echo "Fetching to rebase onto latest origin/master."
+    $2 && git fetch
+
+		git checkout $1
+		git rebase -i origin/master;
+		git checkout -
+}
+
 function echo_help() {
-	echo "Rebase onto a branch with a identifier."
-	echo "First argument should be your string pattern for the branch in question. Supports regex operations."
+	echo "Rebase current branch onto target branch with a identifier."
+	echo "First argument should be your string pattern for target branch in question. Supports grep operations."
     echo " "
     echo "\$griu identifier [actions]"
     echo " "
     echo "actions:"
     echo "-h, --help        show brief help"
-    echo "-r, --remotes     select from just remote branches"
-    echo "-a, --all         select from local and remote branches"
+    echo "-u, --update      rebase target branch onto master first"
+    echo "-r, --remotes     select from just remote branches (will fetch first)"
+    echo "-a, --all         select from local and remote branches (will fetch first)"
     die 0
 }
 
 PATTERN="$1"
 test -z "$PATTERN" && echo_help
 GIT_BRANCH_ACTIONS="--list"
+REBASE_TARGET_FIRST=false
 
 while test $# -gt 0; do
   case "$1" in
@@ -42,11 +59,17 @@ while test $# -gt 0; do
       echo_help
       ;;
     -a|--all)
+      fetchForRemotes "All"
       GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --all"
       shift
       ;;
   	-r|--remotes)
+      fetchForRemotes "Remote"
       GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
+      shift
+      ;;
+    -u|--update)
+      REBASE_TARGET_FIRST=true
       shift
       ;;
     *)
@@ -62,6 +85,8 @@ MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
 if (("${MATCHCOUNT}" == 1)); then
+	$REBASE_TARGET_FIRST && rebaseBranchOntoMaster $MATCHING_BRANCH true
+
 	git rebase -i $MATCHING_BRANCH
 	die 0
 fi
@@ -82,8 +107,11 @@ if (("$MATCHCOUNT" > 1)); then
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
 		die 1 "Not a valid option. Exiting..."
 	fi
-	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
+	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}	
 	echo "You have selected $SELECTED_BRANCH"
+
+	$REBASE_TARGET_FIRST && rebaseBranchOntoMaster $MATCHING_BRANCH true
+
 	git rebase -i $SELECTED_BRANCH
 	die 0
 fi

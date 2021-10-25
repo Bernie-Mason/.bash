@@ -2,13 +2,13 @@
 # 
 # git checkout tool
 #
-# Checks out a branch in git based on an identifier.
+# Checks out a branch based on a provided pattern.
 # If more than one match is found, the tool provides a list of options that may be selected.
 #
 # By default the script only searches local branches. However it can also search remotes by 
-# providing the all action.
+# providing the all or remotes action.
 #
-# No required env variables or scripts
+# No external dependencies (env variables or scripts)
 
 function say() {
 	echo "$@" >&2
@@ -19,16 +19,21 @@ function die() {
 	exit "$1"
 }
 
+function fetchForRemotes() {
+      echo "$1 branches selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
+      git fetch
+}
+
 function echo_help() {
   echo "Checkout a branch with a identifier."
-  echo "First argument should be your string pattern for the branch in question. Supports regex operations."
+  echo "First argument should be your string pattern for the branch in question. Supports grep operations."
     echo " "
     echo "\$gchu identifier [actions]"
     echo " "
     echo "actions:"
     echo "-h, --help        show brief help"
-    echo "-r, --remotes     select from just remote branches"
-    echo "-a, --all         select from local and remote branches"
+    echo "-r, --remotes     select from just remote branches (will fetch first)"
+    echo "-a, --all         select from local and remote branches (will fetch first)"
     echo "-t, --track       track selected branch"
     die 0
 }
@@ -44,10 +49,13 @@ while test $# -gt 0; do
       echo_help
       ;;
     -a|--all)
+      fetchForRemotes "All"
       GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --all"
       shift
       ;;
   	-r|--remotes)
+      fetchForRemotes "Remote"
+      git fetch
       GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
       shift
       ;;
