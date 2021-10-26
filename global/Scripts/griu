@@ -60,12 +60,12 @@ while test $# -gt 0; do
       ;;
     -a|--all)
       fetchForRemotes "All"
-      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --all"
+      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --all"
       shift
       ;;
   	-r|--remotes)
       fetchForRemotes "Remote"
-      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
+      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       shift
       ;;
     -u|--update)
@@ -79,12 +79,12 @@ while test $# -gt 0; do
   esac
 done
 
-MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${PATTERN} | sed -E 's/\* (\(HEAD detached at )?//g' )
+MATCHING_BRANCH=$(git branch $GIT_BRANCH_ACTIONS | grep $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
-if (("${MATCHCOUNT}" == 1)); then
+if (("$MATCHCOUNT" == 1)); then
 	$REBASE_TARGET_FIRST && rebaseBranchOntoMaster $MATCHING_BRANCH true
 
 	git rebase -i $MATCHING_BRANCH

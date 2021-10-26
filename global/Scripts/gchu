@@ -39,7 +39,7 @@ function echo_help() {
 }
 
 PATTERN="$1"
-test -z "$PATTERN" && echo_help
+test -z $PATTERN && echo_help
 GIT_BRANCH_ACTIONS="--list"
 GIT_CHECKOUT_ACTIONS=""
 
@@ -50,13 +50,12 @@ while test $# -gt 0; do
       ;;
     -a|--all)
       fetchForRemotes "All"
-      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --all"
+      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --all"
       shift
       ;;
   	-r|--remotes)
       fetchForRemotes "Remote"
-      git fetch
-      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
+      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       shift
       ;;
   	-t|--track)
@@ -64,7 +63,8 @@ while test $# -gt 0; do
       shift
       ;;
     -tr|-rt)
-      GIT_BRANCH_ACTIONS=$GIT_BRANCH_ACTIONS" --remotes"
+      fetchForRemotes "Remote"
+      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       GIT_CHECKOUT_ACTIONS=" --track"
       shift
       ;;
@@ -75,12 +75,12 @@ while test $# -gt 0; do
   esac
 done
 
-MATCHING_BRANCH=$(git branch ${GIT_BRANCH_ACTIONS} | grep ${PATTERN} | sed -E 's/\* (\(HEAD detached at )?//g' )
+MATCHING_BRANCH=$(git branch $GIT_BRANCH_ACTIONS | grep $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
-if (("${MATCHCOUNT}" == 1)); then
+if (("$MATCHCOUNT" == 1)); then
 	git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
 	die 0
 fi
