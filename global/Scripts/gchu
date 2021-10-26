@@ -80,32 +80,25 @@ BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
-if (("$MATCHCOUNT" == 1)); then
-	git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
-	die 0
-fi
+test $MATCHCOUNT -eq 0 && die 1 "No matching branches. Exiting..."
 
-if (("$MATCHCOUNT" > 1)); then
+if (($MATCHCOUNT > 1)); then
 	echo "More than one match. Select the one you want e.g. type \"1\" to checkout the first item in the list:"
 	echo "-------------------------------------------------------------------------------"
 	echo ""
 	i=1
 	for BRANCH in ${BRANCHES[@]}; do
-		echo "	$i  $BRANCH"
-		((++i))
+		echo "  $((i++))  $BRANCH"
 	done
 	echo ""
 	re='^[0-9]+$'
 	read SELECTED_NUMBER
-	echo "Value read in: ($SELECTED_BRANCH)"
+	echo "Value read in: ($SELECTED_NUMBER)"
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
 		die 1 "Not a valid option. Exiting..."
 	fi
-	SELECTED_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
+	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
 	echo "You have selected $SELECTED_BRANCH"
-	git checkout$GIT_CHECKOUT_ACTIONS $SELECTED_BRANCH
-	die 0
 fi
 
-
-die 1 "No matching branches. Exiting..."
+git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
