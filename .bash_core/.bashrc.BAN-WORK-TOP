@@ -37,6 +37,12 @@ fi
 source_all_bash_files
 
 # Gotham Shell
-GOTHAM_SHELL="$HOME/.config/gotham/gotham.sh"
-[[ -s $GOTHAM_SHELL ]] && source $GOTHAM_SHELL
+#GOTHAM_SHELL="$HOME/.config/gotham/gotham.sh"
+#[[ -s $GOTHAM_SHELL ]] && source $GOTHAM_SHELL
 
+# PS1 - essentially the same as the default MINGW64 one (which is pretty excellent) but without the unnecessary emulator declarator.
+PS1='\[\033]0;$TITLEPREFIX:$PWD\007\]\n\[\033[32m\]\u@\h \[\033[33m\]\w\[\033[36m\]`__git_ps1`\[\033[0m\]\n$ '
+
+
+# Start in grid repo
+cd-grid

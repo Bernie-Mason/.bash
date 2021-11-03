@@ -2,20 +2,21 @@
 	name = Bernard Mason
 	email = bernard.mason@thinksmartbox.com
 [core]
-	autocrlf = false
+	editor = vim 
+	autocrlf = true
 	whitespace = cr-at-eol
 [alias]
 	rb = for-each-ref refs/heads/   --count=10   --sort=-committerdate   --format='%(objectname:short) %(committerdate:short) %(refname:short)'
 [branch]
 	autosetuprebase = always
 [merge]
-    tool = vscode
+	tool = vscode
 [mergetool "vscode"]
-    cmd = code --wait $MERGED
+	cmd = code --wait $MERGED
 [diff]
-    tool = vscode
+	tool = vscode
 [difftool "vscode"]
-    cmd = code --wait --diff $LOCAL $REMOTE
+	cmd = code --wait --diff $LOCAL $REMOTE
 [pull]
 	rebase = false
 [fetch]
