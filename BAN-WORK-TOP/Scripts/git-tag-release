@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+# Script to tag the next version of a release
+#
+
+
+function say() {
+  echo "$@" >&2
+}
+
+function die() {
+  test -z "$2" || say "$2"
+  exit "$1"
+}
+
+function echo_help() {
+  echo "Tag release"
+  echo ""
+    echo " "
+    echo "actions:"
+    echo "-h, --help        show brief help"
+    die 0
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    -p|--pretty)
+    PRETTY=true;
+    shift
+      ;;
+    *)
+    shift
+      continue
+      ;;
+  esac
+done
+
+PREVIOUS_TAG=$(git describe --tags --abbrev=0)
+echo "The previous tag is $PREVIOUS_TAG" 
+
+TAG_STRING=$(echo $PREVIOUS_TAG | tr "." "\n" )
+TAG_ARRAY=($TAG_STRING)
+
+# Assumes tag has the form Grid_3.0.MINOR_VERSION.BUILD_VERSION
+PATCH_VERSION=${TAG_ARRAY[3]}
+MINOR_VERSION=${TAG_ARRAY[2]}
+
+let "PATCH_VERSION_INCREASE=$PATCH_VERSION + 1"
+let "MINOR_VERSION_INCREASE=$MINOR_VERSION + 1"
+
+if [ $PATCH_VERSION -eq 0 ]; then
+  echo "Patch version in $PREVIOUS_TAG is 0. There are two options. An increase in minor version: $MINOR_VERSION or an increase in patch version: $PATCH_VERSION"
+  echo "  1. Increase minor version from $MINOR_VERSION to $MINOR_VERSION_INCREASE"
+  echo "  2. Increase minor version from $PATCH_VERSION to $PATCH_VERSION_INCREASE"
+    read SELECTED_NUMBER
+    if [ $SELECTED_NUMBER -eq 1 ]; then
+      TAG_ARRAY[2]=$MINOR_VERSION_INCREASE
+      NEW_TAG=$( IFS=$'.'; echo "${TAG_ARRAY[*]}" )
+      echo "Creating new tag called $NEW_TAG which follow $PREVIOUS_TAG. (Incrementing the minor version)"
+      git tag $NEW_TAG
+
+    elif [ $SELECTED_NUMBER -eq 2 ]; then
+      TAG_ARRAY[3]=$PATCH_VERSION_INCREASE
+      NEW_TAG=$( IFS=$'.'; echo "${TAG_ARRAY[*]}" )
+      echo "Incrementing the patch version. Creating new tag called $NEW_TAG which follow $PREVIOUS_TAG. (Incrementing the minor version)"
+      git tag $NEW_TAG
+
+    else
+      echo "Aborting..."
+    fi
+else
+  TAG_ARRAY[3]=$PATCH_VERSION_INCREASE
+  NEW_TAG=$( IFS=$'.'; echo "${TAG_ARRAY[*]}" )
+  read -p  "Please confirm that you wish to create a tag here called $NEW_TAG. Please press y or Y"
+
+  if [[ $REPLY =~ [yY] ]]; then
+      echo "Creating new tag called $NEW_TAG which follow $PREVIOUS_TAG"
+      git tag $NEW_TAG
+  else 
+    echo "Aborting..."
+  fi
+fi
