@@ -1,0 +1,24 @@
+#!/bin/bash
+# 
+# copy public key from local machine to remote ~/.ssh/authorized_keys file  
+# 
+
+function say() {
+	echo "$@" >&2
+}
+
+function die() {
+	test -z "$2" || say "$2"
+	exit "$1"
+}
+
+function echo_help() {
+	echo "Copy public key from local machine to remote ~/.ssh/authorized_keys file  "
+	echo "First argument should be the path to the public key. E.g. ~/.ssh/bitbucket.pub"
+	echo "Second argument is the hostname of the server"
+	echo "Third argument is the username for the server"
+    echo "-r, --remote-master  show log between remote master (e.g. origin/master"
+    die 0
+}
+
+cat $1 | ssh "${2}@${3}" "mkdir -p ~/.ssh/ && touch ~/.ssh/authorized_keys && cat >> ~/.ssh/authorized_keys"
