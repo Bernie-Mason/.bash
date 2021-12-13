@@ -11,7 +11,7 @@
 # No external dependencies (env variables or scripts)
 
 function say() {
-	echo "$@" >&2
+	echo -e "$@" >&2
 }
 
 function die() {
@@ -20,41 +20,42 @@ function die() {
 }
 
 function fetchForRemotes() {
-      echo "$1 branches selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
+      echo -e "$1 selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
       git fetch
 }
 
-function echo_help() {
-  echo "Checkout a branch with a identifier."
-  echo "First argument should be your string pattern for the branch in question. Supports grep operations."
-    echo " "
+function print_help() {
+  echo -e "${UWhite}Checkout a branch with a identifier.${NC}"
+  echo -e "First argument should be your string pattern for the branch in question. Supports grep operations."
+    echo -e " "
     echo "\$gchu identifier [actions]"
-    echo " "
-    echo "actions:"
-    echo "-h, --help        show brief help"
-    echo "-r, --remotes     select from just remote branches (will fetch first)"
-    echo "-a, --all         select from local and remote branches (will fetch first)"
-    echo "-t, --track       track selected branch"
+    echo -e " "
+    echo -e "actions:"
+    echo -e "-h, --help        ${Yellow}show brief help${NC}"
+    echo -e "-r, --remotes     ${Yellow}select from just remote branches (will fetch first)${NC}"
+    echo -e "-a, --all         ${Yellow}select from local and remote branches (will fetch first)${NC}"
+    echo -e "-t, --track       ${Yellow}track selected branch${NC}"
     die 0
 }
 
 PATTERN="$1"
-test -z $PATTERN && echo_help
+test -z $PATTERN && print_help
 GIT_BRANCH_ACTIONS="--list"
 GIT_CHECKOUT_ACTIONS=""
+GIT_REFS="branch"
 
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
-      echo_help
+      print_help
       ;;
     -a|--all)
-      fetchForRemotes "All"
+      fetchForRemotes "All branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --all"
       shift
       ;;
   	-r|--remotes)
-      fetchForRemotes "Remote"
+      fetchForRemotes "Remote branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       shift
       ;;
@@ -62,8 +63,13 @@ while test $# -gt 0; do
       GIT_CHECKOUT_ACTIONS=" --track"
       shift
       ;;
+    -g|--tags)
+      fetchForRemotes "Tags"
+      GIT_REFS="tag"
+      shift
+      ;;
     -tr|-rt)
-      fetchForRemotes "Remote"
+      fetchForRemotes "Remote branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       GIT_CHECKOUT_ACTIONS=" --track"
       shift
@@ -75,30 +81,29 @@ while test $# -gt 0; do
   esac
 done
 
-MATCHING_BRANCH=$(git branch $GIT_BRANCH_ACTIONS | grep $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
+MATCHING_BRANCH=$(git $GIT_REFS $GIT_BRANCH_ACTIONS | grep $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 echo ""
 
-test $MATCHCOUNT -eq 0 && die 1 "No matching branches. Exiting..."
+test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REFS} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
 if (($MATCHCOUNT > 1)); then
-	echo "More than one match. Select the one you want e.g. type \"1\" to checkout the first item in the list:"
-	echo "-------------------------------------------------------------------------------"
+	echo -e "${UYellow}More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:${NC}"
 	echo ""
 	i=1
 	for BRANCH in ${BRANCHES[@]}; do
-		echo "  $((i++))  $BRANCH"
+		echo -e "  $((i++))  $BRANCH"
 	done
 	echo ""
 	re='^[0-9]+$'
 	read SELECTED_NUMBER
-	echo "Value read in: ($SELECTED_NUMBER)"
+	echo -e "Value read in: ($SELECTED_NUMBER)"
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
-		die 1 "Not a valid option. Exiting..."
+		die 1 "${BRed}Not a valid option. Exiting...${NC}"
 	fi
 	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
-	echo "You have selected $SELECTED_BRANCH"
+	echo -e "${Green}You have selected:${NC} \"$MATCHING_BRANCH\""
 fi
 
 git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
