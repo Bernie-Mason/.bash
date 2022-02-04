@@ -1,20 +1,8 @@
 #!/bin/bash
 
-FILE_BASHRC="~/.bash/.bash_core/.bashrc.${HOSTNAME}"
-FILE_BASH_PROFILE="~/.bash/.bash_core/.bash_profile.${HOSTNAME}"
-FILE_GIT_CONFIG="~/.bash/.bash_core/.gitconfig.${HOSTNAME}"
-
-if [ ! -f "$FILE_BASHRC" ]{
-	touch "$FILE_BASHRC"
-}
-
-if [ ! -f "$FILE_GIT_CONFIG" ]{
-	touch "$FILE_GIT_CONFIG"
-}
-
-if [ ! -f "$FILE_BASH_PROFILE" ]{
-	touch "$FILE_BASH_PROFILE"
-}
+touch ~/.bash/.bash_core/.bashrc.${HOSTNAME}
+touch ~/.bash/.bash_core/.bash_profile.${HOSTNAME}
+touch ~/.bash/.bash_core/.gitconfig.${HOSTNAME}
 
 BASH_BIN_HOSTNAME_FOLDER=~/.bash/${HOSTNAME}
 if [ ! -d $BASH_BIN_HOSTNAME_FOLDER ]; then
@@ -32,6 +20,6 @@ if [ ! -d $FOLDER_SCRIPTS ]; then
 fi
 
 FILE_ALIASES=${FOLDER_SOURCEABLE}/aliases
-if [ ! -f "$FILE_ALIASES" ]{
+if [ ! -f "$FILE_ALIASES" ]; then
 	touch "$FILE_ALIASES"
-}
+fi
