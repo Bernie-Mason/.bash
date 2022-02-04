@@ -8,9 +8,9 @@ update-sublime() {
 }
 
 update-writings() {
-	generic-update '/C/Users/Bernie/Documents/Writings/'
+	generic-update '~/Documents/Writings/'
 }
 
 update-python() {
-	generic-update '/C/Users/Bernie/Documents/Python/'
+	generic-update '~/Documents/Python/'
 }

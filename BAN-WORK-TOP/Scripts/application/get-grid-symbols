@@ -4,7 +4,7 @@
 # Prerequisites
 # Must define:
 #	grid_repository_dir - e.g. /c/dev/grid
-# 	nuget_global_packages - e.g. /C/Users/Bernie/.nuget/packages/
+# 	nuget_global_packages - e.g. ~/.nuget/packages/
 #
 
 function say() {
