@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-# git rebase tool
+# pattern based git rebase tool
 #
 # Rebases onto a branch based on a provided pattern.
 # If more than one match is found, the tool provides a list of options that may be selected.

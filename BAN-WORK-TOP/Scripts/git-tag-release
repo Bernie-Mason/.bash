@@ -39,47 +39,48 @@ while test $# -gt 0; do
 done
 
 PREVIOUS_TAG=$(git describe --tags --abbrev=0)
+echo "==============================================" 
+echo "Tagging util for Grid and Content repositories"
 echo "The previous tag is $PREVIOUS_TAG" 
+echo "===============================================" 
+echo "" 
 
 TAG_STRING=$(echo $PREVIOUS_TAG | tr "." "\n" )
 TAG_ARRAY=($TAG_STRING)
+TAG_ARRAY_LENGTH=${#TAG_ARRAY[@]}
+
+# Final item is patch version and second to last is minor version
+let "PATCH_INDEX=$TAG_ARRAY_LENGTH - 1"
+let "MINOR_VERSION_INDEX=$TAG_ARRAY_LENGTH - 2"
 
 # Assumes tag has the form Grid_3.0.MINOR_VERSION.BUILD_VERSION
-PATCH_VERSION=${TAG_ARRAY[3]}
-MINOR_VERSION=${TAG_ARRAY[2]}
+PATCH_VERSION=${TAG_ARRAY[$PATCH_INDEX]}
+MINOR_VERSION=${TAG_ARRAY[$MINOR_VERSION_INDEX]}
 
 let "PATCH_VERSION_INCREASE=$PATCH_VERSION + 1"
 let "MINOR_VERSION_INCREASE=$MINOR_VERSION + 1"
 
-if [ $PATCH_VERSION -eq 0 ]; then
-  echo "Patch version in $PREVIOUS_TAG is 0. There are two options. An increase in minor version: $MINOR_VERSION or an increase in patch version: $PATCH_VERSION"
-  echo "  1. Increase minor version from $MINOR_VERSION to $MINOR_VERSION_INCREASE"
-  echo "  2. Increase minor version from $PATCH_VERSION to $PATCH_VERSION_INCREASE"
-    read SELECTED_NUMBER
-    if [ $SELECTED_NUMBER -eq 1 ]; then
-      TAG_ARRAY[2]=$MINOR_VERSION_INCREASE
-      NEW_TAG=$( IFS=$'.'; echo "${TAG_ARRAY[*]}" )
-      echo "Creating new tag called $NEW_TAG which follow $PREVIOUS_TAG. (Incrementing the minor version)"
-      git tag $NEW_TAG
+# Construct a new tag for a minor version increase
+MINOR_VERSION_TAG_ARRAY=(${TAG_ARRAY[*]})
+MINOR_VERSION_TAG_ARRAY[$MINOR_VERSION_INDEX]=$MINOR_VERSION_INCREASE
+MINOR_VERSION_TAG_ARRAY[$PATCH_INDEX]=0
+TAG_MINOR_VERSION_INCREASE=$( IFS=$'.'; echo "${MINOR_VERSION_TAG_ARRAY[*]}" )
 
-    elif [ $SELECTED_NUMBER -eq 2 ]; then
-      TAG_ARRAY[3]=$PATCH_VERSION_INCREASE
-      NEW_TAG=$( IFS=$'.'; echo "${TAG_ARRAY[*]}" )
-      echo "Incrementing the patch version. Creating new tag called $NEW_TAG which follow $PREVIOUS_TAG. (Incrementing the minor version)"
-      git tag $NEW_TAG
+# Construct a new tag for a patch increase
+PATCH_VERSION_TAG_ARRAY=(${TAG_ARRAY[*]})
+PATCH_VERSION_TAG_ARRAY[$PATCH_INDEX]=$PATCH_VERSION_INCREASE
+TAG_PATCH_INCREASE=$( IFS=$'.'; echo "${PATCH_VERSION_TAG_ARRAY[*]}" )
 
-    else
-      echo "Aborting..."
-    fi
+echo "Do you wish to create a tag that increases:"
+echo "  1. The minor version from $MINOR_VERSION to $MINOR_VERSION_INCREASE -> $TAG_MINOR_VERSION_INCREASE"
+echo "  2. The patch version from $PATCH_VERSION to $PATCH_VERSION_INCREASE -> $TAG_PATCH_INCREASE"
+read SELECTED_NUMBER
+if [ $SELECTED_NUMBER -eq 1 ]; then
+  echo "Creating new tag called $TAG_MINOR_VERSION_INCREASE which follow $PREVIOUS_TAG. (Incrementing the minor version)"
+  git tag $TAG_MINOR_VERSION_INCREASE
+elif [ $SELECTED_NUMBER -eq 2 ]; then
+  echo "Incrementing the patch version. Creating new tag called $TAG_PATCH_INCREASE which follow $PREVIOUS_TAG. (Incrementing the minor version)"
+  git tag $TAG_PATCH_INCREASE
 else
-  TAG_ARRAY[3]=$PATCH_VERSION_INCREASE
-  NEW_TAG=$( IFS=$'.'; echo "${TAG_ARRAY[*]}" )
-  read -p  "Please confirm that you wish to create a tag here called $NEW_TAG. Please press y or Y"
-
-  if [[ $REPLY =~ [yY] ]]; then
-      echo "Creating new tag called $NEW_TAG which follow $PREVIOUS_TAG"
-      git tag $NEW_TAG
-  else 
-    echo "Aborting..."
-  fi
+  echo "Aborting..."
 fi

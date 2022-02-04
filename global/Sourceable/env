@@ -12,7 +12,7 @@ alias SCRIPT_PATH='$(dirname $(realpath -s $0))'
 
 # Reset
 export Color_Off='\033[0m'       # Text Reset
-export NC='\033[0m'       # Text Reset
+export NC='\033[0m'       		# Text Reset
 
 # Regular Colors
 export Black='\033[0;30m'        # Black
