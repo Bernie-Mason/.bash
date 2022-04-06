@@ -138,6 +138,7 @@ if try_resolve_version "${DEFAULT_MSBUILD_VERSION}"; then
 fi
 
 for FIND_MSBUILD in     \
+    use_msbuild_vs2019  \
     use_msbuild_vs2017  \
     use_msbuild_vs2015  \
     use_msbuild_vs2013  \

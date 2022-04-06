@@ -9,7 +9,6 @@
 # providing the all or remotes action.
 #
 # No external dependencies (env variables or scripts)
-
 NC='\033[0m'              # Text Reset
 Red='\033[0;31m'          # Red
 Green='\033[0;32m'        # Green
@@ -47,17 +46,22 @@ function print_help() {
     die 0
 }
 
+
 PATTERN="$1"
 test -z $PATTERN && print_help
 GIT_BRANCH_ACTIONS="--list"
 GIT_CHECKOUT_ACTIONS=""
 GIT_REF="branch"
 RAINBOW_OUTPUT=false;
-
+DEBUG=false;
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
       print_help
+      ;;
+    -d|--debug)
+      DEBUG=true;
+      shift
       ;;
     -a|--all)
       fetchForRemotes "All branches"
@@ -95,10 +99,12 @@ while test $# -gt 0; do
   esac
 done
 
+$DEBUG && echo "Debug output"
+$DEBUG && echo "Finding branches that match the pattern: $PATTERN"
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
-echo "$MATCHCOUNT"
+$DEBUG && echo "Match count: $MATCHCOUNT"
 
 test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
@@ -127,7 +133,7 @@ if (($MATCHCOUNT > 1)); then
 	done
 	echo ""
 	re='^[0-9]+$'
-	read SELECTED_NUMBER
+	read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
 	echo -e "Value read in: \"$SELECTED_NUMBER\""
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
 		die 1 "${BRed}Not a valid option. Exiting...${NC}"
@@ -136,7 +142,11 @@ if (($MATCHCOUNT > 1)); then
       die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
   fi
 	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
-	echo -e "${Green}The select ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
+	echo -e "${Green}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 fi
 
-git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
+if $DEBUG; then
+  GIT_TRACE=1 git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
+else
+  git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
+fi
