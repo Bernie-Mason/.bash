@@ -109,6 +109,17 @@ use_msbuild_vs2019() {
     fi
 }
 
+use_msbuild_vs2022() {
+    INSTALL_ROOT="$(_get_msbuild_installation_root "15" "2022")"
+    say "$INSTALL_ROOT $USEX86"
+    test -n "${INSTALL_ROOT}" || return
+    test -d "${INSTALL_ROOT}" || return
+    if "${USEX86}";
+        then MSBUILD="${INSTALL_ROOT}/MSBuild/Current/Bin/MSBuild.exe"
+        else MSBUILD="${INSTALL_ROOT}/MSBuild/Current/Bin/amd64/MSBuild.exe"
+    fi
+}
+
 run_msbuild() {
     "$MSBUILD" "$@"
 }
@@ -138,6 +149,7 @@ if try_resolve_version "${DEFAULT_MSBUILD_VERSION}"; then
 fi
 
 for FIND_MSBUILD in     \
+    use_msbuild_vs2022  \
     use_msbuild_vs2019  \
     use_msbuild_vs2017  \
     use_msbuild_vs2015  \
