@@ -8,17 +8,22 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all or remotes action.
 #
-# No external dependencies (env variables or scripts)
+# Depends on formatBranches script
+
 NC='\033[0m'              # Text Reset
-Red='\033[0;31m'          # Red
-Green='\033[0;32m'        # Green
-Yellow='\033[0;33m'       # Yellow
-BRed='\033[1;31m'         # Red
-UYellow='\033[4;33m'      # Yellow
-UWhite='\033[4;37m'       # White
+Red='\033[0;31m'
+Green='\033[0;32m'
+Yellow='\033[0;33m'
+UWhite='\033[4;37m'
+Black='\033[0;30m'
 
 function say() {
 	echo -e "$@" >&2
+}
+
+function title() {
+  echo -e "${Green}>> $@"${NC} >&2
+  echo ""
 }
 
 function die() {
@@ -43,6 +48,7 @@ function print_help() {
     echo -e "-a, --all         ${Yellow}select from local and remote branches (will fetch first)${NC}"
     echo -e "-t, --track       ${Yellow}track selected branch${NC}"
     echo -e "-g, --tags        ${Yellow}tag to checkout${NC}"
+    echo -e "-b, --rainbow        ${Yellow}RAINBOW OUTPUT MODE${NC}"
     die 0
 }
 
@@ -101,6 +107,7 @@ done
 
 $DEBUG && echo "Debug output"
 $DEBUG && echo "Finding branches that match the pattern: $PATTERN"
+title "Finding branches matching the pattern \"${PATTERN}\""
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
@@ -109,42 +116,25 @@ $DEBUG && echo "Match count: $MATCHCOUNT"
 test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
 if (($MATCHCOUNT > 1)); then
-	echo -e "${UYellow}More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:${NC}"
-	echo ""
-	let i=1
-  let MAX_LENGTH=0;
+	title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
 
-  for BRANCH in ${BRANCHES[@]}; do
-    BRANCH_LENGTH=$(expr length $BRANCH)
-    if (( BRANCH_LENGTH > MAX_LENGTH )); then
-      MAX_LENGTH=$BRANCH_LENGTH
-    fi
-  done
-	for BRANCH in ${BRANCHES[@]}; do
-    if $RAINBOW_OUTPUT; then
-      let OPTION=$((i++))
-      echo -e "\e[3$(( $RANDOM * 6 / 32767 + 1 ))m$(printf %6s $OPTION) => $(prinf %${MAX_LENGTH}s $BRANCH)"
-    else
-      let OPTION=$((i++))
-      OPTION_COLOUR="${IBlack}${On_Yellow}"
-      if (( $(( $OPTION % 2 )) == 0 )); then OPTION_COLOUR="${Yellow}"; fi
-      echo -e "${OPTION_COLOUR}$(printf %6s $OPTION) => $BRANCH${NC}"
-    fi
-	done
+  formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+
 	echo ""
-	re='^[0-9]+$'
+	re="^[0-9]+$"
 	read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
 	echo -e "Value read in: \"$SELECTED_NUMBER\""
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
-		die 1 "${BRed}Not a valid option. Exiting...${NC}"
+		  die 1 "${Red}Not a valid option. Exiting...${NC}"
 	fi
-  if [[ $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT ]]; then # 
+  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT)); then
       die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
   fi
 	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
-	echo -e "${Green}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
+	echo -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 fi
 
+title "Checking out ${NC}${MATCHING_BRANCH}"
 if $DEBUG; then
   GIT_TRACE=1 git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
 else

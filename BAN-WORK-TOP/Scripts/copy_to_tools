@@ -3,13 +3,14 @@ BIN_COPY_PATH=/C/Dev/tools/scripts/bash/scripts/
 SOURCEABLE_COPY_PATH=/C/Dev/tools/scripts/bash/sourceable/
 cp ~/.bash/global/scripts/git-log-release $BIN_COPY_PATH
 cp ~/.bash/global/scripts/glogu ${BIN_COPY_PATH}/git-unique-log
-sed --in-place s_glogu_git-unique-log_g ${BIN_COPY_PATH}/git-unique-log
+sed --in-place "s_glogu_git-unique-log_g" ${BIN_COPY_PATH}/git-unique-log
 cp ~/.bash/global/scripts/gchu ${BIN_COPY_PATH}/git-unique-checkout
-sed --in-place s_gchu_git-unique-checkout_g ${BIN_COPY_PATH}/git-unique-checkout
+sed --in-place "s_gchu_git-unique-checkout_g" ${BIN_COPY_PATH}/git-unique-checkout
 cp ~/.bash/global/scripts/griu ${BIN_COPY_PATH}/git-unique-rebase
-sed --in-place s_griu_git-unique-rebase_g ${BIN_COPY_PATH}/git-unique-rebase
+sed --in-place "s_griu_git-unique-rebase_g" ${BIN_COPY_PATH}/git-unique-rebase
 cp ~/.bash/global/scripts/nuget-pack $BIN_COPY_PATH
 cp ~/.bash/global/scripts/msbuild32 $BIN_COPY_PATH
+cp ~/.bash/global/scripts/formatBranches $BIN_COPY_PATH
 
 cp ~/.bash/BAN-WORK-TOP/scripts/application/clear-shared-cache $BIN_COPY_PATH
 cp ~/.bash/BAN-WORK-TOP/scripts/application/clear-eyegaze-cache $BIN_COPY_PATH

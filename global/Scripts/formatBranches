@@ -1,0 +1,29 @@
+#!/bin/bash
+
+RAINBOW_OUTPUT=$1
+shift
+BRANCHES=("$@")
+i=1
+MAX_LENGTH=0;
+Blue='\033[0;34m'
+On_Blue='\033[44m'
+
+for BRANCH in ${BRANCHES[@]}; do
+  BRANCH_LENGTH=$(expr length $BRANCH)
+  if (( BRANCH_LENGTH > MAX_LENGTH )); then
+    MAX_LENGTH=$BRANCH_LENGTH
+  fi
+done
+for BRANCH in ${BRANCHES[@]}; do
+  if $RAINBOW_OUTPUT; then
+    let OPTION=$((i++))
+    echo -e "\e[3$(( $RANDOM * 6 / 32767 + 1 ))m$(printf %6s $OPTION) => $BRANCH"
+  else
+    let OPTION=$((i++))
+    OPTION_COLOUR="${Blue}"
+    #if (( $(( $OPTION % 2 )) == 1 )); then OPTION_COLOUR="${Black}${On_Blue}"; fi
+    BRANCH_LENGTH=$(expr length $BRANCH)
+    LENGTH_DIFF=$((MAX_LENGTH-BRANCH_LENGTH))
+    echo -e " ${OPTION_COLOUR}$(printf %3s $OPTION) => $BRANCH$(printf %${LENGTH_DIFF}s)   ${NC}"
+  fi
+done

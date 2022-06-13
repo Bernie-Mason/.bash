@@ -100,5 +100,5 @@ fi
 
 if $BUILD; then
   title "Building solution"
-  msbuild32 "vs2019" "${SOLUTION_PATH}" -p:Configuration=Debug -verbosity:q -consoleloggerparameters:ErrorsOnly || die 1  "== build failed =="
+  msbuild32 "${SOLUTION_PATH}" -p:Configuration=Debug -verbosity:q -consoleloggerparameters:ErrorsOnly || die 1  "== build failed =="
 fi

@@ -8,7 +8,13 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all action.
 #
-# No external dependencies (env variables or scripts)
+# Depends on formatBranches script
+
+NC='\033[0m'              # Text Reset
+Red='\033[0;31m'
+Green='\033[0;32m'
+Yellow='\033[0;33m'
+UWhite='\033[4;37m'
 
 function say() {
 	echo "$@" >&2
@@ -19,13 +25,18 @@ function die() {
 	exit "$1"
 }
 
+function title() {
+  echo -e "${Green}>> $@"${NC} >&2
+  echo ""
+}
+
 function fetchForRemotes() {
       echo "$1 branches selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
       git fetch
 }
 
 function rebaseBranchOntoMaster() {
-    echo "Rebasing $1 branch onto origin/master."
+    title "Rebasing $1 branch onto origin/master."
     $2 && echo "Fetching to rebase onto latest origin/master."
     $2 && git fetch
 
@@ -35,16 +46,16 @@ function rebaseBranchOntoMaster() {
 }
 
 function echo_help() {
-	echo "Rebase current branch onto target branch with a identifier."
-	echo "First argument should be your string pattern for target branch in question. Supports grep operations."
-    echo " "
-    echo "\$griu identifier [actions]"
-    echo " "
-    echo "actions:"
-    echo "-h, --help        show brief help"
-    echo "-u, --update      rebase target branch onto master first"
-    echo "-r, --remotes     select from just remote branches (will fetch first)"
-    echo "-a, --all         select from local and remote branches (will fetch first)"
+	echo -e "${UWhite}Rebase current branch onto target branch with a identifier.${NC}"
+	echo -e "First argument should be your string pattern for target branch in question. Supports grep operations."
+    echo -e " "
+    echo -e "\$griu identifier [actions]"
+    echo -e " "
+    echo -e "actions:"
+    echo -e "-h, --help        ${Yellow}show brief help${NC}"
+    echo -e "-u, --update      ${Yellow}rebase target branch onto master first${NC}"
+    echo -e "-r, --remotes     ${Yellow}select from just remote branches (will fetch first)${NC}"
+    echo -e "-a, --all         ${Yellow}select from local and remote branches (will fetch first)${NC}"
     die 0
 }
 
@@ -52,6 +63,7 @@ PATTERN="$1"
 test -z "$PATTERN" && echo_help
 GIT_BRANCH_ACTIONS="--list"
 REBASE_TARGET_FIRST=false
+RAINBOW_OUTPUT=false
 
 while test $# -gt 0; do
   case "$1" in
@@ -72,6 +84,10 @@ while test $# -gt 0; do
       REBASE_TARGET_FIRST=true
       shift
       ;;
+    -b|--rainbow)
+      RAINBOW_OUTPUT=true;
+      shift
+      ;;
     *)
 	  shift
       continue
@@ -79,32 +95,34 @@ while test $# -gt 0; do
   esac
 done
 
+title "Finding branches matching the pattern \"${PATTERN}\""
 MATCHING_BRANCH=$(git branch $GIT_BRANCH_ACTIONS | grep $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
-echo ""
 
-test $MATCHCOUNT -eq 0 && die 1 "No matching branches. Exiting..."
+test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
 if (($MATCHCOUNT > 1)); then
-	echo "More than one match. Select the one you want e.g. type \"1\" to rebase onto the first item in the list:"
-	echo "-------------------------------------------------------------------------------"
-	echo ""
-	i=1
-	for BRANCH in ${BRANCHES[@]}; do
-		echo "  $((i++))  $BRANCH"
-	done
+  title "More than one match. Select the one you want. E.g. type \"1\" to rebase onto the first item in the list:"
+
+  formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+
 	echo ""
 	re='^[0-9]+$'
 	read SELECTED_NUMBER
 	echo "Value read in: ($SELECTED_NUMBER)"
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
-		die 1 "Not a valid option. Exiting..."
+		  die 1 "${Red}Not a valid option. Exiting...${NC}"
 	fi
+  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT)); then # 
+      die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
+  fi
 	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}	
 	echo "You have selected $MATCHING_BRANCH"
 fi
 
 $REBASE_TARGET_FIRST && rebaseBranchOntoMaster $MATCHING_BRANCH true
+
+title "Rebasing onto ${MATCHING_BRANCH}"
 
 git rebase -i $MATCHING_BRANCH
