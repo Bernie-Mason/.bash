@@ -15,6 +15,7 @@ Red='\033[0;31m'
 Green='\033[0;32m'
 Yellow='\033[0;33m'
 UWhite='\033[4;37m'
+Black='\033[0;30m'
 
 function say() {
 	echo "$@" >&2
@@ -64,6 +65,7 @@ test -z "$PATTERN" && echo_help
 GIT_BRANCH_ACTIONS="--list"
 REBASE_TARGET_FIRST=false
 RAINBOW_OUTPUT=false
+GIT_REF="branch"
 
 while test $# -gt 0; do
   case "$1" in
@@ -84,6 +86,11 @@ while test $# -gt 0; do
       REBASE_TARGET_FIRST=true
       shift
       ;;
+    -g|--tags)
+      fetchForRemotes "Tags"
+      GIT_REF="tag"
+      shift
+      ;;
     -b|--rainbow)
       RAINBOW_OUTPUT=true;
       shift
@@ -96,30 +103,31 @@ while test $# -gt 0; do
 done
 
 title "Finding branches matching the pattern \"${PATTERN}\""
-MATCHING_BRANCH=$(git branch $GIT_BRANCH_ACTIONS | grep $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
+MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
 
 test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
 if (($MATCHCOUNT > 1)); then
-  title "More than one match. Select the one you want. E.g. type \"1\" to rebase onto the first item in the list:"
+  title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
 
   formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
-	echo ""
-	re='^[0-9]+$'
-	read SELECTED_NUMBER
-	echo "Value read in: ($SELECTED_NUMBER)"
-	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
-		  die 1 "${Red}Not a valid option. Exiting...${NC}"
-	fi
-  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT)); then # 
+  echo ""
+  re="^[0-9]+$"
+  read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
+  echo -e "Value read in: \"$SELECTED_NUMBER\""
+  if ! [[ $SELECTED_NUMBER =~ $re ]]; then
+      die 1 "${Red}Not a valid option. Exiting...${NC}"
+  fi
+  if [[ $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT ]]; then
       die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
   fi
-	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}	
-	echo "You have selected $MATCHING_BRANCH"
+  MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
+  echo -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 fi
+
 
 $REBASE_TARGET_FIRST && rebaseBranchOntoMaster $MATCHING_BRANCH true
 

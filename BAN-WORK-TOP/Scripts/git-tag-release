@@ -76,11 +76,11 @@ echo "  1. The minor version from $MINOR_VERSION to $MINOR_VERSION_INCREASE -> $
 echo "  2. The patch version from $PATCH_VERSION to $PATCH_VERSION_INCREASE -> $TAG_PATCH_INCREASE"
 read SELECTED_NUMBER
 if [ $SELECTED_NUMBER -eq 1 ]; then
-  echo "Creating new tag called $TAG_MINOR_VERSION_INCREASE which follow $PREVIOUS_TAG. (Incrementing the minor version)"
+  echo "Incrementing the minor version. Creating new tag called $TAG_MINOR_VERSION_INCREASE which follow $PREVIOUS_TAG."
   git tag $TAG_MINOR_VERSION_INCREASE
 elif [ $SELECTED_NUMBER -eq 2 ]; then
-  echo "Incrementing the patch version. Creating new tag called $TAG_PATCH_INCREASE which follow $PREVIOUS_TAG. (Incrementing the minor version)"
+  echo "Incrementing the patch version. Creating new tag called $TAG_PATCH_INCREASE which follow $PREVIOUS_TAG."
   git tag $TAG_PATCH_INCREASE
 else
-  echo "Aborting..."
+  echo "$SELECTED_NUMBER not 1 or 2. Aborting..."
 fi

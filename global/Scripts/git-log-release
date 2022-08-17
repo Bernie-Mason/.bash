@@ -36,9 +36,6 @@ function echo_help() {
     die 0
 }
 
-test -z $1 && die 1 "Please provide the oldest commit as your first argument"
-test -z $2 && die 1 "Please provide the newest commit as your second argument"
-
 FIRST_COMMIT="$1"
 SECOND_COMMIT="$2"
 PRETTY=false
@@ -58,6 +55,10 @@ while test $# -gt 0; do
       ;;
   esac
 done
+
+
+test -z $1 && die 1 "Please provide the oldest commit as your first argument"
+test -z $2 && die 1 "Please provide the newest commit as your second argument"
 
 [[ $(git cat-file -t ${FIRST_COMMIT}) == "commit" ]] || die 1 "${FIRST_COMMIT} is not a valid commit"
 [[ $(git cat-file -t ${SECOND_COMMIT}) == "commit" ]] || die 1 "${SECOND_COMMIT} is not a valid commit"
