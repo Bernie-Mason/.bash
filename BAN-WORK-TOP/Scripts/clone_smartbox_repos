@@ -15,9 +15,6 @@ function title() {
     echo "${UYellow}${1}${NC}"
 }
 
-title clone stuff
-exit
-
 CLONE_ROOT=$1
 if [ -z $CLONE_ROOT ]; then
     echo "No repository root specified. Creating and using /c/dev"
