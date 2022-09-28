@@ -126,7 +126,7 @@ if (($MATCHCOUNT > 1)); then
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
 		  die 1 "${Red}Not a valid option. Exiting...${NC}"
 	fi
-  if [[ $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT ]]; then
+  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
       die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
   fi
 	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}

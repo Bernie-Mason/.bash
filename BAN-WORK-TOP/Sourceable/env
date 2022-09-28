@@ -6,6 +6,7 @@
 export grid_repository_dir='/c/dev/grid'
 export smartbox_js_repository_dir='/c/dev/smartbox-grid-js'
 export eyegaze_repository_dir='/c/dev/eyegaze'
+export speech_repository_dir='/c/dev/speech'
 export web_repository_dir='/c/dev/web'
 export shared_repository_dir='/c/dev/shared'
 export text_repository_dir='/c/dev/text'
