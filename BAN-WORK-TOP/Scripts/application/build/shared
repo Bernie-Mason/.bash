@@ -99,5 +99,5 @@ fi
 
 if $BUILD; then
 	title "Building solution"
-	msbuild32 "${SOLUTION_PATH}" -p:Configuration=Debug -verbosity:q -consoleloggerparameters:ErrorsOnly || die 1  "== build failed =="
+	dotnet build  "${SOLUTION_PATH}" --configuration=Debug --verbosity=quiet -consoleloggerparameters:ErrorsOnly || die 1  "== build failed =="
 fi

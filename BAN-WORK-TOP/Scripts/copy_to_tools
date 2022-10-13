@@ -12,14 +12,6 @@ cp ~/.bash/global/scripts/nuget-pack $BIN_COPY_PATH
 cp ~/.bash/global/scripts/msbuild32 $BIN_COPY_PATH
 cp ~/.bash/global/scripts/formatBranches $BIN_COPY_PATH
 
-cp ~/.bash/BAN-WORK-TOP/scripts/application/clear-shared-cache $BIN_COPY_PATH
-cp ~/.bash/BAN-WORK-TOP/scripts/application/clear-eyegaze-cache $BIN_COPY_PATH
-cp ~/.bash/BAN-WORK-TOP/scripts/application/pack-eyegaze $BIN_COPY_PATH
-cp ~/.bash/BAN-WORK-TOP/scripts/application/pack-shared $BIN_COPY_PATH
-
-cp ~/.bash/BAN-WORK-TOP/scripts/application/build/shared $BIN_COPY_PATH
-cp ~/.bash/BAN-WORK-TOP/scripts/application/build/grid $BIN_COPY_PATH
-cp ~/.bash/BAN-WORK-TOP/scripts/application/build/eyegaze $BIN_COPY_PATH
-
-#cp ~/.bash/BAN-WORK-TOP/sourceable/env $SOURCEABLE_COPY_PATH
-#cp ~/.bash/BAN-WORK-TOP/sourceable/aliases $SOURCEABLE_COPY_PATHgs
+cp -r ~/.bash/BAN-WORK-TOP/scripts/application/pack/* /C/Dev/tools/scripts/bash/scripts/
+cp -r ~/.bash/BAN-WORK-TOP/scripts/application/build/* /C/Dev/tools/scripts/bash/scripts/
+cp -r ~/.bash/BAN-WORK-TOP/scripts/git-tag-release /C/Dev/tools/scripts/bash/scripts/

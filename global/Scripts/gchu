@@ -106,7 +106,7 @@ while test $# -gt 0; do
 done
 
 $DEBUG && echo "Debug output"
-title "Finding branches matching the pattern \"${PATTERN}\""
+title "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"

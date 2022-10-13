@@ -1,0 +1,9 @@
+#!/bin/bash
+
+rm -rf /c/Program\ Files\ \(x86\)/grid/win7-x86/*
+cp -rf /c/dev/grid/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Release/net5.0-windows/win7-x86/* /c/Program\ Files\ \(x86\)/grid/win7-x86/
+#cd /c/Program\ Files\ \(x86\)/grid/win7-x86/
+#cmd
+#"Grid 3.exe"
+#exit
+#cd -

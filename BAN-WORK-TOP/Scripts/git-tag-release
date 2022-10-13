@@ -20,11 +20,11 @@ function die() {
 }
 
 function echo_help() {
-  echo "Tag release of grid or gridresources repositories"
+  echo "Tag release of grid or gridresources repositories. Note: this script does not push the new tag."
   echo ""
     echo " "
-    echo "${Yellow}actions:"
-    echo "${Yellow}-h, --help        show brief help"
+    echo -e "${Yellow}actions:"
+    echo -e "${Yellow}-h, --help        show brief help"
     die 0
 }
 
@@ -44,6 +44,9 @@ done
 REPO_NAME=$(basename -s .git `git config --get remote.origin.url`)
 test $REPO_NAME != "gridresources" && test $REPO_NAME != "grid" && die 1 "${Red}Repository name ${NC}\"$REPO_NAME\" ${Red}is not gridresources or grid. Tagging pattern may not be valid"
 
+# Fetch to ensure tags are up to date. git fetch fetches all branch heads (or all specified by the remote.fetch config option), all commits necessary for them, and all tags which are reachable from these branches. In most cases, all tags are reachable in this way.
+echo "Performing a git fetch to ensure tags are up-to-date."
+git fetch
 
 PREVIOUS_TAG=$(git describe --tags --abbrev=0)
 say "${Blue}==============================================" 
@@ -60,7 +63,7 @@ TAG_ARRAY_LENGTH=${#TAG_ARRAY[@]}
 let "PATCH_INDEX=$TAG_ARRAY_LENGTH - 1"
 let "MINOR_VERSION_INDEX=$TAG_ARRAY_LENGTH - 2"
 
-# Assumes tag has the form Grid_3.0.MINOR_VERSION.BUILD_VERSION or GridResources_1.MINOR_VERSION.BUILD_VERSION
+# Assumes tag has the form Grid_3.0.MINOR_VERSION.PATCH_VERSION or GridResources_1.MINOR_VERSION.PATCH_VERSION
 PATCH_VERSION=${TAG_ARRAY[$PATCH_INDEX]}
 MINOR_VERSION=${TAG_ARRAY[$MINOR_VERSION_INDEX]}
 
@@ -81,7 +84,7 @@ TAG_PATCH_NEXT=$( IFS=$'.'; echo "${PATCH_VERSION_TAG_ARRAY[*]}" )
 say "${Yellow}Do you wish to create a tag that increases:"
 say "  ${Yellow}1. The minor version from ${NC}$MINOR_VERSION${Yellow} to ${NC}$MINOR_VERSION_NEXT${Yellow} -> ${NC}$TAG_MINOR_VERSION_NEXT"
 say "  ${Yellow}2. The patch version from ${NC}$PATCH_VERSION${Yellow} to ${NC}$PATCH_VERSION_NEXT${Yellow} -> ${NC}$TAG_PATCH_NEXT"
-read SELECTED_NUMBER
+read -p "Enter number 1 or 2: " SELECTED_NUMBER
 if [ $SELECTED_NUMBER -eq 1 ]; then
   say "${Green}Incrementing the minor version. Creating new tag called ${NC}$TAG_MINOR_VERSION_NEXT${Green} which follow ${NC}$PREVIOUS_TAG."
   git tag $TAG_MINOR_VERSION_NEXT

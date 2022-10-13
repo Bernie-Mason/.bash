@@ -1,5 +1,8 @@
 alias cd-grid="cd ${grid_repository_dir}/Source"
 alias cd-resources="cd /c/dev/gridresources"
+alias cd-text="cd /c/dev/text"
+alias cd-speech="cd /c/dev/speech"
+alias cd-eriskay="cd /c/dev/eriskay"
 alias cd-eyegaze="cd ${eyegaze_repository_dir}"
 alias cd-shared="cd ${shared_repository_dir}"
 alias cd-dev="cd /c/dev"
@@ -26,3 +29,9 @@ alias grid-release='"${grid_repository_dir}/Source/SensorySoftware.Grids.Grid3.D
 
 # logfile analyser
 alias lfa="${logfile_analyser_exe}"
+
+# Nuget clear caches
+alias clear-shared-cache="clear-package-cache 'sensorysoftware.shared' 'sensorysoftware.shared.desktop' 'sensorysoftware.shared.iOS'  'sensorysoftware.symbols.metafilereader.desktop' 'sensorysoftware.shared.fluentui'"
+alias clear-speech-cache="clear-package-cache 'sensorysoftware.speechlib'"
+alias clear-text-cache="clear-package-cache 'sensorysoftware.text' 'sensorysoftware.text.desktop'"
+alias clear-eyegaze-cache="clear-package-cache 'sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop'"

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Remove local cached copies of shared packages
+# Remove all packages supplied as arguments to the script from the global nuget package cache
 #
 # There appears to be no way to specify a package with the nuget locals command
 # so instead we manually remove the offending folders.
@@ -13,9 +13,7 @@ say() {
 	echo "$@" 1>&2 #redirect stdout to stderr
 }
 
-PACKAGE_CACHE=${nuget_global_packages}
-SHARED_PACKAGES=('sensorysoftware.text' 'sensorysoftware.text.desktop')
-for PACKAGE in ${SHARED_PACKAGES[@]}; do
+for PACKAGE in "$@"; do
 	FULL_PACKAGE_NAME="$PACKAGE_CACHE$PACKAGE"
 	if [[ -d  $FULL_PACKAGE_NAME ]]; then
 		rm -rd $FULL_PACKAGE_NAME && say "Removed ${FULL_PACKAGE_NAME}"

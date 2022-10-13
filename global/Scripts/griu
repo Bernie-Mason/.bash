@@ -32,7 +32,7 @@ function title() {
 }
 
 function fetchForRemotes() {
-      echo "$1 branches selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
+      echo "$1 selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
       git fetch
 }
 
@@ -57,6 +57,7 @@ function echo_help() {
     echo -e "-u, --update      ${Yellow}rebase target branch onto master first${NC}"
     echo -e "-r, --remotes     ${Yellow}select from just remote branches (will fetch first)${NC}"
     echo -e "-a, --all         ${Yellow}select from local and remote branches (will fetch first)${NC}"
+    echo -e "-g, --tags        ${Yellow}tag to checkout${NC}"
     die 0
 }
 
@@ -73,12 +74,12 @@ while test $# -gt 0; do
       echo_help
       ;;
     -a|--all)
-      fetchForRemotes "All"
+      fetchForRemotes "All branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --all"
       shift
       ;;
   	-r|--remotes)
-      fetchForRemotes "Remote"
+      fetchForRemotes "Remote branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       shift
       ;;
@@ -121,7 +122,7 @@ if (($MATCHCOUNT > 1)); then
   if ! [[ $SELECTED_NUMBER =~ $re ]]; then
       die 1 "${Red}Not a valid option. Exiting...${NC}"
   fi
-  if [[ $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT ]]; then
+  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
       die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
   fi
   MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}

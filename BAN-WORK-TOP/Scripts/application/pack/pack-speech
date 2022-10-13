@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+# With .NET 5 we build our packages automatically and can just copy them from the output folder to the speech package cache
+#
+# Required env variables: 
+#   grid_repository_dir - absolute path to directory of the grid repository
+#   speech_repository_dir - absolute path to directory of the speech repository
+#
+# Required scripts: 
+#   clear-speech-cache
+#
+# Optional scripts: 
+#   speech - for pre-building
+
+say() {
+  echo "$@" 1>&2 # redirect stdout to stderr
+}
+
+die() {
+  say "$2"
+  exit "$1"
+}
+
+function echo_help() {
+  echo "Copy nuget packages from speech repo to local package cache."
+    echo " "
+    echo "actions:"
+    echo "-h, --help             show brief help"
+    echo "-s, --set-config       set packages.props in Speech and directory.build.props in Grid to ${SET_PACKAGE_VERSION}. Will also build"
+    echo "-b, --build            Build the speech solution"
+    die 0
+}
+
+SPEECH_PACKAGE_PROPS="${speech_repository_dir}/Source/packages.props"
+SET_PACKAGE_VERSION=5.5.5
+VERSION_REGEX='[0-9]\.[0-9]\.[0-9]'
+CURRENT_PACKAGE_VERSION=$(grep -oP "Version>\K${VERSION_REGEX}+" "${SPEECH_PACKAGE_PROPS}")
+BUILD_BEFORE_PACKING=false
+SET_CONFIG=false
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    -s|--set-config)
+      SET_CONFIG=true
+      # Run build process to ensure packages are built and copied before setting configs.
+      BUILD_BEFORE_PACKING=true
+      CURRENT_PACKAGE_VERSION=${SET_PACKAGE_VERSION}
+
+      shift
+      ;;
+    -b|--build)
+      BUILD_BEFORE_PACKING=true
+      shift
+      ;;
+    *)
+    shift
+      continue
+      ;;
+  esac
+done
+
+if $SET_CONFIG; then
+  say "
+  -- Setting SPEECH packages.props Version --
+  "
+  sed --in-place s_"Version>${VERSION_REGEX}\+"_"Version>${CURRENT_PACKAGE_VERSION}"_g ${SPEECH_PACKAGE_PROPS}
+  
+  say "Show version now in SPEECH packages.props: $CURRENT_PACKAGE_VERSION"
+  
+fi
+
+if $BUILD_BEFORE_PACKING; then
+  speech -b || die 1 "Build failed"
+fi
+
+say "
+-- Copying packages from output directory to local package store --
+"
+
+cp -v "${speech_repository_dir}/Source/SensorySoftware.SpeechLib/bin/x86/Debug/SensorySoftware.SpeechLib.${CURRENT_PACKAGE_VERSION}.nupkg" "${local_package_store}" || die 1 "Cannot copy a package that doesn't exist"
+
+say "
+-- Removing cached packages from global nuget cache --
+"
+
+clear-speech-cache
+
+if $SET_CONFIG; then
+  say "
+  -- Setting GRID Directory.Build.Props SpeechVersion --
+  "
+  GRID_DIRECTORY_BUILD_PROPS="${grid_repository_dir}/Source/Directory.Build.props"
+  sed --in-place s_"SpeechLibVersion>${VERSION_REGEX}\+"_"SpeechLibVersion>${CURRENT_PACKAGE_VERSION}"_g ${GRID_DIRECTORY_BUILD_PROPS}
+  
+  
+  say "Show SpeechLibVersion now in GRID Directory.Build.props:"
+  grep SpeechLibVersion ${GRID_DIRECTORY_BUILD_PROPS}
+fi

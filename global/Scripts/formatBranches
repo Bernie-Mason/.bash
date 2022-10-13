@@ -6,7 +6,11 @@ BRANCHES=("$@")
 i=1
 MAX_LENGTH=0;
 Blue='\033[0;34m'
+Yellow='\033[0;33m'
 On_Blue='\033[44m'
+Red='\033[0;31m'
+Green='\033[0;32m'
+UWhite='\033[0;37m'
 
 for BRANCH in ${BRANCHES[@]}; do
   BRANCH_LENGTH=$(expr length $BRANCH)
@@ -20,10 +24,8 @@ for BRANCH in ${BRANCHES[@]}; do
     echo -e "\e[3$(( $RANDOM * 6 / 32767 + 1 ))m$(printf %6s $OPTION) => $BRANCH"
   else
     let OPTION=$((i++))
-    OPTION_COLOUR="${Blue}"
-    #if (( $(( $OPTION % 2 )) == 1 )); then OPTION_COLOUR="${Black}${On_Blue}"; fi
     BRANCH_LENGTH=$(expr length $BRANCH)
     LENGTH_DIFF=$((MAX_LENGTH-BRANCH_LENGTH))
-    echo -e " ${OPTION_COLOUR}$(printf %3s $OPTION) => $BRANCH$(printf %${LENGTH_DIFF}s)   ${NC}"
+    echo -e " ${UWhite}$(printf %3s $OPTION) => ${Yellow}$BRANCH$(printf %${LENGTH_DIFF}s)   ${NC}"
   fi
 done

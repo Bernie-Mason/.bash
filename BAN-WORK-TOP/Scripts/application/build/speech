@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# For dot net framework and x86 builds of eyegaze
+# For dot net framework and x86 builds of speech
 #
 # Required env variables: 
-#   eyegaze_repository_dir - absolute path to directory of the grid repository
+#   speech_repository_dir - absolute path to directory of the speech repository
 #
 # Required scripts
 #   msbuild32
@@ -23,7 +23,7 @@ function die() {
 }
 
 function echo_help() {
-	echo "Eyegaze build script"
+	echo "Speech build script"
   echo " "
   echo "actions:"
   echo "-c, --clean         clean directory with git clean -fdx -e \"*.vscode\"'"
@@ -83,8 +83,8 @@ while test $# -gt 0; do
   esac
 done
 
-REPO_DIR=${eyegaze_repository_dir}
-SOLUTION_PATH="${REPO_DIR}/Source/SensorySoftware.Eyegaze.sln"
+REPO_DIR=${speech_repository_dir}
+SOLUTION_PATH="${REPO_DIR}/Source/SensorySoftware.Speech.sln"
 
 if $GIT_CLEAN; then
 	title "Cleaning solution"
