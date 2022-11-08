@@ -86,7 +86,7 @@ say "
 -- Removing cached packages from global nuget cache --
 "
 
-clear-speech-cache
+clear-package-cache 'sensorysoftware.speechlib'
 
 if $SET_CONFIG; then
   say "

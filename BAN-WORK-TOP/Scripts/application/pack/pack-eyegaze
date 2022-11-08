@@ -7,7 +7,7 @@
 #   eyegaze_repository_dir - absolute path to directory of the eyegaze repository
 #
 # Required scripts: 
-#   clear-eyegaze-cache
+#   clear-package-cache
 #
 # Optional scripts: 
 #   eyegaze - for pre-building
@@ -33,8 +33,8 @@ function echo_help() {
 
 EYEGAZE_PACKAGES_PROPS="${eyegaze_repository_dir}/Source/packages.props"
 SET_PACKAGE_VERSION=5.5.5
+DEFAULT_PACKAGE_VERSION=$(grep -oP "Version>\K${VERSION_REGEX}+" "${EYEGAZE_PACKAGES_PROPS}")
 VERSION_REGEX='[0-9]\.[0-9]\.[0-9]'
-CURRENT_PACKAGE_VERSION=$(grep -oP "Version>\K${VERSION_REGEX}+" "${EYEGAZE_PACKAGES_PROPS}")
 BUILD_BEFORE_PACKING=false
 SET_CONFIG=false
 
@@ -66,37 +66,35 @@ if $SET_CONFIG; then
   say "
   -- Setting EyeGaze Packages.Props Version --
   "
-  EYEGAZE_PACKAGES_PROPS="${eyegaze_repository_dir}/Source/packages.props"
   sed --in-place s_"Version>${VERSION_REGEX}\+"_"Version>${DEFAULT_PACKAGE_VERSION}"_g ${EYEGAZE_PACKAGES_PROPS}
   
-  say "Show version now in EYEGAZE packages.props: $CURRENT_PACKAGE_VERSION"
-  
+  say "Show version now in EYEGAZE packages.props: ${DEFAULT_PACKAGE_VERSION}"
 fi
 
 if $BUILD_BEFORE_PACKING; then
-  eyegaze -b || die 1 "Build failed"
+  eyegaze || die 1 "Build failed"
 fi
 
 say "
 -- Copying packages from output directory to local package store --
 "
 
-cp -v "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze/bin/Debug/SensorySoftware.EyeGaze.${CURRENT_PACKAGE_VERSION}.nupkg" "${local_package_store}" || die 1 "Cannot copy a package that doesn't exist"
-cp -v "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.Desktop/bin/Debug/SensorySoftware.EyeGaze.Desktop.${CURRENT_PACKAGE_VERSION}.nupkg" "${local_package_store}" || die 1 "Cannot copy a package that doesn't exist"
+cp -v "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze/bin/Debug/SensorySoftware.EyeGaze.${DEFAULT_PACKAGE_VERSION}.nupkg" "${local_package_store}" || die 1 "Cannot copy a package that doesn't exist"
+cp -v "${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.Desktop/bin/Debug/SensorySoftware.EyeGaze.Desktop.${DEFAULT_PACKAGE_VERSION}.nupkg" "${local_package_store}" || die 1 "Cannot copy a package that doesn't exist"
 
 
 say "
 -- Removing cached packages from global nuget cache --
 "
 
-clear-eyegaze-cache
+clear-package-cache 'sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop'
 
 if $SET_CONFIG; then
   say "
   -- Setting Grid Directory.Build.Props EyeGazeVersion --
   "
   GRID_DIRECTORY_BUILD_PROPS="${grid_repository_dir}/Source/Directory.Build.props"
-  sed --in-place s_"EyeGazeVersion>${VERSION_REGEX}\+"_"EyeGazeVersion>${CURRENT_PACKAGE_VERSION}"_g ${GRID_DIRECTORY_BUILD_PROPS}
+  sed --in-place s_"EyeGazeVersion>${VERSION_REGEX}\+"_"EyeGazeVersion>${DEFAULT_PACKAGE_VERSION}"_g ${GRID_DIRECTORY_BUILD_PROPS}
   
   
   say "Show EyeGazeVersion now in GRID Directory.Build.props:"

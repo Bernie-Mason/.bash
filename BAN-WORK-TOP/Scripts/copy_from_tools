@@ -11,10 +11,10 @@ sed --in-place s_"git-unique-rebase"_"griu"_g ~/.bash/global/scripts/griu
 cp "$BIN_COPY_PATH/nuget-pack" ~/.bash/global/scripts 
 cp "$BIN_COPY_PATH/msbuild32" ~/.bash/global/scripts 
 
-cp "/C/Dev/tools/scripts/bash/scripts/clear-package-cache" ~/.bash/BAN-WORK-TOP/scripts/application 
+cp "/C/Dev/tools/scripts/bash/scripts/clear-package-cache" ~/.bash/BAN-WORK-TOP/scripts/application/pack
 
-cp "/C/Dev/tools/scripts/bash/scripts/pack-eyegaze" ~/.bash/BAN-WORK-TOP/scripts/application 
-cp "$BIN_COPY_PATH/pack-shared"  ~/.bash/BAN-WORK-TOP/scripts/application
+cp "$BIN_COPY_PATH/pack-eyegaze" ~/.bash/BAN-WORK-TOP/scripts/application/pack
+cp "$BIN_COPY_PATH/pack-shared"  ~/.bash/BAN-WORK-TOP/scripts/application/pack
 
 cp "$BIN_COPY_PATH/shared" ~/.bash/BAN-WORK-TOP/scripts/application/build 
 cp "$BIN_COPY_PATH/grid" ~/.bash/BAN-WORK-TOP/scripts/application/build 

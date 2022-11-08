@@ -13,6 +13,7 @@ say() {
 	echo "$@" 1>&2 #redirect stdout to stderr
 }
 
+PACKAGE_CACHE=${nuget_global_packages}
 for PACKAGE in "$@"; do
 	FULL_PACKAGE_NAME="$PACKAGE_CACHE$PACKAGE"
 	if [[ -d  $FULL_PACKAGE_NAME ]]; then

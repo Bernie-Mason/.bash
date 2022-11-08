@@ -2,6 +2,8 @@
 # 
 # Nuget pack wrapper. 
 #
+# Not unsurprisingly, requires nuget.exe in your PATH.
+#
 # Required env variables: 
 #   local_package_store - absolute path to directory of your personal local nuget package cache
 

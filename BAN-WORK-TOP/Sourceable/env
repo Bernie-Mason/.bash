@@ -19,7 +19,7 @@ export logfile_analyser_exe='/c/Dev/tools/LogFileAnalyser/LogFileAnalyser/bin/Re
 # plugins-cache: C:\Users\USERNAME\AppData\Local\NuGet\plugins-cache
 export nuget_http_cache='~/AppData/Local/NuGet/v3-cache/'
 # It's frustrating that the 'nuget locals global-packages -list' doesn't just return this
-export nuget_global_packages='~/.nuget/packages/'
+export nuget_global_packages='/C/Users/BernardMason/.nuget/packages/'
 export nuget_temp='~\AppData\Local\Temp\NuGetScratch'
 export nuget_plugins_cache='~\AppData\Local\NuGet\plugins-cache'
 

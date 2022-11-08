@@ -79,7 +79,7 @@ nuget-pack $TEXT_PROJ_PATH $TEXT_DESKTOP_PROJ_PATH
 echo " 
 -- Removing cached packages --
 "
-clear-text-cache
+clear-package-cache 'sensorysoftware.text' 'sensorysoftware.text.desktop'
 
 if $SET_GRID_CONFIG; then
 	echo "
