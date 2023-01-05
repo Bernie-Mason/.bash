@@ -60,6 +60,7 @@ GIT_CHECKOUT_ACTIONS=""
 GIT_REF="branch"
 RAINBOW_OUTPUT=false;
 DEBUG=false;
+
 while test $# -gt 0; do
   case "$1" in
     -h|--help)

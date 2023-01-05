@@ -67,11 +67,16 @@ GIT_BRANCH_ACTIONS="--list"
 REBASE_TARGET_FIRST=false
 RAINBOW_OUTPUT=false
 GIT_REF="branch"
+DEBUG=false;
 
 while test $# -gt 0; do
   case "$1" in
     -h|--help)
       echo_help
+      ;;
+    -d|--debug)
+      DEBUG=true;
+      shift
       ;;
     -a|--all)
       fetchForRemotes "All branches"
@@ -103,10 +108,12 @@ while test $# -gt 0; do
   esac
 done
 
-title "Finding branches matching the pattern \"${PATTERN}\""
+$DEBUG && echo "Debug output"
+title "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
+$DEBUG && echo "Match count: $MATCHCOUNT"
 
 test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
