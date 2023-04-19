@@ -1,6 +1,6 @@
 #!/bin/bash
 
-shopt -s expand_aliases
+#shopt -s expand_aliases
 
 alias cd-grid="cd ${grid_repository_dir}/Source"
 alias cd-resources="cd /c/dev/gridresources"
