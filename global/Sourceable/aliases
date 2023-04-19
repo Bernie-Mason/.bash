@@ -9,6 +9,7 @@ alias reloadbash='source ~/.bash_profile'
 
 # Directory alias (computer specific)
 alias cdd='cd ~/Documents/'
+alias cddown='cd ~/Downloads/'
 alias cdw='cd ~/Documents/Writings/'
 alias cd..='cd ..'
 alias cdb='cd ~/.bash'
