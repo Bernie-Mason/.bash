@@ -52,6 +52,7 @@ clone-with-checks ${CLONE_ROOT}/looktolearn ${APPS_BASE_URL}/looktolearn.git
 clone-with-checks ${CLONE_ROOT}/looktoread ${APPS_BASE_URL}/looktoread.git
 clone-with-checks ${CLONE_ROOT}/speech ${APPS_BASE_URL}/speech.git
 clone-with-checks ${CLONE_ROOT}/web ${APPS_BASE_URL}/web.git
+clone-with-checks ${CLONE_ROOT}/looklab ${APPS_BASE_URL}/pakora.git
 
 # libraries
 clone-with-checks ${CLONE_ROOT}/eyegaze ${LIBS_BASE_URL}/eyegaze.git
