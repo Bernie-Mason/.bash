@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#shopt -s expand_aliases
+
+alias cd-grid="cd ${grid_repository_dir}/Source"
+alias cd-resources="cd /c/dev/gridresources"
+alias cd-text="cd /c/dev/text"
+alias cd-speech="cd /c/dev/speech"
+alias cd-eriskay="cd /c/dev/eriskay"
+alias cd-looklab="cd /c/dev/looklab"
+alias cd-eyegaze="cd ${eyegaze_repository_dir}"
+alias cd-shared="cd ${shared_repository_dir}"
+alias cd-dev="cd /c/dev"
+alias cd-web="cd ${web_repository_dir}"
+alias cd-javascript="cd ${smartbox_js_repository_dir}"
+alias cd-activate="cd ${web_repository_dir}/activate"
+alias cd-tools="cd /c/dev/tools"
+alias cd-sublime='cd ~/appdata/roaming/sublime\ text\ 3/packages/user'
+
+alias vs-grid='start ${grid_repository_dir}/Source/SensorySoftware.Grid3.sln'
+alias vs-shared='start ${shared_repository_dir}/Source/SensorySoftware.Shared.All.sln'
+alias vs-activate='start ${web_repository_dir}/activate/Activate.sln'
+alias vs-eyegaze='start ${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln'
+alias vs-crashreporter='start ${web_repository_dir}/CrashReporter/src/SensorySoftware.CrashReporter.Site.sln'
+
+#nuget
+alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
+alias nuget-restore="nuget restore -nocache"
+
+
+# Application builds
+alias grid-debug="grid -d"
+alias grid-release='"${grid_repository_dir}/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Release/net452/Grid 3.exe" &'
+
+# logfile analyser
+alias lfa="${logfile_analyser_exe}"
+
+# Nuget clear caches
+alias clear-shared-cache="clear-package-cache 'sensorysoftware.shared' 'sensorysoftware.shared.desktop' 'sensorysoftware.shared.iOS'  'sensorysoftware.symbols.metafilereader.desktop' 'sensorysoftware.shared.fluentui'"
+alias clear-speech-cache="clear-package-cache 'sensorysoftware.speechlib'"
+alias clear-text-cache="clear-package-cache 'sensorysoftware.text' 'sensorysoftware.text.desktop'"
+alias clear-eyegaze-cache="clear-package-cache 'sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop'"

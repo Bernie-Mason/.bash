@@ -1,0 +1,89 @@
+#!/bin/bash
+# clone relevant smartbox repos. You can curl https://bitbucket.thinksmartbox.com/rest/api/1.0/repos to get a full list of current repos
+#
+# Modify this script to use https if necessary... but ideally start using SSH keys!!
+
+NC='\033[0m'              # Text Reset
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;33m'       # Yellow
+BRed='\033[1;31m'         # Red
+UYellow='\033[4;33m'      # Yellow
+UWhite='\033[4;37m'       # White
+
+function title() {
+    echo "${UYellow}${1}${NC}"
+}
+
+CLONE_ROOT=$1
+if [ -z $CLONE_ROOT ]; then
+    echo "No repository root specified. Creating and using /c/dev"
+    CLONE_ROOT="/c/dev"
+    if [ ! -d $CLONE_ROOT ]; then
+        mkdir -p $CLONE_ROOT
+    fi
+fi
+
+function clone-with-checks() {
+    local targetFolder=$1
+    local repoLink=$2
+
+    title "Clone of $2"
+    echo "Check if repo already exists at location $1..."
+    if [ -d "${1}/.git" ]; then
+        echo "No cloning for $2 as $1 contains a .git folder"
+    else
+        echo "Beginning clone for $2"
+        git clone $2 $1
+    fi
+}
+
+cd $CLONE_ROOT
+SSH_BASE_URL="ssh://git@bitbucket.thinksmartbox.com:7999"
+APPS_BASE_URL="${SSH_BASE_URL}/apps"
+LIBS_BASE_URL="${SSH_BASE_URL}/libs"
+TOOLS_BASE_URL="${SSH_BASE_URL}/tools"
+CONTENT_BASE_URL="${SSH_BASE_URL}/content"
+
+# applications
+clone-with-checks ${CLONE_ROOT}/dwellclicker2 ${APPS_BASE_URL}/dwellclicker2.git
+clone-with-checks ${CLONE_ROOT}/grid ${APPS_BASE_URL}/grid.git
+clone-with-checks ${CLONE_ROOT}/looktolearn ${APPS_BASE_URL}/looktolearn.git
+clone-with-checks ${CLONE_ROOT}/looktoread ${APPS_BASE_URL}/looktoread.git
+clone-with-checks ${CLONE_ROOT}/speech ${APPS_BASE_URL}/speech.git
+clone-with-checks ${CLONE_ROOT}/web ${APPS_BASE_URL}/web.git
+clone-with-checks ${CLONE_ROOT}/looklab ${APPS_BASE_URL}/pakora.git
+
+# libraries
+clone-with-checks ${CLONE_ROOT}/eyegaze ${LIBS_BASE_URL}/eyegaze.git
+clone-with-checks ${CLONE_ROOT}/gridphone ${LIBS_BASE_URL}/gridphone.git
+clone-with-checks ${CLONE_ROOT}/shared ${LIBS_BASE_URL}/shared.git
+clone-with-checks ${CLONE_ROOT}/cefsharp ${LIBS_BASE_URL}/cefsharp.git
+clone-with-checks ${CLONE_ROOT}/text ${LIBS_BASE_URL}/text.git
+clone-with-checks ${CLONE_ROOT}/zip ${LIBS_BASE_URL}/zip.git
+
+# tools
+clone-with-checks ${CLONE_ROOT}/published-inventory ${TOOLS_BASE_URL}/published-inventory.git
+clone-with-checks ${CLONE_ROOT}/tools ${TOOLS_BASE_URL}/tools.git
+
+# content
+clone-with-checks ${CLONE_ROOT}/gridresources ${CONTENT_BASE_URL}/gridresources.git
+
+
+# old - unused
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/libs/content.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/content/test.git
+
+# Hardware. Probably don't nee these.
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/altium-libraries.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/altiumtemplates.git 
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/battery-tester.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/bb9-electronics.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/cypress-gp10s-rpbv2-firmware.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/eriskay.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/gridlink.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/ipad_10033.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/joycable.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/lakota-firmware.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/product-development-templates.git
+# git clone ssh://git@bitbucket.thinksmartbox.com:7999/hardware/servusir.git

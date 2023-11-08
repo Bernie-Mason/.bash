@@ -1,0 +1,25 @@
+# Source this file from your .bash_profile or paste the contents directly
+# For example:
+# export grid_repository_dir='/c/dev/grid'
+# export eyegaze_repository_dir='/c/dev/eyegaze'
+export grid_repository_dir='~/dev/grid'
+export smartbox_js_repository_dir='~/dev/smartbox-grid-js'
+export eyegaze_repository_dir='~/dev/eyegaze'
+export speech_repository_dir='~/dev/speech'
+export web_repository_dir='~/dev/web'
+export shared_repository_dir='~/dev/shared'
+export text_repository_dir='~/dev/text'
+export logfile_analyser_exe='~/dev/tools/LogFileAnalyser/LogFileAnalyser/bin/Release/LogFileAnalyser.exe'
+# To get the list of nuget caches run: nuget locals all -list 
+# http-cache: C:\Users\USERNAME\AppData\Local\NuGet\v3-cache
+# global-packages: C:\Users\USERNAME\.nuget\packages\
+# temp: C:\Users\USERNAME\AppData\Local\Temp\NuGetScratch
+# plugins-cache: C:\Users\USERNAME\AppData\Local\NuGet\plugins-cache
+#export nuget_http_cache='~/AppData/Local/NuGet/v3-cache/'
+# It's frustrating that the 'nuget locals global-packages -list' doesn't just return this
+export nuget_global_packages='~/.nuget/Nuget/'
+export dotnet_global_packages='~/.config/Nuget/'
+#export nuget_temp='~\AppData\Local\Temp\NuGetScratch'
+#export nuget_plugins_cache='~\AppData\Local\NuGet\plugins-cache'
+# Your local package store. 
+export local_package_store='~/dev/packages'

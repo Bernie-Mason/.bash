@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# backs up symbolicator cache symbol files to the teamcity server
+# For full and subscription symbol file folders
+# Iterates over all the builds in each folder
+# For each build, tries to find the Grid3iOS symbol file in the cache which can exist in one of two relative paths
+# ssh's into the teamcity server to invoke mkdir to create the directory to copy the symbol file into
+# scp's the symbol file into the new folder
+# The target folder we copy the file into matches the folder structure that exists beneath the output directory at this point: /bin/iPhone/Release/Grid3iOS.app.dSYM. And thus we have the same folder structure that we get when we backup the symbol file after running a production build using the build script. 
+#
+
+userRoot="/Users/devvm"
+symbolicatorCacheRootSub="$userRoot/Smartbox/G3iCrashSymbolicatorCache/Grid3_ReleaseIOS"
+symbolicatorCacheRootFull="$userRoot/Smartbox/G3iCrashSymbolicatorCache/Grid3_ReleaseIOSFull"
+symbolFolderName="Grid3iOS.app.dSYM"
+
+subBuildFolderName=$(basename $symbolicatorCacheRootSub)
+
+for dir in $symbolicatorCacheRootSub/*; do
+	buildVersion=$(basename $dir)
+	sourcefile="$dir/com.thinksmartbox.Grid3/Grid3iOS"
+	if [ ! -f $sourcefile ]; then
+		sourcefile="$dir/Grid3iOS"
+		if [ ! -f $sourcefile ]; then
+			echo "Error: symbol file could not be located at ${sourcefile}. Moving on to next file..."
+			continue
+		fi
+	fi
+	targetFolder="/d/Backups/macaulay/symbols/${subBuildFolderName}/${symbolFolderName}.${buildVersion}/Contents/Resources/DWARF"
+	targetFile="${targetFolder}/Grid3iOS"
+	# echo "Will copy to: $targetFile"
+	ssh teamcity-server "test -f $targetFile"
+	if [ $? -eq 0 ]; then
+		echo "File exists. Do not overwrite and continue to next file"
+		continue
+	else
+		echo "File doesn't exist. Copying"
+		ssh teamcity-server "mkdir -p ${targetFolder}"
+		scp $sourcefile teamcity-server:$targetFile
+	fi
+done
+
+exit
+
+fullBuildFolderName=$(basename $symbolicatorCacheRootFull)
+for dir in $symbolicatorCacheRootFull/*; do
+	buildVersion=$(basename $dir)
+	sourcefile="$dir/com.thinksmartbox.GridFull/Grid3iOS"
+	if [ ! -f $sourcefile ]; then
+		sourcefile="$dir/Grid3iOS"
+		if [ ! -f $sourcefile ]; then
+			echo "Error: symbol file could not be located at ${sourcefile}. Moving on to next file..."
+			continue
+		fi
+	fi
+	targetFolder="/d/Backups/macaulay/symbols/${fullBuildFolderName}/${symbolFolderName}.${buildVersion}/Contents/Resources/DWARF"
+	targetFile="${targetFolder}/Grid3iOS"
+	# echo "Will copy to: $targetFile"
+	ssh teamcity-server "test -f $targetFile"
+	if [ $? -eq 0 ]; then
+		echo "File exists. Do not overwrite and continue to next file"
+		continue
+	else
+		echo "File doesn't exist. Copying"
+		ssh teamcity-server "mkdir -p ${targetFolder}"
+		scp $sourcefile teamcity-server:$targetFile
+	fi
+done
+exit 0
+

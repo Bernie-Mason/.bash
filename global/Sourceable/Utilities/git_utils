@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # function gd() {
 #     if test "$#" -eq 0; then
 #         (

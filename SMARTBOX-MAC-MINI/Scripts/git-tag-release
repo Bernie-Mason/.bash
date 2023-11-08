@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# Script to tag the next version of a release
+# For tagging of grid or gridresources repositories only
+#
+
+NC='\033[0m'              # Text Reset
+Green='\033[0;32m'
+Yellow='\033[0;33m'
+Blue='\033[0;34m'
+Red='\033[0;31m'
+
+function say() {
+  echo -e "$@" >&2
+}
+
+function die() {
+  test -z "$2" || say "$2"
+  exit "$1"
+}
+
+function echo_help() {
+  echo "Tag release of grid or gridresources repositories. Note: this script does not push the new tag."
+  echo ""
+    echo " "
+    echo -e "${Yellow}actions:"
+    echo -e "${Yellow}-h, --help        show brief help"
+    die 0
+}
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    *)
+    shift
+      continue
+      ;;
+  esac
+done
+
+# Test you are in a supported repo
+REPO_NAME=$(basename -s .git `git config --get remote.origin.url`)
+test $REPO_NAME != "gridresources" && test $REPO_NAME != "grid" && die 1 "${Red}Repository name ${NC}\"$REPO_NAME\" ${Red}is not gridresources or grid. Tagging pattern may not be valid"
+
+# Fetch to ensure tags are up to date. git fetch fetches all branch heads (or all specified by the remote.fetch config option), all commits necessary for them, and all tags which are reachable from these branches. In most cases, all tags are reachable in this way.
+echo "Performing a git fetch to ensure tags are up-to-date."
+git fetch
+
+PREVIOUS_TAG=$(git describe --tags --abbrev=0)
+say "${Blue}==============================================" 
+say "${NC}Tagging util for Grid and Content repositories"
+say "${NC}The previous tag is $PREVIOUS_TAG" 
+say "${Blue}==============================================" 
+say "" 
+
+TAG_STRING=$(echo $PREVIOUS_TAG | tr "." "\n" )
+TAG_ARRAY=($TAG_STRING)
+TAG_ARRAY_LENGTH=${#TAG_ARRAY[@]}
+
+# Final item is patch version and second to last is minor version
+let "PATCH_INDEX=$TAG_ARRAY_LENGTH - 1"
+let "MINOR_VERSION_INDEX=$TAG_ARRAY_LENGTH - 2"
+
+# Assumes tag has the form Grid_3.0.MINOR_VERSION.PATCH_VERSION or GridResources_1.MINOR_VERSION.PATCH_VERSION
+PATCH_VERSION=${TAG_ARRAY[$PATCH_INDEX]}
+MINOR_VERSION=${TAG_ARRAY[$MINOR_VERSION_INDEX]}
+
+let "PATCH_VERSION_NEXT=$PATCH_VERSION + 1"
+let "MINOR_VERSION_NEXT=$MINOR_VERSION + 1"
+
+# Construct a new tag for a minor version increase
+MINOR_VERSION_TAG_ARRAY=(${TAG_ARRAY[*]})
+MINOR_VERSION_TAG_ARRAY[$MINOR_VERSION_INDEX]=$MINOR_VERSION_NEXT
+MINOR_VERSION_TAG_ARRAY[$PATCH_INDEX]=0
+TAG_MINOR_VERSION_NEXT=$( IFS=$'.'; echo "${MINOR_VERSION_TAG_ARRAY[*]}" )
+
+# Construct a new tag for a patch increase
+PATCH_VERSION_TAG_ARRAY=(${TAG_ARRAY[*]})
+PATCH_VERSION_TAG_ARRAY[$PATCH_INDEX]=$PATCH_VERSION_NEXT
+TAG_PATCH_NEXT=$( IFS=$'.'; echo "${PATCH_VERSION_TAG_ARRAY[*]}" )
+
+say "${Yellow}Do you wish to create a tag that increases:"
+say "  ${Yellow}1. The minor version from ${NC}$MINOR_VERSION${Yellow} to ${NC}$MINOR_VERSION_NEXT${Yellow} -> ${NC}$TAG_MINOR_VERSION_NEXT"
+say "  ${Yellow}2. The patch version from ${NC}$PATCH_VERSION${Yellow} to ${NC}$PATCH_VERSION_NEXT${Yellow} -> ${NC}$TAG_PATCH_NEXT"
+read -p "Enter number 1 or 2: " SELECTED_NUMBER
+if [ $SELECTED_NUMBER -eq 1 ]; then
+  say "${Green}Incrementing the minor version. Creating new tag called ${NC}$TAG_MINOR_VERSION_NEXT${Green} which follow ${NC}$PREVIOUS_TAG."
+  git tag $TAG_MINOR_VERSION_NEXT
+elif [ $SELECTED_NUMBER -eq 2 ]; then
+  say "${Green}Incrementing the patch version. Creating new tag called ${NC}$TAG_PATCH_NEXT${Green} which follow ${NC}$PREVIOUS_TAG."
+  git tag $TAG_PATCH_NEXT
+else
+  die 1 "$SELECTED_NUMBER ${Red}not 1 or 2. Aborting..."
+fi
