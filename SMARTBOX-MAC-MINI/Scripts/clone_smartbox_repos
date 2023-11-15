@@ -18,7 +18,7 @@ function title() {
 CLONE_ROOT=$1
 if [ -z $CLONE_ROOT ]; then
     echo "No repository root specified. Creating and using /c/dev"
-    CLONE_ROOT="/c/dev"
+    CLONE_ROOT="~/dev"
     if [ ! -d $CLONE_ROOT ]; then
         mkdir -p $CLONE_ROOT
     fi
@@ -46,19 +46,19 @@ TOOLS_BASE_URL="${SSH_BASE_URL}/tools"
 CONTENT_BASE_URL="${SSH_BASE_URL}/content"
 
 # applications
-clone-with-checks ${CLONE_ROOT}/dwellclicker2 ${APPS_BASE_URL}/dwellclicker2.git
-clone-with-checks ${CLONE_ROOT}/grid ${APPS_BASE_URL}/grid.git
-clone-with-checks ${CLONE_ROOT}/looktolearn ${APPS_BASE_URL}/looktolearn.git
-clone-with-checks ${CLONE_ROOT}/looktoread ${APPS_BASE_URL}/looktoread.git
-clone-with-checks ${CLONE_ROOT}/speech ${APPS_BASE_URL}/speech.git
+#clone-with-checks ${CLONE_ROOT}/dwellclicker2 ${APPS_BASE_URL}/dwellclicker2.git
+#clone-with-checks ${CLONE_ROOT}/grid ${APPS_BASE_URL}/grid.git
+#clone-with-checks ${CLONE_ROOT}/looktolearn ${APPS_BASE_URL}/looktolearn.git
+#clone-with-checks ${CLONE_ROOT}/looktoread ${APPS_BASE_URL}/looktoread.git
+#clone-with-checks ${CLONE_ROOT}/speech ${APPS_BASE_URL}/speech.git
 clone-with-checks ${CLONE_ROOT}/web ${APPS_BASE_URL}/web.git
-clone-with-checks ${CLONE_ROOT}/looklab ${APPS_BASE_URL}/pakora.git
+#clone-with-checks ${CLONE_ROOT}/looklab ${APPS_BASE_URL}/pakora.git
 
 # libraries
-clone-with-checks ${CLONE_ROOT}/eyegaze ${LIBS_BASE_URL}/eyegaze.git
-clone-with-checks ${CLONE_ROOT}/gridphone ${LIBS_BASE_URL}/gridphone.git
+#clone-with-checks ${CLONE_ROOT}/eyegaze ${LIBS_BASE_URL}/eyegaze.git
+#clone-with-checks ${CLONE_ROOT}/gridphone ${LIBS_BASE_URL}/gridphone.git
 clone-with-checks ${CLONE_ROOT}/shared ${LIBS_BASE_URL}/shared.git
-clone-with-checks ${CLONE_ROOT}/cefsharp ${LIBS_BASE_URL}/cefsharp.git
+#clone-with-checks ${CLONE_ROOT}/cefsharp ${LIBS_BASE_URL}/cefsharp.git
 clone-with-checks ${CLONE_ROOT}/text ${LIBS_BASE_URL}/text.git
 clone-with-checks ${CLONE_ROOT}/zip ${LIBS_BASE_URL}/zip.git
 
@@ -67,7 +67,7 @@ clone-with-checks ${CLONE_ROOT}/published-inventory ${TOOLS_BASE_URL}/published-
 clone-with-checks ${CLONE_ROOT}/tools ${TOOLS_BASE_URL}/tools.git
 
 # content
-clone-with-checks ${CLONE_ROOT}/gridresources ${CONTENT_BASE_URL}/gridresources.git
+#clone-with-checks ${CLONE_ROOT}/gridresources ${CONTENT_BASE_URL}/gridresources.git
 
 
 # old - unused
