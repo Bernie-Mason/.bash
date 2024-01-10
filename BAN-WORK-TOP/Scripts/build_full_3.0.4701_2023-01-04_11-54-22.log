@@ -1,0 +1,11 @@
+2023-01-04_11-54-22 Build script parameters:
+2023-01-04_11-54-22  Build type: full
+2023-01-04_11-54-22  Release version: 3.0.47.1
+2023-01-04_11-54-22  Build version: 3.0.4701
+2023-01-04_11-54-22  Skip publishing?: false
+2023-01-04_11-54-22  Skip build?: false
+2023-01-04_11-54-22  Skip codeCheckout?: false
+2023-01-04_11-54-22  Skip contentCheckout?: false
+2023-01-04_11-54-22 > Step 1: Code checkout. Getting code for 3.0.4701 
+2023-01-04_11-54-22 -> 1.1: Git: Fetch and check tag "Grid_3.0.47.1" exists...
+2023-01-04_11-54-22 FAILURE: /Users/devvm/release-build/grid-source/.git does not exist

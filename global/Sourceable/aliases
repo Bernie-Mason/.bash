@@ -76,6 +76,7 @@ alias gcm='git commit -m'
 alias gcl='git clean -fd'
 alias gcp='git cherry-pick'
 alias gcpn='git cherry-pick --no-commit'
+alias gfo='git fetch origin'
 alias gpfwl='git push --force-with-lease'
 alias gpus='git push'
 alias gpusom='git push -u origin master'
@@ -170,7 +171,7 @@ alias du2='du -h -d 2'
 alias lbhelp='cd ~/.bash/bhelp; ls | grep .; cd ~'
 
 # powershell
-alias pstos='powershell turn-off-screen'
+alias pstos='powershell turn-off-screen.ps1'
 
 # Windows
 alias kill-msbuild='taskkill //IM msbuild.exe //F'	

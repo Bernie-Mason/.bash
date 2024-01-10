@@ -1,0 +1,417 @@
+#!/bin/bash
+
+################################################################################################
+#                                                                                              #
+# This is a copy of the script checked in to Grid\Source\SensorySoftware.Grids.Grid3.iOS\build #
+# Please check in any changes that you make to it!                                             #
+#                                                                                              #
+################################################################################################
+#
+# Dependencies
+# -> Install using package manager of choise. Suggest homebrew e.g. 'brew install packagename'
+# colordiff
+# svn
+# bundler -> gem install bundler
+# xcodebuild -> for fastlane. 
+#       By default the path for this is /Library/Developer/CommandlineTools however you've installed xcode as an application you can use the application xcodebuild. 
+#       Run `sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer` to change the xcodebuild path to the application install directory.
+#
+# Other setup
+# ssh server setup for backup of symbol files.
+
+# Colors for printing
+Blue='\033[2;36m'         # Light blue
+Red='\033[0;31m'          # Red
+Green='\033[4;32m'        # Green underlined
+Yellow='\033[0;33m'       # Yellow
+Cyan='\033[0;36m'         # Cyan 
+NC='\033[0m'       # Text Reset
+
+function log() {
+  logTime=$(date '+%Y-%m-%d_%H-%M-%S');
+  echo "${logTime} $@" >> "${scriptLogFile}"
+}
+
+subStep=1
+function subTitle() {
+	local formatted="-> ${step}.${subStep}: $@"
+	let "subStep+=1"
+	echo -e "${Yellow}${formatted}${NC}"
+	log "$formatted"
+}
+step=0
+
+function title() {
+	let "step+=1"
+	let "subStep=1"
+	local formatted="> Step ${step}: $@ "
+	echo -e "${Green}${formatted}${NC}"
+	log "$formatted"
+}
+
+function echo-and-log() {
+	echo -e "$@" >&2
+	log "$@"
+}
+
+function die() {
+  if [ ! -z "$2" ]; then
+    echo -e "${Red}$2${NC}"
+    log "FAILURE: $2"
+  fi
+	exit "$1"
+}
+
+function handle-exitcode() {
+	if [ $1 == 0 ]; then
+		# success statement is optional
+    if [ ! -z "${3}" ]; then
+		  echo -e "${Cyan}Success: ${3}${NC}"
+      log "Success: $2"
+    fi
+	else
+		die 1 "Failure: ${2}"
+	fi
+}
+
+function pattern-based-checkout() {
+	local pattern=$1
+	local matchingTag=$(git tag | grep -iE $pattern | sed -E 's/\* (\(HEAD detached at )?//g' )
+	local tags=($matchingTag)
+	local matchCount="${#tags[@]}"
+	test $matchCount -eq 0 && die 1 "No matching tag in the repository \"$(basename `git rev-parse --show-toplevel`)\" for pattern \"${pattern}\" Exiting..."
+
+	if (($matchCount > 1)); then
+		echo -e "${Yellow}More than one match. Select the one you want. e.g. type \"1\" to checkout the first item in the list:"
+		echo ""
+		i=1
+		for tag in ${tags[@]}; do
+			echo -e "  $((i++))  $tag"
+		done
+		echo ""
+		re="^[0-9]+$"
+		read selectedNumber
+		echo -e "Value read in: \"$selectedNumber\""
+		if ! [[ $selectedNumber =~ $re ]]; then 
+			die 1 "\"$selectedNumber\" is not a valid option. exiting..."
+		fi
+		if [[ $selectedNumber < 1 || $selectedNumber > $matchCount ]]; then
+			die 1 "\"$selectedNumber\" is of bounds. exiting..."
+		fi
+		matchingTag=${tags[$((--selectedNumber))]}
+		echo -e "${Blue}The selected tag to check out is:${NC} \"$matchingTag\""
+	else 
+		echo -e "${Blue}One match. Checking out tag:${NC} \"$matchingTag\""
+	fi
+
+	git checkout $matchingTag
+}
+
+function test-build-scripts-are-equal {
+	if ! cmp --silent $1 $2; then
+		echo-and-log "Error: build script differs from script in repository
+Diff:
+===="
+		colordiff -a $1 $2
+		echo "===="
+
+		read -p 'Do you want to ignore this difference and continue with the existing build file? [Yy/Nn] ' ignore
+		case "$ignore" in
+			[Yy]) ;;
+			[Nn]) echo "
+This script will now exit.
+
+Please run either:
+   cp $1 $2
+or:
+   cp $2 $1
+to update the correct script before re-running this script.
+"; exit ;;
+			*) echo-and-log "Input '$ignore' not accepted. Exiting..."; exit ;;
+		esac
+		echo-and-log "
+Continuing...
+"
+	fi
+}
+
+function echo_help() {
+	echo ""
+	echo "Usage: build BUILD_TYPE CODE_VERSION BUILD_NUMBER [-f|-d]"
+	echo ""
+	echo "First argument is the build type (full or subscription)."
+	echo "Second argument is the code version (e.g. 47.1)."
+	echo "Third arugment is the build number (e.g. 4701)."
+	echo " "
+	echo "Recommendation(s):"
+	echo " * Use tmux:" 
+	echo "	 If running in SSH. Due to the length of time this script takes to execute (~ 80 minutes)" 
+	echo "   it's highly recommended to run it in a tmux session. It your ssh session disconnects tmux"
+	echo "   will continue running the script in it's session and you'll be able to reconnect to the tmux"
+	echo "   session when you re-ssh into the server running this script"
+	echo " "
+	echo "actions (after required arguments only):"
+	echo "-sp,  --skip-publishing         Skip fastlane submission and skips copying symbol files to the symbolicator cache and backing them up."
+	echo "-sc,  --skip-code-checkout      Skips checkout of git/SVN resources, setting version number"
+	echo "-sco, --skip-content-checkout   Skips checkout of git/SVN resources, setting version number"
+	echo "-sb,  --skip-build              Skips restoring of packages and msbuild invocation for building grid"
+	echo "                                -> Suitable if the script failed during the fastlane submission process."
+	echo "-h,   --help                    Show brief help"
+	echo ""
+	echo "terminating..."
+	die 0
+}
+
+if [ "$#" -lt 3 ]; then
+	echo_help
+fi
+
+# setup
+buildType="$1"
+symbolsCacheFolder=""
+appIdentifier=""
+appIconSet=""
+
+# Naming rules for full paths - suffix of Root for directorys and suffix of FilePath for files
+userRoot="/Users/devvm"
+releaseBuildRoot="$userRoot/release-build"
+gridResourcesRepositoryRoot="$releaseBuildRoot/gridResources"
+gridRepositoryRoot="$releaseBuildRoot/grid-source"
+gridRepositoryRootSource="$gridRepositoryRoot/Source"
+symbolicatorCacheRoot="$userRoot/Smartbox/G3iCrashSymbolicatorCache"
+buildScriptFilePath="$releaseBuildRoot/build"
+repositoryBuildScriptFilePath="$gridRepositoryRootSource/SensorySoftware.Grids.Grid3.iOS/build"
+restorePackageIOSScript="$gridRepositoryRootSource/restore-packages-ios"
+
+if [ $buildType = "subscription" ]; then
+	appIdentifier="com.thinksmartbox.Grid3"
+	appIconSet="AppIcons.appiconset"
+	symbolsCacheFolder="Grid3_ReleaseIOS"
+	symbolicatorCacheRoot="$symbolicatorCacheRoot/$symbolsCacheFolder"
+elif [ $buildType = "full" ]; then
+	appIdentifier="com.thinksmartbox.GridFull"
+	appIconSet="AppIconsVpp.appiconset"
+	symbolsCacheFolder="Grid3_ReleaseIOSFull"
+	symbolicatorCacheRoot="$symbolicatorCacheRoot/$symbolsCacheFolder"
+else
+	die 1 "Incorrect build type parameter; please use full or subscription"
+fi
+
+releaseVersion="3.0.$2"
+buildVersion="3.0.$3" 
+remoteTag="Grid_$releaseVersion"
+minorVersion=$(echo $2 | grep -o '^[0-9]*')
+skipPublishing=false
+skipBuild=false
+skipCodeCheckout=false
+skipContentCheckout=false
+
+while test $# -gt 0; do
+	case "$1" in
+		-sp|--skip-publishing)
+			skipPublishing=true
+			shift
+			;;
+		-sb|--skip-build)
+			skipBuild=true
+			shift
+			;;
+		-sc|--skip-code-checkout)
+			skipCodeCheckout=true
+			shift
+			;;
+		-sco|--skip-content-checkout)
+			skipContentCheckout=true
+			shift
+			;;
+		-h|--help)
+			echo_help
+			;;
+		*)
+			shift
+			continue
+			;;
+	esac
+done
+
+# get script directory: https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+scriptDateTime=$(date '+%Y-%m-%d_%H-%M-%S');
+scriptLogFile="$DIR/build_${buildType}_${buildVersion}_${scriptDateTime}.log"
+log "Build script parameters:"
+log " Build type: ${buildType}"
+log " Release version: ${releaseVersion}"
+log " Build version: ${buildVersion}"
+log " Skip publishing?: ${skipPublishing}"
+log " Skip build?: ${skipBuild}"
+log " Skip codeCheckout?: ${skipCodeCheckout}"
+log " Skip contentCheckout?: ${skipContentCheckout}"
+
+echo -e "${Blue}"
+echo -e "                 #########################"
+echo -e "#############################################################"
+echo -e "#                                                           #"
+echo -e "#${NC}                  Grid for iPad Publisher                  ${Blue}#"
+echo -e "#${NC}   (G4i production build and fastlane submission script)   ${Blue}#"
+echo -e "#                                                           #"
+echo -e "#############################################################"
+echo -e "                 #########################"
+echo -e "${NC}"
+echo -e "Script output is logged to ${scriptLogFile}"
+echo ""
+
+
+#<---- Code checkout step ---->
+if ! $skipCodeCheckout; then
+	cd $gridRepositoryRoot
+
+	title "Code checkout. Getting code for $buildVersion"
+
+	subTitle "Git: Fetch and check tag \"$remoteTag\" exists..."
+	[ ! -d "$gridRepositoryRoot/.git" ] && die 1 "$gridRepositoryRoot/.git does not exist" ""
+
+	git fetch >> ${scriptLogFile}
+	remoteTagExists="$(git rev-parse --verify --quiet $remoteTag)"
+	if [ -z $remoteTagExists ]; then
+		die 1 "Remote tag \"$remoteTag\" does not exist!"
+	fi
+
+	subTitle "Git: Cleaning repository..."
+	git clean -xdf >> ${scriptLogFile}
+	git checkout . 
+
+	subTitle "Git: Checking out at \"$remoteTag\"..."
+	git checkout $remoteTag
+
+	test-build-scripts-are-equal $buildScriptFilePath $repositoryBuildScriptFilePath
+
+	cd $releaseBuildRoot
+else
+	title "Skipped checkout of code from grid repository."
+fi
+
+# <---- Content checkout step ----> 
+if ! $skipContentCheckout; then
+	cd $gridResourcesRepositoryRoot
+
+	# It's important to do the clean step in the code checkout before this step to guarantee the correct 
+	# gridResources in the Resources and Locale folder in the build directory. 
+	title "Collect gridResources changes"
+
+	subTitle "Git: Fetching changes..."
+	[ ! -d "$gridResourcesRepositoryRoot/.git" ] && die 1 "$gridResourcesRepositoryRoot/.git does not exist. Please clone the repository into \"$gridResourcesRepositoryRoot\" before running the script again" ""
+
+	git fetch >> ${scriptLogFile}
+
+	subTitle "Git: Cleaning repository..."
+	git clean -xdf >> ${scriptLogFile}
+	git checkout . 
+
+	gridResourcesTagPattern="GridResources_[[:digit:]]+\.$minorVersion\.[[:digit:]]+$"
+	subTitle "Git: Checkout a tag based on the pattern: \"$gridResourcesTagPattern\"..."
+	pattern-based-checkout $gridResourcesTagPattern
+
+	subTitle "Information: Showing the last 10 commits on this branch:"
+	git log -n10 --oneline 
+	git log -n10 --oneline >> ${scriptLogFile}
+
+	subTitle "File copy: Copying locale and resources folders from gridResources repository into code repo for building..."
+	cp -r "$gridResourcesRepositoryRoot/Resources"  "$gridRepositoryRoot/Source/SensorySoftware.Grids.Grid3.iOS"
+	cp -r "$gridResourcesRepositoryRoot/Locale"  "$gridRepositoryRoot/Source/SensorySoftware.Grids.Grid3.iOS/Resources"
+
+	cd $releaseBuildRoot
+else
+	title "Skipped checkout of gridResources..."
+fi
+
+#<---- Build step ---->
+if ! $skipBuild; then
+	cd $gridRepositoryRoot
+
+	title "Build. Restore packages and build"
+
+	subTitle "Pre-build action: Updating plist"
+	/usr/libexec/PListBuddy -c "Set :CFBundleVersion $buildVersion" "Source/SensorySoftware.Grids.Grid3.iOS/Info.plist"
+	/usr/libexec/PListBuddy -c "Set :CFBundleShortVersionString $buildVersion" "Source/SensorySoftware.Grids.Grid3.iOS/Info.plist"
+	/usr/libexec/PListBuddy -c "Set :CFBundleIdentifier $appIdentifier" "Source/SensorySoftware.Grids.Grid3.iOS/Info.plist"
+	/usr/libexec/PListBuddy -c "Set :XSAppIconAssets Resources/Media.xcassets/$appIconSet" "Source/SensorySoftware.Grids.Grid3.iOS/Info.plist"
+	/usr/libexec/PListBuddy -c "Set :UILaunchStoryboardName LaunchScreen" "Source/SensorySoftware.Grids.Grid3.iOS/Info.plist"
+
+	subTitle "Pre-build action: Setting version number in AssemblyInfo.cs to ${releaseVersion}"
+	assemblyInfoPath="Source/SensorySoftware.Grids.Grid3.iOS/Properties/AssemblyInfo.cs"
+	sed -E "/^\[assembly: Assembly(File)?Version/s/[0-9\.]+/$releaseVersion/" "$assemblyInfoPath" > "${assemblyInfoPath}.new" # in place write results in an empty file, so have to write to temporary then move
+	mv -f "${assemblyInfoPath}.new" "$assemblyInfoPath"
+
+	subTitle "Unlocking key chain. May require you to enter your password again (sorry about that)"
+	security unlock-keychain login.keychain || die 1 "Keychain login failed"
+
+	subTitle "Nuget: Restoring packages"
+	$restorePackageIOSScript >> ${scriptLogFile}
+	handle-exitcode $? "Package restore. See build.log file for more information" "package restore."
+
+	subTitle "msbuild: Rebuilding in release - may take up to 10 minutes"
+	msbuild /target:Rebuild /p:Configuration=Release /p:Platform=iPhone /p:BuildIpa=true /p:Version=$releaseVersion "/p:CodesignKey=iPhone Distribution: Smartbox Assistive Technology Ltd (XZMZ45KK3N)" "/p:CodesignProvision=Automatic:AppStore" -verbosity:minimal Source/SensorySoftware.Grid3.sln >> ${scriptLogFile}
+	handle-exitcode $? "msbuild. See build.log file for more information" "msbuild rebuilt."
+
+	cd $releaseBuildRoot
+else
+	title "Skipped build and restore."
+fi
+
+#<---- Publishing: Build submission to fastlane and symbol copying step ---->
+if ! $skipPublishing; then
+	title "Uploading to Fastlane."
+	export FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=yzyi-hwjs-aied-zvaf
+	
+	cd "$gridRepositoryRootSource"
+	bundle install --path vendor/bundle
+	bundle exec fastlane beta
+
+	handle-exitcode $? "Fastlane upload. See build.log file for more information" "Fastlane upload."
+
+	title "Symbol copy step: Copying symbol files for backup and crash symbolicator"
+	gridBinReleaseRoot=$gridRepositoryRootSource/SensorySoftware.Grids.Grid3.iOS/bin/iPhone/Release
+	symbolFolderName="Grid3iOS.app.dSYM"
+	symbolsSourceRoot="$gridBinReleaseRoot/$symbolFolderName/Contents"
+	symbolsSource="$symbolsSourceRoot/Resources/DWARF/Grid3iOS"
+	symbolsDestination="$symbolicatorCacheRoot/$buildVersion/$appIdentifier"
+	if [ ! -d $symbolsDestination  ]; then
+		mkdir -p $symbolsDestination
+	fi
+
+	subTitle "Copying symbol files to crash symbolicator cache location at $symbolsDestination"
+
+	cp $symbolsSource $symbolsDestination
+
+	# teamcity-server is an alias for the username@host that should be defined in ~/.ssh/config 
+	subTitle "Backing up symbols to teamcity server"
+	symbolsTargetDirectory="/d/Backups/macaulay/symbols/${symbolsCacheFolder}/${symbolFolderName}.${buildVersion}"
+	
+	subTitle "Creating directory for backup on teamcity server"
+	# It's important to first ensure that the backup directory exists before exectuting scp as the result of the scp copy
+	# will be different depending on whether the target directory exists. If it does exist then it will copy the symbolFolderName foler
+	# into the target directory. If it doesn't exist then it will rename the symbolFolderName on copy to the target directory name.
+	ssh teamcity-server "mkdir -p ${symbolsTargetDirectory}"
+	handle-exitcode $? "creation of ${symbolsTargetDirectory} on teamcity server" "directory created on teamcity server"
+
+	subTitle "Copying symbols to teamcity server"
+	# scp uses an interactive terminal and its output cannot be easily redirected to stdout
+	# To debug ssh issues between this machine and its target please try invoking scp/ssh directly with a verbose (-v)
+	# -r Recursively copy folder
+	# -p Save the original file's modification/access times, and modes
+	scp -r -p "${symbolsSourceRoot}/" teamcity-server:$symbolsTargetDirectory
+
+	if [ $? -gt 0 ]; then
+		subTitle "Failure: scp copy of symbol files to TC server failed. Retrying in verbose mode..."
+		scp -r -v $symbolsSourceRoot teamcity-server:$symbolsTargetDirectory
+
+		handle-exitcode $? "scp copy to backup server. IMPORTANT: please copy symbol file from $symbolsSourceRoot to $symbolsTargetDirectory manually. " "scp copy to backup server."
+	fi
+
+
+else
+	title "Skipped fastland and copying symbols to symbolicator cache and backing up."
+fi
+
+echo ""
+handle-exitcode 0 "" "<-- Script finished. No failures -->"

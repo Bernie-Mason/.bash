@@ -1,0 +1,114 @@
+#!/bin/bash
+# 
+# VMP signing script
+#
+# Finds the libraries required for VMP signing in the specified folder. 
+# If no folder is provided then we attempt to sign files in the x86 release folder
+#
+# Requirements
+# Python3 installed and available on the PATH
+# castlabs vmp cmd utility installed.
+
+function say() {
+	echo -e "$@" >&2
+}
+
+function die() {
+	test -z "$2" || say "$2"
+	exit "$1"
+}
+
+function echo_help() {
+	echo "VMP signing script"
+	echo "The first argument should be the password for the vmp signing process (required)."
+	echo "The second argument should be the absolute or relative path to out folder without a trailing slash (not required). If none is provided then we attempt to find the release out folder."
+    echo " "
+    echo "vmp_sign_tool vmp_password path_to_out_folder [actions]"
+    echo " "
+    echo "actions:"
+    echo "-c, --cef            Expect cef sample app libraries"
+    echo "-h, --help           show this help"
+    die 0
+}
+
+function sign_if_exists() {
+    if [ -f $1 ]; then
+      python3 -m castlabs_evs.vmp sign --persistent --intermediate $1
+    else
+      echo "File $1 not found"
+    fi
+}
+
+# Test for python3 requirement
+test $(command -v python3) || die 1 "python3 not installed. Please install python3.exe and ensure that it is available on your PATH"
+
+# Test for castlabs VMP requirement
+CASTLABS_PYTHON_MODULE_ENTRY=$(python3 -m pip freeze | grep "castlabs-evs==")
+if [ -z $CASTLABS_PYTHON_MODULE_ENTRY ]; then
+  echo "python3 castlabs-evs module not installed. Would you like to try to install it now (as per instructions on https://pypi.org/project/castlabs-evs/)?"
+  read -t 20 SHOULD_INSTALL
+  if [[ $SHOULD_INSTALL =~ ^(y|Y)$ ]]; then
+    echo "Attempting to install castlabs-evs module" 
+    python3 -m pip install castlabs-evs
+  else
+    die 1 "Cannot continue without module, exiting."
+  fi
+fi 
+
+# Test for password arg
+VMP_PASSWORD="$1"
+if [ -z $VMP_PASSWORD ]; then
+  die 1 "VMP password is required as the first argument."
+fi
+
+# Test for output directory arg
+PATH_TO_OUT="$2"
+if [[ $PATH_TO_OUT == "default" ]]; then
+  PATH_TO_OUT="/c/dev/grid/source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Release/net7.0-windows/win7-x86"
+fi
+
+CEF_SAMPLE_APP=false;
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    -c|--cef)
+      echo "CEF sample app"
+      CEF_SAMPLE_APP=true;
+      shift
+      ;;
+    *)
+      shift
+      continue
+      ;;
+  esac
+done
+
+if ! [ -z $PATH_TO_OUT ]; then
+  echo "=> Looking for libraries to sign in $PATH_TO_OUT"
+  cd $PATH_TO_OUT || die 1 $"Failed to change directories to {$PATH_TO_OUT}. Maybe you have not created the required build?"
+fi
+
+echo "=> Reauthenticating with castlabs."
+python3 -m castlabs_evs.account reauth --passwd $VMP_PASSWORD --account Grid3Smartbox
+
+# Intermediate libraries
+echo "=> Signing intermediate libraries."
+sign_if_exists libcef.dll
+if $CEF_SAMPLE_APP; then 
+    echo "=> Signing the entry executable."
+    python3 -m castlabs_evs.vmp sign --persistent cefclient.exe
+    die 0
+fi
+
+sign_if_exists CefSharp.BrowserSubprocess.dll
+sign_if_exists CefSharp.BrowserSubprocess.Core.dll
+
+# Entry exe
+echo "=> Signing the entry executable."
+python3 -m castlabs_evs.vmp sign --persistent CefSharp.BrowserSubprocess.exe
+if ! [ -z $PATH_TO_OUT ]; then
+  cd -
+fi
