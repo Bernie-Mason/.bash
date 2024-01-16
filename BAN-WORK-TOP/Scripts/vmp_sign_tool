@@ -33,6 +33,7 @@ function echo_help() {
 
 function sign_if_exists() {
     if [ -f $1 ]; then
+      echo "=> Signing $1 as intermediate library."
       python3 -m castlabs_evs.vmp sign --persistent --intermediate $1
     else
       echo "File $1 not found"
@@ -63,8 +64,20 @@ fi
 
 # Test for output directory arg
 PATH_TO_OUT="$2"
-if [[ $PATH_TO_OUT == "default" ]]; then
-  PATH_TO_OUT="/c/dev/grid/source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Release/net7.0-windows/win7-x86"
+if [[ "$PATH_TO_OUT" == "default" ]]; then
+  PATH_TO_OUT="/c/dev/grid/source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Debug/net7.0-windows/win7-x86"
+fi
+if [[ "$PATH_TO_OUT" == "debug-x86" ]]; then
+  PATH_TO_OUT="/c/dev/grid/source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Debug/net7.0-windows/win7-x86"
+fi
+if [[ "$PATH_TO_OUT" == "debug-x64" ]]; then
+  PATH_TO_OUT="/c/dev/grid/source/SensorySoftware.Grids.Grid3.Desktop/bin/x64/Debug/net7.0-windows/win7-x64"
+fi
+if [[ "$PATH_TO_OUT" == "release-x86" ]]; then
+  PATH_TO_OUT="/c/dev/grid/source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/release/net7.0-windows/win7-x86"
+fi
+if [[ "$PATH_TO_OUT" == "release-x86" ]]; then
+  PATH_TO_OUT="/c/dev/grid/source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/release/net7.0-windows/win7-x86"
 fi
 
 CEF_SAMPLE_APP=false;
@@ -95,8 +108,7 @@ echo "=> Reauthenticating with castlabs."
 python3 -m castlabs_evs.account reauth --passwd $VMP_PASSWORD --account Grid3Smartbox
 
 # Intermediate libraries
-echo "=> Signing intermediate libraries."
-sign_if_exists libcef.dll
+python3 -m castlabs_evs.vmp sign --persistent --intermediate libcef.dll
 if $CEF_SAMPLE_APP; then 
     echo "=> Signing the entry executable."
     python3 -m castlabs_evs.vmp sign --persistent cefclient.exe
@@ -106,7 +118,7 @@ fi
 sign_if_exists CefSharp.BrowserSubprocess.dll
 sign_if_exists CefSharp.BrowserSubprocess.Core.dll
 
-# Entry exe
+# Entry exe (blessed)
 echo "=> Signing the entry executable."
 python3 -m castlabs_evs.vmp sign --persistent CefSharp.BrowserSubprocess.exe
 if ! [ -z $PATH_TO_OUT ]; then
