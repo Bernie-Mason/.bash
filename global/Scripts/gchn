@@ -1,0 +1,101 @@
+#!/bin/bash
+# 
+# git new branch checkout tool
+#
+# A helpful text interface for creating a new branch
+#
+# By default the script only searches local branches. However it can also search remotes by 
+# providing the all or remotes action.
+#
+# Depends on formatBranches script
+
+NC='\033[0m'              # Text Reset
+Red='\033[0;31m'
+Green='\033[0;32m'
+Yellow='\033[0;33m'
+UWhite='\033[4;37m'
+Black='\033[0;30m'
+
+function say() {
+	echo -e "$@" >&2
+}
+
+function title() {
+  echo -e "${Green}>> $@"${NC} >&2
+  echo ""
+}
+
+function die() {
+	test -z "$2" || say "$2"
+	exit "$1"
+}
+
+function fetchForRemotes() {
+      echo -e "$1 selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
+      git fetch
+}
+
+function print_help() {
+  echo -e "${UWhite}Checkout a branch based on an identifier.${NC}"
+  echo -e "First argument should be your string pattern for the branch in question. Supports grep operations."
+    echo -e " "
+    echo "\$gchn"
+    echo -e " "
+    echo -e "actions:"
+    echo -e "-h, --help        ${Yellow}show brief help${NC}"
+    die 0
+}
+
+BRANCH_NAME=""
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      print_help
+      ;;
+    *)
+	  shift
+      continue
+      ;;
+  esac
+done
+
+NO_PREFIX_STR="[no-prefix]"
+PREFIX_OPTIONS=("task" "bugfix" "feature" "test" "other" $NO_PREFIX_STR)
+OPTION_COUNT="${#PREFIX_OPTIONS[@]}"
+title "Select a prefix for the branch"
+I=1;
+for option in ${PREFIX_OPTIONS[@]}; do
+  echo "${I}: ${option}"  
+  I=$((I + 1)) 
+done
+
+read -p "Enter number {1-$OPTION_COUNT}: " SELECTED_NUMBER
+if ! [[ $SELECTED_NUMBER =~ $re ]]; then
+    die 1 "${Red}Not a valid option. Exiting...${NC}"
+fi
+if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $OPTION_COUNT )); then
+    die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
+fi
+if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $OPTION_COUNT )); then
+    die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
+fi
+OPTION=${PREFIX_OPTIONS[$((--SELECTED_NUMBER))]}
+if [[ ${NO_PREFIX_STR} != ${OPTION} ]]; then
+  BRANCH_NAME="${BRANCH_NAME}${OPTION}/"
+fi
+
+echo ""
+title "Type your ticket identifier"
+
+read -p "Type your identifier (spaces will be replaced with hyphons): " WRITTEN_IDENTIFIER
+
+WRITTEN_IDENTIFIER=$(tr -s ' ' '-' <<< "${WRITTEN_IDENTIFIER}")
+BRANCH_NAME="${BRANCH_NAME}${WRITTEN_IDENTIFIER}"
+
+read -p "Your branch name is: $BRANCH_NAME. Checkout this new branch? [Yy|Nn]" WILL_CHECKOUT
+case "$WILL_CHECKOUT" in
+  [Yy]) git checkout -b $BRANCH_NAME ;;
+  [Nn]) die 0 "Exiting"  ;;
+esac
+die 0
