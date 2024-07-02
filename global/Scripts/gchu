@@ -32,7 +32,7 @@ function die() {
 }
 
 function fetchForRemotes() {
-      echo -e "$1 selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
+      say -e "$1 selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
       git fetch
 }
 
@@ -47,8 +47,9 @@ function print_help() {
     echo -e "-r, --remotes     ${Yellow}select from just remote branches (will fetch first)${NC}"
     echo -e "-a, --all         ${Yellow}select from local and remote branches (will fetch first)${NC}"
     echo -e "-t, --track       ${Yellow}track selected branch${NC}"
+    echo -e "-s, --strict      ${Yellow}Do not look in remote/locals if match is not found${NC}"
     echo -e "-g, --tags        ${Yellow}tag to checkout${NC}"
-    echo -e "-b, --rainbow        ${Yellow}RAINBOW OUTPUT MODE${NC}"
+    echo -e "-b, --rainbow     ${Yellow}RAINBOW OUTPUT MODE${NC}"
     die 0
 }
 
@@ -59,7 +60,8 @@ GIT_BRANCH_ACTIONS="--list"
 GIT_CHECKOUT_ACTIONS=""
 GIT_REF="branch"
 WILL_TRACK=false
-REMOTES=true
+STRICT=false
+REMOTES=false
 RAINBOW_OUTPUT=false;
 DEBUG=false;
 
@@ -88,6 +90,10 @@ while test $# -gt 0; do
       WILL_TRACK=true;
       shift
       ;;
+    -s|--strict)
+      STRICT=true;
+      shift
+      ;;
     -b|--rainbow)
       RAINBOW_OUTPUT=true;
       shift
@@ -101,6 +107,15 @@ while test $# -gt 0; do
       fetchForRemotes "Remote branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       GIT_CHECKOUT_ACTIONS=" --track"
+      REMOTES=true;
+      WILL_TRACK=true;
+      shift
+      ;;
+    -str|-srt|-rts|-rst|-trs|-tsr)
+      fetchForRemotes "Remote branches"
+      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
+      GIT_CHECKOUT_ACTIONS=" --track"
+      STRICT=true;
       REMOTES=true;
       WILL_TRACK=true;
       shift
@@ -128,47 +143,51 @@ MATCHCOUNT="${#BRANCHES[@]}"
 $DEBUG && say "Match count: $MATCHCOUNT"
 
 if [[ $MATCHCOUNT -eq 0 ]]; then
-  if [ !$REMOTES ]; then
-      say "Failed to find local branch. Would you like to search the remotes with the same pattern?"
-      read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
-      case "$SEARCH_REMOTES" in
-          [yY]*) 
-              $(gchu $PATTERN -rt) 
-              die 0
-              ;;
-          *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
-      esac
+  if ! $STRICT; then
+    if ! $REMOTES; then
+        say "Failed to find local branch. Would you like to search the remotes with the same pattern?"
+        read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
+        case "$SEARCH_REMOTES" in
+            [yY]*) 
+                $(gchu $PATTERN -rts) 
+                die $?
+                ;;
+            *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red} for the pattern: ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
+        esac
+    else
+        say "Failed to find remote branch. Would you like to search the local branches with the same pattern?"
+        read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
+        case "$SEARCH_REMOTES" in
+            [yY]*) 
+                $(gchu $PATTERN -s) 
+                die $?
+                ;;
+            *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red} for the pattern: ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
+        esac
+    fi
   else
-      say "Failed to find remote branch. Would you like to search the local branches with the same pattern?"
-      read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
-      case "$SEARCH_REMOTES" in
-          [yY]*) $(gchu $PATTERN) 
-              die 0
-              ;;
-          *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
-      esac
+    say "Strict option selected. Not looking elsewhere for pattern."
+    die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red} for the pattern: ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
   fi
 fi
-#test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
-if (($MATCHCOUNT > 1)); then
-	title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
+title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
 
-  formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
-	say ""
-	re="^[0-9]+$"
-	read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
-	say -e "Value read in: \"$SELECTED_NUMBER\""
-	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
-		  die 1 "${Red}Not a valid option. Exiting...${NC}"
-	fi
-  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
-      die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
-  fi
-	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
-	say -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
+say ""
+re="^[0-9]+$"
+read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
+say -e "Value read in: \"$SELECTED_NUMBER\""
+if ! [[ $SELECTED_NUMBER =~ $re ]]; then
+	  die 1 "${Red}Not a valid option. Exiting...${NC}"
 fi
+if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
+    die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
+fi
+
+MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
+say -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 
 title "Checking out ${NC}${MATCHING_BRANCH}"
 
@@ -176,11 +195,13 @@ if $DEBUG; then
   GIT_TRACE=1 git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
 else
   git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
-  if [[ $? == 128 && $WILL_TRACK ]]; then
-      say "Tracking of remote failed due to branch already existing. Checking out local branch"
-      git checkout $MATCHING_BRANCH
-  fi
-  if [[ $? != 0 ]]; then
-     say "Failed to checkout with git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH with code $?"
-  fi
+fi
+
+if [[ $? == 128 && $WILL_TRACK ]]; then
+    say "Tracking of remote failed due to branch already existing. Checking out local branch"
+    git checkout $MATCHING_BRANCH
+fi
+
+if [[ $? != 0 ]]; then
+   say "Failed to checkout with git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH with code $?"
 fi
