@@ -58,6 +58,8 @@ test -z $PATTERN && print_help
 GIT_BRANCH_ACTIONS="--list"
 GIT_CHECKOUT_ACTIONS=""
 GIT_REF="branch"
+WILL_TRACK=false
+REMOTES=true
 RAINBOW_OUTPUT=false;
 DEBUG=false;
 
@@ -78,10 +80,12 @@ while test $# -gt 0; do
   	-r|--remotes)
       fetchForRemotes "Remote branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
+      REMOTES=true;
       shift
       ;;
   	-t|--track)
       GIT_CHECKOUT_ACTIONS=" --track"
+      WILL_TRACK=true;
       shift
       ;;
     -b|--rainbow)
@@ -97,33 +101,65 @@ while test $# -gt 0; do
       fetchForRemotes "Remote branches"
       GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
       GIT_CHECKOUT_ACTIONS=" --track"
+      REMOTES=true;
+      WILL_TRACK=true;
+      shift
+      ;;
+    -at|-at)
+      fetchForRemotes "Remote branches"
+      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --all"
+      GIT_CHECKOUT_ACTIONS=" --track"
+      WILL_TRACK=true;
+      REMOTES=true;
       shift
       ;;
     *)
-	  shift
+  	  shift
       continue
       ;;
   esac
 done
 
-$DEBUG && echo "Debug output"
+$DEBUG && say "Debug output"
 title "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
-$DEBUG && echo "Match count: $MATCHCOUNT"
+$DEBUG && say "Match count: $MATCHCOUNT"
 
-test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
+if [[ $MATCHCOUNT -eq 0 ]]; then
+  if [ !$REMOTES ]; then
+      say "Failed to find local branch. Would you like to search the remotes with the same pattern?"
+      read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
+      case "$SEARCH_REMOTES" in
+          [yY]*) 
+              $(gchu $PATTERN -rt) 
+              die 0
+              ;;
+          *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
+      esac
+  else
+      say "Failed to find remote branch. Would you like to search the local branches with the same pattern?"
+      read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
+      case "$SEARCH_REMOTES" in
+          [yY]*) $(gchu $PATTERN) 
+              die 0
+              ;;
+          *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
+      esac
+  fi
+fi
+#test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
 
 if (($MATCHCOUNT > 1)); then
 	title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
 
   formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
-	echo ""
+	say ""
 	re="^[0-9]+$"
 	read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
-	echo -e "Value read in: \"$SELECTED_NUMBER\""
+	say -e "Value read in: \"$SELECTED_NUMBER\""
 	if ! [[ $SELECTED_NUMBER =~ $re ]]; then
 		  die 1 "${Red}Not a valid option. Exiting...${NC}"
 	fi
@@ -131,12 +167,20 @@ if (($MATCHCOUNT > 1)); then
       die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
   fi
 	MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
-	echo -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
+	say -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 fi
 
 title "Checking out ${NC}${MATCHING_BRANCH}"
+
 if $DEBUG; then
   GIT_TRACE=1 git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
 else
   git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
+  if [[ $? == 128 && $WILL_TRACK ]]; then
+      say "Tracking of remote failed due to branch already existing. Checking out local branch"
+      git checkout $MATCHING_BRANCH
+  fi
+  if [[ $? != 0 ]]; then
+     say "Failed to checkout with git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH with code $?"
+  fi
 fi

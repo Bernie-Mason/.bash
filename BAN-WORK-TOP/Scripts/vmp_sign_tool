@@ -118,6 +118,8 @@ fi
 sign_if_exists CefSharp.BrowserSubprocess.dll
 sign_if_exists CefSharp.BrowserSubprocess.Core.dll
 
+sign_if_exists "C:\Program Files (x86)\dotnet\host\fxr\7.0.9"
+
 # Entry exe (blessed)
 echo "=> Signing the entry executable."
 python3 -m castlabs_evs.vmp sign --persistent CefSharp.BrowserSubprocess.exe
