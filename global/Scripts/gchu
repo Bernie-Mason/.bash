@@ -137,6 +137,8 @@ done
 
 $DEBUG && say "Debug output"
 title "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
+git status || die 1 "gchu FATAL: Not a git repository" 
+
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
