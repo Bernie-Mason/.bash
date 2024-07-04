@@ -151,7 +151,7 @@ if [[ $MATCHCOUNT -eq 0 ]]; then
         read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
         case "$SEARCH_REMOTES" in
             [yY]*) 
-                $(gchu $PATTERN -rts) 
+                gchu $PATTERN -rts
                 die $?
                 ;;
             *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red} for the pattern: ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
@@ -161,7 +161,7 @@ if [[ $MATCHCOUNT -eq 0 ]]; then
         read -p "Enter y/Y or anything else to exit: " SEARCH_REMOTES
         case "$SEARCH_REMOTES" in
             [yY]*) 
-                $(gchu $PATTERN -s) 
+                gchu $PATTERN -s
                 die $?
                 ;;
             *) die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red} for the pattern: ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" ;;
@@ -176,7 +176,7 @@ fi
 if (($MATCHCOUNT > 1)); then
   title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
 
-  formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
   say ""
   re="^[0-9]+$"
@@ -213,7 +213,7 @@ fi
 
 if [[ $? == 128 && $WILL_TRACK ]]; then
     say "Tracking of remote failed due to branch already existing. Checking out local branch"
-    #git checkout $MATCHING_BRANCH - don't work. Has the remote like "origin" as the prefix
+    git checkout $MATCHING_BRANCH
 fi
 
 if [[ $? != 0 ]]; then
