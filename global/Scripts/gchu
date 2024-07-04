@@ -173,25 +173,37 @@ if [[ $MATCHCOUNT -eq 0 ]]; then
   fi
 fi
 
-title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
+if (($MATCHCOUNT > 1)); then
+  title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
 
-formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+  formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
-say ""
-re="^[0-9]+$"
-read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
-say -e "Value read in: \"$SELECTED_NUMBER\""
-if ! [[ $SELECTED_NUMBER =~ $re ]]; then
-	  die 1 "${Red}Not a valid option. Exiting...${NC}"
+  say ""
+  re="^[0-9]+$"
+  read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
+  say -e "Value read in: \"$SELECTED_NUMBER\""
+  if ! [[ $SELECTED_NUMBER =~ $re ]]; then
+  	  die 1 "${Red}Not a valid option. Exiting...${NC}"
+  fi
+  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
+      die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
+  fi
+
+  MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
+  say -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 fi
-if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
-    die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
-fi
-
-MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
-say -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 
 title "Checking out ${NC}${MATCHING_BRANCH}"
+
+if $WILL_TRACK; then
+  title "Tracking selected. Checking for an existing local branch..."
+  local_match=$(git branch -vv | grep ${MATCHING_BRANCH} | grep -Eo "[[:alnum:]]+\/[^ ]*" | head -1)
+  if [[ ! -z $local_match ]]; then
+    say "Local branch \"${local_match}\" exists for remote: \"${MATCHING_BRANCH}\""
+    git checkout $local_match
+    die 0
+  fi
+fi
 
 if $DEBUG; then
   GIT_TRACE=1 git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH
@@ -201,7 +213,7 @@ fi
 
 if [[ $? == 128 && $WILL_TRACK ]]; then
     say "Tracking of remote failed due to branch already existing. Checking out local branch"
-    git checkout $MATCHING_BRANCH
+    #git checkout $MATCHING_BRANCH - don't work. Has the remote like "origin" as the prefix
 fi
 
 if [[ $? != 0 ]]; then
