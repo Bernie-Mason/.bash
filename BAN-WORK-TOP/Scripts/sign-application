@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Script to aid application signing
+# Requires an .ssh config file with a teamcity-server
+# entry to connect to teamcity
+#
+
+NC='\033[0m'              # Text Reset
+Green='\033[0;32m'
+Yellow='\033[0;33m'
+Blue='\033[0;34m'
+Red='\033[0;31m'
+
+function say() {
+  echo -e "$@" >&2
+}
+
+function die() {
+  test -z "$2" || say "$2"
+  exit "$1"
+}
+
+function echo_help() {
+  echo "Sign application."
+  echo ""
+    echo " "
+    echo -e "${Yellow}actions:"
+    echo -e "${Yellow}-h, --help        show brief help"
+    die 0
+}
+
+
+FILE_TO_SIGN="$1"
+test -f $FILE_TO_SIGN && echo_help
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo_help
+      ;;
+    *)
+    shift
+      continue
+      ;;
+  esac
+done
+
+
+
+scp -p "${FILE_TO_SIGN}/" teamcity-server:$symbolsTargetDirectory
