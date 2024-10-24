@@ -30,8 +30,8 @@ function echo_help() {
 }
 
 
-FILE_TO_SIGN="$1"
-test -f $FILE_TO_SIGN && echo_help
+FILE_TO_SIGN=${1}
+test -f "${FILE_TO_SIGN}" || echo_help
 
 while test $# -gt 0; do
   case "$1" in
@@ -45,6 +45,10 @@ while test $# -gt 0; do
   esac
 done
 
+if [ -f "${FILE_TO_SIGN}" ]; then
+  scp -p "${FILE_TO_SIGN}" teamcity:~/
+else
+  echo "File to sign ${FILE_TO_SIGN} does not exist";
+fi
 
 
-scp -p "${FILE_TO_SIGN}/" teamcity-server:$symbolsTargetDirectory
