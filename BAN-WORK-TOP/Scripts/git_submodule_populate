@@ -1,0 +1,57 @@
+#!/bin/sh
+
+#!/bin/sh
+
+# Check if the correct number of arguments is provided
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 PARENT_DIRECTORY"
+    exit 1
+fi
+
+PARENT=$1
+
+# Check if the provided path exists and is a directory
+if [ ! -d "$PARENT" ]; then
+    echo "Error: Directory $PARENT does not exist."
+    exit 1
+fi
+
+# Iterate through all immediate subdirectories of PARENT
+for dir in "$PARENT"/*; do
+    if [ -d "$dir" ]; then
+        # Check if the subdirectory is already a git repository
+        if [ -d "$dir/.git" ]; then
+            echo "Skipping $dir: Already a git repository."
+            continue
+        fi
+
+        # Initialize the subdirectory as a git repository
+        echo "Initializing $dir as a git repository."
+        git init "$dir"
+        cd "$dir" || exit
+        git add .
+        git commit -m "initial commit"
+        cd - || exit
+    fi
+done
+
+# Create the Symbols directory and initialize it as a git repository
+SYMBOLS_DIR="$PARENT/Symbols"
+mkdir -p "$SYMBOLS_DIR"
+cd "$SYMBOLS_DIR" || exit
+git init
+
+# Add each subdirectory as a submodule to the Symbols repository
+for dir in "$PARENT"/*; do
+    if [ -d "$dir" ] && [ "$dir" != "$SYMBOLS_DIR" ]; then
+        SUBMODULE_NAME=$(basename "$dir")
+        echo "Adding $dir as a submodule to Symbols."
+        git submodule add "$dir" "$SUBMODULE_NAME"
+    fi
+done
+
+# Commit the submodules to the Symbols repository
+git add .
+git commit -m "Added submodules"
+
+echo "Script completed successfully."
