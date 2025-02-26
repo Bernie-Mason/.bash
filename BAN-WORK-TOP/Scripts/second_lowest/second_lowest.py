@@ -3,6 +3,24 @@
 # Returns the second lowest value in the array.
 # param numbers: List of integers
 
+class Solution
+    def seond_lowest(self, numbers):
+        if len(numbers) < 2:
+            raise ValueError("Array must contain at least two elements")
+
+        first, second = float('inf'), float('inf')
+        for num in numbers:
+            if num < first:
+                second = first
+                first = num
+            elif first < num < second:
+                second = num
+
+        if second == float('inf'):
+            raise ValueError("Array must contain at least two unique elements")
+
+        return second
+
 def second_lowest(numbers):
     """
     Returns the second lowest value in the array.

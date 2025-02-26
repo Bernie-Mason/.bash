@@ -35,18 +35,19 @@ for dir in "$PARENT"/*; do
     fi
 done
 
-# Create the Symbols directory and initialize it as a git repository
+# Create the SymbolLibraries directory inside Symbols and initialize it as a git repository
 SYMBOLS_DIR="$PARENT/Symbols"
-mkdir -p "$SYMBOLS_DIR"
+SYMBOL_LIBRARIES_DIR="$SYMBOLS_DIR/SymbolLibraries"
+mkdir -p "$SYMBOL_LIBRARIES_DIR"
 cd "$SYMBOLS_DIR" || exit
 git init
 
-# Add each subdirectory as a submodule to the Symbols repository
+# Add each subdirectory as a submodule to the SymbolLibraries repository
 for dir in "$PARENT"/*; do
     if [ -d "$dir" ] && [ "$dir" != "$SYMBOLS_DIR" ]; then
         SUBMODULE_NAME=$(basename "$dir")
-        echo "Adding $dir as a submodule to Symbols."
-        git submodule add "$dir" "$SUBMODULE_NAME"
+        echo "Adding $dir as a submodule to SymbolLibraries/$SUBMODULE_NAME."
+        git submodule add "$dir" "SymbolLibraries/$SUBMODULE_NAME"
     fi
 done
 

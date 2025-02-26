@@ -1,0 +1,74 @@
+#!/bin/bash
+# 
+# Script to show git repository statistics
+# 
+
+# Function to show git repository statistics
+
+while true; do
+  echo -e "${Yellow}Repository statistics options:${NC}"
+  echo -e "\t${Yellow}1. Show file sizes and list of files in .git/objects grouped by type${NC}"
+  echo -e "\t${Yellow}2. Show file sizes and list of files in the repository (excluding .git)${NC}"
+  echo -e "\t${Yellow}3. Show git commit log${NC}"
+  echo -e "\t${Yellow}4. Verify pack files${NC}"
+  echo -e "\t${Yellow}5. Exit${NC}"
+  echo ""
+  read -p $'\e[32mEnter your choice: \e[0m' choice
+  echo ""
+
+  case "$choice" in
+    1)
+      echo -e "${Yellow}File sizes and list of files in .git/objects grouped by type:${NC}"
+      declare -A object_types
+      declare -A object_sizes
+      while IFS= read -r file; do
+        hash=$(basename "$(dirname "$file")")$(basename "$file")
+        type=$(git cat-file -t "$hash")
+        size=$(du -k "$file" | cut -f1)
+        object_types["$type"]+="${size}K  $hash\n"
+        object_sizes["$type"]=$(( ${object_sizes["$type"]} + $size ))
+      done < <(find .git/objects -type f ! -path ".git/objects/info/*" ! -path ".git/objects/pack/*")
+      
+      for type in "${!object_types[@]}"; do
+        count=$(echo -e "${object_types[$type]}" | wc -l)
+        count=$(( count - 1 ))
+        total_size=${object_sizes[$type]}
+        echo -e "${Yellow}${type^} files (${count}) - total size: ${total_size}K:${NC}"
+        echo -e "${object_types[$type]}"
+      done
+
+      total_pack_size=$(du -sh .git/objects/pack | cut -f1)
+      echo -e "${Yellow}Pack files (${total_pack_size}K):${NC}"
+      find .git/objects/pack -type f -exec du -h {} +
+      ;;
+    2)
+      echo -e "${Yellow}File sizes and list of files in the repository (excluding .git):${NC}"
+      find . -path ./.git -prune -o -type f -exec du -h {} + | sort -h
+      ;;
+    3)
+      git log | less
+      ;;
+    4)
+      if [ -f .git/objects/pack/*.idx ]; then
+        echo -e "${Yellow}Verifying pack files:${NC}"
+        git verify-pack -v .git/objects/pack/*.idx
+      else
+        read -p $'\e[32mNo pack index file found. Do you want to run git gc first? (y/n): \e[0m' run_gc
+        if [[ "$run_gc" =~ ^[Yy]$ ]]; then
+          run_git_gc
+          echo -e "${Yellow}Verifying pack files:${NC}"
+          git verify-pack -v .git/objects/pack/*.idx
+        else
+          echo "Skipping verification."
+        fi
+      fi
+      ;;
+    5)
+      exit 0
+      ;;
+    *)
+      echo "Invalid choice. Please try again."
+      ;;
+  esac
+  echo ""
+done
