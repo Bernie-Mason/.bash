@@ -8,7 +8,8 @@ export HISTCONTROL=ignoredups
 export HISTSIZE=1000
 
 alias SCRIPT_PATH='$(dirname $(realpath -s $0))'
-
+export utilities_path=~/.bash/global/Sourceable/Utilities/utils
+export logging_utils_path=~/.bash/global/Sourceable/Utilities/logging_utils
 
 # Reset
 export Color_Off='\033[0m'       # Text Reset

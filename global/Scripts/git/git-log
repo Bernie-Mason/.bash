@@ -1,0 +1,88 @@
+#!/bin/bash
+
+# Function to show the log difference between the current commit and the default branch
+function show_log_diff_default_branch() {
+    DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+    git log HEAD.."$DEFAULT_BRANCH" | less
+}
+
+# Function to show the last n commits from the current commit
+function show_last_n_commits() {
+    read -p "Enter the number of commits to show: " n
+    git log -n "$n" | less
+}
+
+# Function to show the last n commits of the default branch and how behind it is from its remote counterpart
+function show_last_n_commits_default_branch() {
+    DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+    read -p "Enter the number of commits to show: " n
+    git log -n "$n" "$DEFAULT_BRANCH" | less
+    BEHIND_COUNT=$(git rev-list --count "$DEFAULT_BRANCH".."origin/$DEFAULT_BRANCH")
+    echo "The default branch is $BEHIND_COUNT commits behind its remote counterpart."
+}
+
+# Function to show the log history for a particular file
+function show_log_history_for_file() {
+    read -p "Enter the file name pattern to search for: " pattern
+    matching_files=$(git ls-files | grep -i "$pattern")
+
+    if [ -z "$matching_files" ]; then
+        echo "No files found matching the pattern: $pattern"
+        return
+    fi
+
+    file_count=$(echo "$matching_files" | wc -l)
+
+    if [ "$file_count" -eq 1 ]; then
+        selected_file=$(echo "$matching_files" | head -n 1)
+    else
+        echo "Multiple files found:"
+        select selected_file in $matching_files; do
+            if [ -n "$selected_file" ]; then
+                break
+            else
+                echo "Invalid selection. Please try again."
+            fi
+        done
+    fi
+
+    read -p "Enter the number of commits to show: " n
+    git log -n "$n" -- "$selected_file" | less
+}
+
+# Function to display the menu and handle user input
+function show_menu() {
+    echo "Select an option:"
+    echo "ld - Show log difference between the current commit and the default branch"
+    echo "lc - Show the last n commits from the current commit"
+    echo "lb - Show the last n commits of the default branch and how behind it is from its remote counterpart"
+    echo "lf - Show the log history for a particular file"
+    echo "q  - Exit"
+    read -p "Enter your choice: " choice
+
+    case $choice in
+        ld)
+            show_log_diff_default_branch
+            ;;
+        lc)
+            show_last_n_commits
+            ;;
+        lb)
+            show_last_n_commits_default_branch
+            ;;
+        lf)
+            show_log_history_for_file
+            ;;
+        q)
+            exit 0
+            ;;
+        *)
+            echo "Invalid choice. Please try again."
+            ;;
+    esac
+}
+
+# Main loop to display the menu until the user chooses to exit
+while true; do
+    show_menu
+done

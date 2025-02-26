@@ -8,14 +8,8 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all action.
 
-function say() {
-	echo "$@" >&2
-}
 
-function die() {
-	test -z "$2" || say "$2"
-	exit "$1"
-}
+source $logging_utils_path
 
 function echo_help() {
 	echo "Log printing tool between a specified branch and your remote master branch"

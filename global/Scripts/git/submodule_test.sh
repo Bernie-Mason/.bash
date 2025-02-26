@@ -1,5 +1,9 @@
 #!/bin/sh
 
+source $utilities_path
+say "hello"
+exit
+
 # Create a temporary directory for testing
 TEST_DIR=$(powershell -Command "[System.IO.Path]::GetTempPath() + [System.Guid]::NewGuid().ToString()")
 mkdir -p "$TEST_DIR"
@@ -38,7 +42,7 @@ for subdir in subdir1 subdir2 subdir3; do
 done
 
 # Check if nested subdirectories are not initialized as Git repositories
-for subdir in subdir1/nested1 subdir2/nested2 subdir3/nested3; do
+for subdir in subdir1/nested1 subdir2/nested2 subdir3/nesgchted3; do
     if [ -d "$TEST_DIR/parentRepo/$subdir/.git" ]; then
         echo "Error: $subdir should not be a Git repository."
         exit 1

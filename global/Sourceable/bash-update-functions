@@ -1,6 +1,0 @@
-#!/bin/bash
-
-function update-bash-all(){
-	backup-bash-config
-	generic-update ~/.bash
-}

@@ -4,6 +4,7 @@
 1. %USERPROFILE%\.bash\_ENTER_HOSTNAME_HERE_\Scripts
 2. %USERPROFILE%\.bash\Global\Scripts
 3. %USERPROFILE%\.bash\Global\Scripts\Powershell
+3. %USERPROFILE%\.bash\Global\Scripts\git
 4. %USERPROFILE%\.bash\Global\Vendor
 
 ## Create bash configuration files. 

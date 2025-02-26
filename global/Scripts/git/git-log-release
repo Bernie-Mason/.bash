@@ -17,14 +17,7 @@
 # $ git-log-release Grid_3.0.60.0 origin/release/3.0.61 
 
 
-function say() {
-	echo "$@" >&2
-}
-
-function die() {
-	test -z "$2" || say "$2"
-	exit "$1"
-}
+source $logging_utils_path
 
 function echo_help() {
 	echo "Log of issues in a release"

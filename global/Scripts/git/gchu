@@ -17,19 +17,7 @@ Yellow='\033[0;33m'
 UWhite='\033[4;37m'
 Black='\033[0;30m'
 
-function say() {
-	echo -e "$@" >&2
-}
-
-function title() {
-  echo -e "${Green}>> $@"${NC} >&2
-  echo ""
-}
-
-function die() {
-	test -z "$2" || say "$2"
-	exit "$1"
-}
+source $logging_utils_path
 
 function fetchForRemotes() {
       say -e "$1 selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."

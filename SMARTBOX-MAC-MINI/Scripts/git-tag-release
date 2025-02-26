@@ -10,14 +10,7 @@ Yellow='\033[0;33m'
 Blue='\033[0;34m'
 Red='\033[0;31m'
 
-function say() {
-  echo -e "$@" >&2
-}
-
-function die() {
-  test -z "$2" || say "$2"
-  exit "$1"
-}
+source $logging_utils_path
 
 function echo_help() {
   echo "Tag release of grid or gridresources repositories. Note: this script does not push the new tag."
