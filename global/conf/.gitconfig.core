@@ -1,0 +1,73 @@
+[user]
+	name = Bernard Mason
+	email = bernard.mason@thinksmartbox.com
+[core]
+	editor = vim
+	autocrlf = false
+	whitespace = cr-at-eol
+[alias]
+	rb = for-each-ref refs/heads/   --count=10   --sort=-committerdate   --format='%(objectname:short) %(committerdate:short) %(refname:short)'
+	st = status
+	ci = commit --verbose
+	co = checkout
+	di = diff --find-copies-harder
+	di = diff --find-copies-harder --cached
+	ca = commit --amend
+	aa = add --all
+	fa = fetch --all
+	poh = push -u origin head
+[branch]
+	autosetuprebase = always
+[merge]
+	tool = vscode
+	guitool = vscode
+[mergetool "vscode"]
+	cmd = \"C:/Users/Bernie/AppData/Local/Programs/Microsoft VS Code/Code.exe\" --wait \"$MERGED\"
+	path = C:/Users/Bernie/AppData/Local/Programs/Microsoft VS Code/Code.exe
+[diff]
+	tool = vscode
+	guitool = vscode
+[diff "zip"]
+	textconv = unzip -v
+[difftool "vscode"]
+	cmd = \"C:/Users/Bernie/AppData/Local/Programs/Microsoft VS Code/Code.exe\" --wait --diff \"$LOCAL\" \"$REMOTE\"
+	path = C:/Users/Bernie/AppData/Local/Programs/Microsoft VS Code/Code.exe
+[pull]
+	rebase = false
+[fetch]
+	prune = false
+[rebase]
+	autoStash = false
+[http]
+	postBuffer = 157286400
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[credential "https://bitbucket.thinksmartbox.com"]
+	provider = bitbucket
+[color "diff-highlight"]
+	oldNormal = red
+	oldHighlight = "red#500000"
+	newNormal = green
+	newHighlight = "green#003000"
+[color "diff"]
+	meta = 11
+	frag = magenta bold
+	commit = yellow bold
+	old = red
+	new = green
+	whitespace = "#ffff00"
+[safe]
+	directory = C:/Program Files (x86)/grid
+[credential]
+	helper = store
+[maintenance]
+	repo = C:/Dev/grid
+	repo = C:/Dev/published-inventory
+	repo = C:/Dev/gridresources
+	repo = C:/Dev/web
+	repo = C:/Dev/smartbox-grid-js
+[protocol "file"]
+	allow = always

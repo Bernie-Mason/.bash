@@ -26,7 +26,7 @@ function source_all_bash_files(){
         . $i
     done;
 
-    FOLDER_TO_BE_SOURCED=~/.bash/global/sourceable
+    FOLDER_TO_BE_SOURCED=~/.bash/core/sourceable
     for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
         . $i
     done;
