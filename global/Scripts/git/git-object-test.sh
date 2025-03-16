@@ -39,10 +39,8 @@ size and entropy.
 
 The file operations in this script are designed to demonstrate this behavior. 
 "
-exit 1
 }
 
-# Function to record git statistics
 record_sizes() {
   if [ ! -f "$1" ]; then
     echo -e "${Red}Run, Git Objects Size, Binary file size, Git Objects File Count${NC}" > "$1"
@@ -57,21 +55,19 @@ record_sizes() {
   echo -e "${Orange}$2, $GIT_OBJECTS_SIZE, $ARCHIVE_SIZE, $GIT_OBJECTS_FILE_COUNT${NC}" >> "$1"
 }
 
-# Function to add plain text files
 add_plain_text_files() {
   read -p $'\e[32mEnter the number of files to add (n): \e[0m' n
   read -p $'\e[32mEnter the size of each file in KB (m): \e[0m' m
   for i in $(seq 1 $n); do
     # dd if=/dev/zero of=file_$i.txt bs=1K count=$m > /dev/null 2>&1
-    base64 /dev/urandom | head -c ${m}K > file_$i.txt
+    curl "https://github.com/MicrosoftEdge/WebView2Samples/blob/main/SampleApps/WebView2WpfBrowser/MainWindow.xaml" | head -c ${m}K > file_$i.html
   done
-  git add ./*.txt
+  git add ./*.html
   git commit -m "Added $n plain text files of size ${m}KB each" &> /dev/null
   record_sizes "$OUTPUT_FILE" "Added $n plain text files"
 }
 
-# Function to add a zip/binary file
-add_zip_file() {
+add_binary_file() {
   read -p "Enter the size of the binary file in KB (m): " m
   dd if=/dev/urandom of=binary_file bs=${m}K count=1 > /dev/null 2>&1
   gzip binary_file
@@ -80,9 +76,8 @@ add_zip_file() {
   record_sizes "$OUTPUT_FILE" "Added a binary file"
 }
 
-# Function to modify a plain text file
 modify_plain_text_file() {
-  files=($(find . -type f -name "*.txt"))
+  files=($(find . -type f -name "*.html"))
   echo -e "${Yellow}Select a file to modify:${NC}"
   select file in "${files[@]}"; do
     if [[ -n "$file" ]]; then
@@ -100,7 +95,6 @@ modify_plain_text_file() {
   done
 }
 
-# Function to modify a binary file
 modify_binary_file() {
   files=($(find . -type f -name "*.gz"))
   echo -e "${Yellow}Select a binary file to modify:${NC}"
@@ -108,7 +102,10 @@ modify_binary_file() {
     if [[ -n "$file" ]]; then
       read -p $'\e[32mEnter the number of times to modify the file (n): \e[0m' n
       for i in $(seq 1 $n); do
-        dd if=/dev/zero bs=1K count=1 >> "$file"
+        gzip -d "$file"
+        file_name_without_gz="${file%.gz}"
+        dd if=/dev/urandom bs=1K count=1 >> "$file_name_without_gz"
+        gzip "$file_name_without_gz"
         git add "$file"
         git commit -m "Modified $file $i times" &> /dev/null
         record_sizes "$OUTPUT_FILE" "Modified $file $i times"
@@ -125,7 +122,6 @@ show_session_stats(){
       read -p "Press any key to continue" _  # Wait for user input
 }
 
-# Function to run git gc and record statistics
 run_git_gc() {
   git gc
   record_sizes "$OUTPUT_FILE" "After git gc"
@@ -137,10 +133,8 @@ rebuild_repo(){
   mkdir -p "$DIRECTORY"
   cd "$DIRECTORY" || exit
 
-  # Initialize it as a git repository
   git init
 
-  # Initialize the output file
   git commit -m "Initial commit" --allow-empty &> /dev/null
   record_sizes "$OUTPUT_FILE" "Empty repo"
 }
@@ -166,6 +160,7 @@ if [ -d "$DIRECTORY" ]; then
   esac
 fi
 
+clear
 while true; do
   echo -e "${Blue}git object test script${NC}:"
   echo -e ""
@@ -175,8 +170,8 @@ while true; do
   echo -e "\tgc => Run GC"
   echo ""
   echo -e "File operations:"
-  echo -e "\tap => Add plain text files"
-  echo -e "\tab => Add a zipped binary file"
+  echo -e "\tap => Add plain text files (low entropy diffable file)"
+  echo -e "\tab => Add a binary file (high entropy undiffable file and zip it)"
   echo -e "\tmp => Modify a plain text file"
   echo -e "\tmb => Modify a binary file"
   echo ""
@@ -190,10 +185,12 @@ while true; do
 
   case "$choice" in
     rs)
+      clear
       git-repository-stats
       ;;
     ss)
       show_session_stats
+      read -p "Press any key to continue" _  # Wait for user input
       ;;
     gc)
       run_git_gc
@@ -202,7 +199,7 @@ while true; do
       add_plain_text_files
       ;;
     ab)
-      add_zip_file
+      add_binary_file
       ;;
     mp)
       modify_plain_text_file
@@ -215,6 +212,7 @@ while true; do
       ;;
     hp)
       help
+      read -p "Press any key to continue" _  # Wait for user input
       ;;
     q)
       echo "Goodbye and good luck friend."
@@ -222,7 +220,8 @@ while true; do
       ;;
     *)
       echo "Invalid choice. Please try again."
+      read -p "Press any key to continue" _  # Wait for user input
       ;;
   esac
-  echo ""
+  clear
 done
