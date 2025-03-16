@@ -1,12 +1,5 @@
 #!/bin/bash
 
-#nuget
-alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
-alias nuget-restore="nuget restore -nocache"
-
-# logfile analyser
-alias lfa="${logfile_analyser_exe}"
-
 # Nuget clear caches
 alias clear-shared-cache="clear-package-cache 'sensorysoftware.shared' 'sensorysoftware.shared.desktop' 'sensorysoftware.shared.iOS'  'sensorysoftware.symbols.metafilereader.desktop' 'sensorysoftware.shared.fluentui'"
 alias clear-speech-cache="clear-package-cache 'sensorysoftware.speechlib'"
