@@ -1,0 +1,30 @@
+Shell quoting can be used to prevent expansions from occuring
+
+Important stuff
+""		Expansion suppression except $ \ and ` (tick back)
+''		Suppresses all expansion
+\ 		Escape character, selective suppress expansion
+\n, \r 	Control codes, only within double quotes with echo -e
+
+EXAMPLES:
+[bernie@antergos_vb ~]$ echo text ~/*.txt {a,b} $(echo foo) $((2+2)) $USER
+text /home/bernie/*.txt a b foo 4 bernie
+[bernie@antergos_vb ~]$ echo "text ~/*.txt {a,b} $(echo foo) $((2+2)) $USER"
+text ~/*.txt {a,b} foo 4 bernie
+[bernie@antergos_vb ~]$ echo 'text ~/*.txt {a,b} $(echo foo) $((2+2)) $USER'
+text ~/*.txt {a,b} $(echo foo) $((2+2)) $USER
+
+
+Double quotes
+Placing your expression in double quotes means that all special characters are treated normally except the $, \ and `. This means that word splitting, tilde expansion, brace expansion and pathname expansion are all suppressed by double quotes but parameter and arithmetic expansion as well as command substitution are all carried out.
+
+Single quotes suppress all expansion.
+
+We can also escape characters without quotes or in double quotes (slightly pointless with single quotes) to make them be treated as literals and to selectively prevent an expansion. A backslash can also escape another backslash (\\).
+
+In addition to escaping characters, the backslash is also used as part of a notation to represent certain special characters called control codes:
+\a 		Bell (alert - causes the computer to beep)
+\b 		Backspace
+\n 		Newline
+\r 		Carriage return
+\t 		tab

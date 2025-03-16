@@ -1,8 +1,0 @@
-#grep
-
-How to search for string patterns within files
-
-grep uses regular expressions and most of it's power comes from their flexibility. Real mastery of grep comes with mastery of regex. The name grep comes from a command used in one of the early Unix editors. The command searched for a regular expression, and printed it out. g/string/p where g indicates a global search and p indicates that you wish the result to printed. As regular expression can be shortened to re this becomes g/re/p.
-
-
-
