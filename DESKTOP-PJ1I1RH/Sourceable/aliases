@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# Directory alias (computer specific)
-alias cdd='cd ~/Documents/'
-alias cdp='cd ~/Documents/Visual\ Studio\ 2017/Projects/'
-alias cdmagic='cd ~/AppData/Local/Cockatrice/Cockatrice/decks' 
-alias cd..='cd ..'
-alias cd-localbash="cd ~/.bash/BAN-TOP"
-alias xh="explorer ."
