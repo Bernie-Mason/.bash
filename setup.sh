@@ -48,17 +48,19 @@ generate_bashrc() {
     "$BASE_DIR/$platform/$environment/sourceable"
     "$BASE_DIR/$platform/sourceable"
   )
-
+  
+  echo "" >> "$bashrc_path"
   echo "function source_all_bash_files() {" >> "$bashrc_path"
   for path in "${paths_to_add[@]}"; do
     if [ -d "$path" ]; then
-      echo "  local FOLDER_TO_BE_SOURCED=$path" >> "$bashrc_path"
-      echo "  for i in \$(find \$FOLDER_TO_BE_SOURCED -type f); do" >> "$bashrc_path"
+      echo "  local SOURCEABLE_DIRECTORY=$path" >> "$bashrc_path"
+      echo "  for i in \$(find \$SOURCEABLE_DIRECTORY -type f); do" >> "$bashrc_path"
       echo "    source \$i" >> "$bashrc_path"
       echo "  done;" >> "$bashrc_path"
     fi
   done
   echo "}" >> "$bashrc_path"
+  echo "" >> "$bashrc_path"
   echo "source_all_bash_files" >> "$bashrc_path"
 
   echo ".bashrc generated at $bashrc_path"
