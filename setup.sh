@@ -37,8 +37,6 @@ generate_bashrc() {
   fi
 
   echo "# .bashrc" > "$bashrc_path"
-  echo "source $HOME_DIR/.bash_profile" >> "$bashrc_path"
-
   local environment=$(prompt "Enter environment (home/smartbox)" "home")
   local platform=$(prompt "Enter platform (windows/linux/ios)" "windows")
 
@@ -94,7 +92,7 @@ generate_gitconfig() {
 # Function to convert Unix path to Windows path
 convert_to_windows_path() {
   local unix_path="$1"
-  local windows_path=$(echo "$unix_path" | sed 's|^/|C:/|' | sed 's|/|\\|g')
+  local windows_path=$(echo "$unix_path" | sed 's|^/c|C:|' | sed 's|/|\\|g')
   echo "$windows_path"
 }
 
@@ -103,17 +101,24 @@ update_path() {
   local environment=$(prompt "Enter environment (home/smartbox)" "home")
   local platform=$(prompt "Enter platform (windows/linux/ios)" "windows")
 
-  local paths_to_add=(
+  local base_paths=(
     "$BASE_DIR/global/scripts"
     "$BASE_DIR/global/$environment/scripts"
     "$BASE_DIR/$platform/$environment/scripts"
     "$BASE_DIR/$platform/scripts"
+    "$BASE_DIR/$platform/vendor"
   )
 
+  local paths_to_add=()
+
   # Find all subdirectories and add them to paths_to_add
-  for path in "${paths_to_add[@]}"; do
+  for path in "${base_paths[@]}"; do
     if [ -d "$path" ]; then
       while IFS= read -r -d '' subdir; do
+        if [[ $(basename $subdir) == "archive" ]]; then
+          echo "--> Skipping archive directory: $subdir"
+          continue
+        fi
         paths_to_add+=("$subdir")
       done < <(find "$path" -type d -print0)
     fi
