@@ -101,7 +101,7 @@ convert_to_windows_path() {
 # Function to update PATH
 update_path() {
   local environment=$(prompt "Enter environment (home/smartbox)" "home")
-  local platform=$(prompt "Enter platform (windows/linux/ios)" "linux")
+  local platform=$(prompt "Enter platform (windows/linux/ios)" "windows")
 
   local paths_to_add=(
     "$BASE_DIR/global/scripts"
@@ -119,14 +119,6 @@ update_path() {
     fi
   done
 
-  local path_file="$HOME_DIR/.bash_profile"
-
-  for path in "${paths_to_add[@]}"; do
-    if ! grep -q "$path" "$path_file"; then
-      echo "export PATH=\"$path:\$PATH\"" >> "$path_file"
-    fi
-  done
-
   if [[ "$platform" == "windows" ]]; then
     echo "The following paths have been added to .bash_profile:"
     for path in "${paths_to_add[@]}"; do
@@ -135,7 +127,7 @@ update_path() {
     done
     echo "Please add these paths to the system environmental variables via the GUI."
   else
-    local path_file="$HOME_DIR/.bashrc"
+    local path_file="$HOME_DIR/.bash_profile"
     for path in "${paths_to_add[@]}"; do
       if ! grep -q "$path" "$path_file"; then
         echo "export PATH=\"$path:\$PATH\"" >> "$path_file"
