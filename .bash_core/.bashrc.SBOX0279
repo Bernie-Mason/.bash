@@ -1,0 +1,46 @@
+#
+# ~/.bashrc
+#
+
+# Load Files #
+
+#
+# All bash environmental variables, custom aliases etc sourced in the following function
+# We don't add any folders to the PATH here. Historically, I used to recursively add all
+# folders within a folder to the PATH but Alex showed me the error of my ways. This had 
+# horrendous consequences when shelling out to DOS. In windows machines, we add to PATH
+# via the environmental variables interface. These are registered in BASH without needing
+# to explicitly register them when the shell starts.
+#
+
+function source_all_bash_files(){
+	# We reuse the scripts for all Smartbox stuff in the BAN-WORK-TOP machine. The first that we set up.
+	local FOLDER_TO_BE_SOURCED=~/.bash/BAN-WORK-TOP/sourceable
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
+		. $i
+	done;
+
+	FOLDER_TO_BE_SOURCED=~/.bash/global/sourceable
+	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
+		. $i
+	done;
+}
+
+if [[ ${USER} == "root" ]]; then
+    SU=${Red}           # User is root.
+elif [[ ${USER} != $(logname) ]]; then
+    SU=${BRed}          # User is not login user.
+	else
+    SU=${BCyan}         # User is normal (well ... most of us are).
+fi
+
+#Update PATH variable for my scripts:
+source_all_bash_files
+
+# Gotham Shell
+#GOTHAM_SHELL="$HOME/.config/gotham/gotham.sh"
+#[[ -s $GOTHAM_SHELL ]] && source $GOTHAM_SHELL
+
+# PS1 - essentially the same as the default MINGW64 one (which is pretty excellent) but without the unnecessary emulator declarator.
+PS1='\[\033]0;$TITLEPREFIX:$PWD\007\]\n\[\033[32m\]\u@\h \[\033[33m\]\w\[\033[36m\]`__git_ps1`\[\033[0m\]\n$ '
+
