@@ -5,3 +5,5 @@ alias clear-shared-cache="clear-package-cache 'sensorysoftware.shared' 'sensorys
 alias clear-speech-cache="clear-package-cache 'sensorysoftware.speechlib'"
 alias clear-text-cache="clear-package-cache 'sensorysoftware.text' 'sensorysoftware.text.desktop'"
 alias clear-eyegaze-cache="clear-package-cache 'sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop'"
+
+alias clone-helper="python3 ~/.bash/global/smartbox/scripts/python/bitbucket_clone_helper.py"
