@@ -6,6 +6,7 @@ Red='\033[0;31m'
 Green='\033[0;32m'
 Yellow='\033[0;33m'
 Blue='\033[0;34m'
+CompressedSymbolsDirectory="SymbolLibrariesDecompressed"
 
 # Function to log messages
 log() {
@@ -44,12 +45,13 @@ update_svn_directory() {
 
 # Function to create SymbolLibraries directory and copy files
 decompress_symbol_libraries() {
-  if [ -d "SymbolLibraries" ]; then
+  if [ -d "$CompressedSymbolsDirectory" ]; then
     while true; do
-      read -p "The directory SymbolLibraries exists. Type \"remove\" to remove it or \"continue\" to continue with the existing SymbolLibraries?" choice 
+      read -p "The directory $CompressedSymbolsDirectory exists. Type \"remove\" to remove it or \"continue\" to continue with the existing $CompressedSymbolsDirectory? " choice 
         
       if [ "$choice" == "remove" ]; then
-        rm -rf "SymbolLibraries"
+        rm -rf "$CompressedSymbolsDirectory"
+        break
       elif [ "$choice" == "continue" ]; then
         return
       else 
@@ -57,18 +59,23 @@ decompress_symbol_libraries() {
       fi
     done
   fi
-  log "Creating SymbolLibraries directory..."
-  mkdir -p SymbolLibraries
-  log "Copying directories from SVN directory to SymbolLibraries..."
+  log "Creating $CompressedSymbolsDirectory directory..."
+  mkdir -p $CompressedSymbolsDirectory
+  log "Copying directories from SVN directory to $CompressedSymbolsDirectory..."
   for dir in "$1"/*; do
     if [ -d "$dir" ] && [[ $(basename "$dir") != _* ]]; then
-      cp -r "$dir" SymbolLibraries/
+      cp -r "$dir" $CompressedSymbolsDirectory/
     fi
   done
-  log "Unzipping files in SymbolLibraries..."
-  find SymbolLibraries -name "*.zip" | xargs -P 5 -I fileName sh -c 'unzip -o -d "$(dirname "fileName")/$(basename -s .zip "fileName")" "fileName" > /dev/null'
+  log "Unzipping files in $CompressedSymbolsDirectory..."
+  echo "Log file for unzipping files" > /c/dev/ziplog.txt
+  for zip_file in $(find $CompressedSymbolsDirectory -name "*.zip"); do
+    log "Unzipping $zip_file..."
+    unzip -o -d "$(dirname "$zip_file")/$(basename -s .zip "$zip_file")" "$zip_file" 2>&1 | tee -a /c/dev/ziplog.txt
+  done
+  #find $CompressedSymbolsDirectory -name "*.zip" | xargs -P 5 -I fileName sh -c 'unzip -o -d "$(dirname "fileName")/$(basename -s .zip "fileName")" "fileName" >> /c/dev/ziplog.txt'
   log "Removing remaining zip files..."
-  find . -name "*.zip" -type f -delete
+  find $CompressedSymbolsDirectory -name "*.zip" -type f -delete
 }
 
 # Function to clone the symbols repository
@@ -162,10 +169,10 @@ add_gridresources_submodule() {
 
 # Function to move SymbolLibraries to the repository
 move_symbol_libraries() {
-  log "Moving SymbolLibraries to the repository..."
-  mv ../SymbolLibraries .
-  git add SymbolLibraries
-  git commit -m "Add SymbolLibraries"
+  log "Moving $CompressedSymbolsDirectory to the repository..."
+  mv ../$CompressedSymbolsDirectory .
+  git add $CompressedSymbolsDirectory
+  git commit -m "Add $CompressedSymbolsDirectory"
 }
 
 # Function to copy tools to the repository
@@ -199,8 +206,8 @@ show_repository_stats() {
   echo -e "${Yellow}Object total size after git gc:${NC} ${git_objects_size}"
   echo -e ""
 
-  symbol_library_size=$(du -sh "SymbolLibraries")
-  echo -e "${Yellow}SymbolLibraries size:${NC} ${symbol_library_size}"
+  symbol_library_size=$(du -sh "$CompressedSymbolsDirectory")
+  echo -e "${Yellow}$CompressedSymbolsDirectory size:${NC} ${symbol_library_size}"
   tools_size=$(du -sh "Tools")
   echo -e "${Yellow}Tools size:${NC} ${tools_size}"
   grid_resources_size=$(du -sh "gridresources" )
@@ -215,27 +222,33 @@ show_repository_stats() {
 
 cleanup() {
   log "Cleaning up..."
-  if [ -d "SymbolLibraries" ]; then
-    read -p $'\e[32mDo you want to remove the SymbolLibraries directory? (y/n): \e[0m' choice
+  if [ -d "$CompressedSymbolsDirectory" ]; then
+    read -p $'\e[32mDo you want to remove the $CompressedSymbolsDirectory) directory? (y/n): \e[0m' choice
     if [ "$choice" == "y" ]; then
-      rm -rf SymbolLibraries
+      rm -rf $CompressedSymbolsDirectory
     fi
   fi
 }
 
 # Main script
 start_time=$(date +%s)
-
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <SVNSymbolLibraryDirectory>"
-  exit 1
-fi
-
-SVNSymbolLibraryDirectory="$1"
+symbols_directory="/c/dev/symbols"
+SVNSymbolLibraryDirectory="/c/dev/SymbolLibraries"
 
 if ! is_svn_directory "$SVNSymbolLibraryDirectory"; then
-  echo "Error: $SVNSymbolLibraryDirectory is not a valid SVN directory."
-  exit 1
+  echo "No directory provided or not an SVN directory."
+  
+  read -p "Would you like to checkout a new SVN symbols directory to $SVNSymbolLibraryDirectory? (y/n): " choice
+  case "$choice" in
+    y|Y|yes|Yes)
+      mkdir $SVNSymbolLibraryDirectory
+      svn checkout "https://svn.sensorysoftware.com/svn/repos2/_Trunk/Resources/Symbol libraries" $SVNSymbolLibraryDirectory
+      ;;
+    *)
+      echo "Exiting script."
+      exit 0
+      ;;
+  esac
 fi
 
 log "Starting symbol migration script..."
@@ -250,13 +263,11 @@ case "$choice" in
     log "Running full migration..."
     update_svn_directory "$SVNSymbolLibraryDirectory"
     decompress_symbol_libraries "$SVNSymbolLibraryDirectory"
-    CURRENT_DIRECTORY=$(pwd)
-    cd "${CURRENT_DIRECTORY}/symbols" || exit
-    clone_symbols_repo
+    clone_symbols_repo $symbols_directory
     checkout_working_branch
     check_and_clear_repo
     create_gitattributes
-    add_gridresources_submodule
+    #add_gridresources_submodule
     move_symbol_libraries
     copy_tools
     show_repository_stats
@@ -272,8 +283,6 @@ case "$choice" in
     log "Updating symbol libraries from SVN..."
     update_svn_directory "$SVNSymbolLibraryDirectory"
     decompress_symbol_libraries "$SVNSymbolLibraryDirectory"
-    CURRENT_DIRECTORY=$(pwd)
-    cd "${CURRENT_DIRECTORY}/symbols" || exit
     move_symbol_libraries
     show_repository_stats    
 
