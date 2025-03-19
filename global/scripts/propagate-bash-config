@@ -1,10 +1,10 @@
 #!/bin/bash
 
-BASH_CORE_FILES=~/.bash/.bash_core
-if [ ! -d $BASH_CORE_FILES ];then
-	mkdir $BASH_CORE_FILES
+BACKUP_DIR=~/.bash/backup
+if [ ! -d $BACKUP_DIR ];then
+	mkdir $BACKUP_DIR
 fi
 
-test -f ~/.bash/.bash_core/.bashrc.${HOSTNAME} && cp ~/.bash/.bash_core/.bashrc.${HOSTNAME} ~/.bashrc
-test -f ~/.bash/.bash_core/.bash_profile.${HOSTNAME} && cp ~/.bash/.bash_core/.bash_profile.${HOSTNAME} ~/.bash_profile
-test -f ~/.bash/.bash_core/.gitconfig.${HOSTNAME} && cp ~/.bash/.bash_core/.gitconfig.${HOSTNAME} ~/.gitconfig
+test -f ${BACKUP_DIR}/.bashrc.${HOSTNAME} && cp ${BACKUP_DIR}/.bashrc.${HOSTNAME} ~/.bashrc
+test -f ${BACKUP_DIR}/.bash_profile.${HOSTNAME} && cp ${BACKUP_DIR}/.bash_profile.${HOSTNAME} ~/.bash_profile
+test -f ${BACKUP_DIR}/.gitconfig.${HOSTNAME} && cp ${BACKUP_DIR}/.gitconfig.${HOSTNAME} ~/.gitconfig
