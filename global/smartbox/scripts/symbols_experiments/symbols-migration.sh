@@ -1,21 +1,48 @@
 #!/bin/bash
 
-# Color variables
 NC='\033[0m'              # Text Reset
 Red='\033[0;31m'
 Green='\033[0;32m'
 Yellow='\033[0;33m'
 Blue='\033[0;34m'
-CompressedSymbolsDirectory="SymbolLibrariesDecompressed"
+COMPRESSED_DIR="SymbolLibrariesDecompressed"
+SVN_DIR="SymbolLibraries"
+start_time=$(date +%s)
+ROOT_PATH="/c/dev"
+SVN_PATH="$ROOT_PATH/$SVN_DIR"
+REPO_PATH="$ROOT_PATH/symbols"
+COMPRESSED_PATH="$ROOT_PATH/$COMPRESSED_DIR"
+TOOLS_PATH="$ROOT_PATH/tools"
+
+#  find "$SVN_PATH" -name "*.zip" -print0 | while IFS= read -r -d '' zip_file; do
+#    substituted=$(sed "s_${SVN_DIR}_${COMPRESSED_DIR}_g" <<< "${zip_file}")
+#    target_dir=$(sed "s_\.zip\$__g" <<< "${substituted}")
+#    dir_name=$(dirname "${substituted}")
+#    base_name=$(basename -s ".zip" "${substituted}")
+#    #echo "${dir_name}/${base_name}"
+#    target_dir="$(dirname "${substituted}")/$(basename -s ".zip" "${substituted}")"
+#    echo "${target_dir}" 
+
+#    #unzip -o -d "$target_dir" "$zip_file" 2>> /c/dev/ziplog.txt
+#    if [ $? -ne 0 ]; then
+#      echo "Error unzipping ${zip_file} to ${target_dir}" >> /c/dev/ziplog.txt
+#    fi
+#  done
+
+# exit
 
 # Function to log messages
 log() {
   echo -e "${Blue}[$(date +'%Y-%m-%d %H:%M:%S')] ${NC}$1"
 }
 
+title() {
+  log "${Yellow}[-- $1 --]${NC}"
+}
+
 # Function to check if a directory is an SVN directory
 is_svn_directory() {
-  if [ -d "$1/.svn" ]; then
+  if [ -d "${SVN_PATH}/.svn" ]; then
     return 0
   else
     return 1
@@ -24,14 +51,14 @@ is_svn_directory() {
 
 # Function to update SVN directory
 update_svn_directory() {
-  log "Checking if SVN directory needs updating..."
-  svn status -u "$1" | grep -q '*'
+  title "Checking if SVN directory needs updating"
+  svn status -u "$SVN_PATH" | grep -q '*'
   if [ $? -eq 0 ]; then
     read -p $'\e[32mSVN directory needs updating. Do you want to update it? (y/n): \e[0m' choice
     case "$choice" in
       y|Y|yes|Yes)
         log "Updating SVN directory..."
-        svn update "$1"
+        svn update "$SVN_PATH"
         ;;
       *)
         log "Exiting script."
@@ -43,14 +70,15 @@ update_svn_directory() {
   fi
 }
 
-# Function to create SymbolLibraries directory and copy files
+# Function to create SymbolLibrariesCompressed directory and copy files
 decompress_symbol_libraries() {
-  if [ -d "$CompressedSymbolsDirectory" ]; then
+  title "Decompressing symbol libraries"
+  if [ -d "$COMPRESSED_PATH" ]; then
     while true; do
-      read -p "The directory $CompressedSymbolsDirectory exists. Type \"remove\" to remove it or \"continue\" to continue with the existing $CompressedSymbolsDirectory? " choice 
+      read -p "The directory $COMPRESSED_PATH exists. Type \"remove\" to remove it or \"continue\" to continue with the existing $COMPRESSED_PATH? " choice 
         
       if [ "$choice" == "remove" ]; then
-        rm -rf "$CompressedSymbolsDirectory"
+        rm -rf "$COMPRESSED_PATH"
         break
       elif [ "$choice" == "continue" ]; then
         return
@@ -59,44 +87,50 @@ decompress_symbol_libraries() {
       fi
     done
   fi
-  log "Creating $CompressedSymbolsDirectory directory..."
-  mkdir -p $CompressedSymbolsDirectory
-  log "Copying directories from SVN directory to $CompressedSymbolsDirectory..."
-  for dir in "$1"/*; do
+  mkdir -p $COMPRESSED_PATH
+  log "Copying directories (except does starting with _) from SVN directory to $COMPRESSED_PATH..."
+  for dir in "$SVN_PATH"/*; do
     if [ -d "$dir" ] && [[ $(basename "$dir") != _* ]]; then
-      cp -r "$dir" $CompressedSymbolsDirectory/
+      cp -r "$dir" $COMPRESSED_PATH/
     fi
   done
-  log "Unzipping files in $CompressedSymbolsDirectory..."
+  log "Removing zip files..."
+  find $COMPRESSED_PATH -name "*.zip" -type f -delete
+
+  log "Unzipping files from ${SVN_PATH} to $COMPRESSED_PATH..."
   echo "Log file for unzipping files" > /c/dev/ziplog.txt
-  for zip_file in $(find $CompressedSymbolsDirectory -name "*.zip"); do
-    log "Unzipping $zip_file..."
-    unzip -o -d "$(dirname "$zip_file")/$(basename -s .zip "$zip_file")" "$zip_file" 2>&1 | tee -a /c/dev/ziplog.txt
+  find "$SVN_PATH" -name "*.zip" -print0 | while IFS= read -r -d '' zip_file; do
+    local substituted=$(sed "s_${SVN_DIR}_${COMPRESSED_DIR}_g" <<< "${zip_file}")
+    target_dir="$(dirname "${substituted}")/$(basename -s ".zip" "${substituted}")"
+    echo "${target_dir}" 
+    unzip -o -d "$target_dir" "$zip_file" 2>> /c/dev/ziplog.txt
+    if [ $? -ne 0 ]; then
+      echo "Error unzipping ${zip_file} to ${target_dir}" >> /c/dev/ziplog.txt
+    fi
   done
-  #find $CompressedSymbolsDirectory -name "*.zip" | xargs -P 5 -I fileName sh -c 'unzip -o -d "$(dirname "fileName")/$(basename -s .zip "fileName")" "fileName" >> /c/dev/ziplog.txt'
-  log "Removing remaining zip files..."
-  find $CompressedSymbolsDirectory -name "*.zip" -type f -delete
+  #find $COMPRESSED_DIR -name "*.zip" | xargs -P 5 -I fileName sh -c 'unzip -o -d "$(dirname "fileName")/$(basename -s .zip "fileName")" "fileName" >> /c/dev/ziplog.txt'
+
 }
 
 # Function to clone the symbols repository
 clone_symbols_repo() {
-  local clone_path="$1"
-  log "The current directory is ${1}";
+  title "Cloning symbols repository"
+  log "Target repo path is ${REPO_PATH}";
   read -p $'\e[32mIs a good location to clone the repository? (y/n): \e[0m' choice
   case "$choice" in
     y|Y|yes|Yes)
       ;;
     *)
-      read -p $'\e[32mEnter the path to clone the repository: \e[0m' clone_path
+      read -p $'\e[32mEnter the path to clone the repository: \e[0m' ROOT_PATH
       ;;
   esac
 
-  if [ -d "$clone_path/symbols" ]; then
+  if [ -d "$REPO_PATH" ]; then
     read -p $'\e[32mDirectory named symbols already exists. Do you want to start over? (y/n): \e[0m' choice
     case "$choice" in
       y|Y|yes|Yes)
         log "Removing existing directory..."
-        rm -rf "$clone_path/symbols"
+        rm -rf "$REPO_PATH"
         ;;
       *)
         log "Continuing with existing directory."
@@ -106,11 +140,12 @@ clone_symbols_repo() {
   fi
 
   log "Cloning symbols repository..."
-  git clone ssh://git@bitbucket.thinksmartbox.com:7999/content/symbols.git "$clone_path/symbols"
+  git clone ssh://git@bitbucket.thinksmartbox.com:7999/content/symbols.git "${REPO_PATH}"
 }
 
 # Function to check and clear the contents of the symbol repository
 check_and_clear_repo() {
+  cd "$REPO_PATH" || exit
   if [ "$(ls -A)" != ".git" ]; then
     read -p $'\e[32mRepository contains files. Do you want to clear the contents? (y/n): \e[0m' choice
     case "$choice" in
@@ -125,27 +160,27 @@ check_and_clear_repo() {
 }
 
 checkout_working_branch() {
-    if git show-ref --verify --quiet refs/heads/task/symbol-migration; then
+  title "Checking out working branch"
+  cd "$REPO_PATH" || exit
+  if git show-ref --verify --quiet refs/heads/task/symbol-migration; then
     git checkout task/symbol-migration
   else
     git checkout -b task/symbol-migration
   fi
 }
 
-# Function to create .gitattributes file
 create_gitattributes() {
-  if [ ! -f .gitattributes ]; then
-    log "Creating .gitattributes file..."
-    echo "* -text" > .gitattributes
-    git add .gitattributes
-    git commit -m "Add .gitattributes to disable line ending normalization"
-  fi
+  title "Creating .gitattributes file"
+  cd "$REPO_PATH" || exit
+  echo "* -text" > .gitattributes
+  git add .gitattributes
+  git commit -m "Add .gitattributes to disable line ending normalization"
 }
 
-# Function to add gridresources submodule
 add_gridresources_submodule() {
+  title "Adding gridresources submodule"
+  cd "$REPO_PATH" || exit
   if ! git submodule status | grep -q "gridresources"; then
-    log "Adding gridresources submodule..."
     git submodule add ssh://git@bitbucket.thinksmartbox.com:7999/content/gridresources.git
     git commit -m "Add gridresources submodule"
   else
@@ -169,19 +204,23 @@ add_gridresources_submodule() {
 
 # Function to move SymbolLibraries to the repository
 move_symbol_libraries() {
-  log "Moving $CompressedSymbolsDirectory to the repository..."
-  mv ../$CompressedSymbolsDirectory .
-  git add $CompressedSymbolsDirectory
-  git commit -m "Add $CompressedSymbolsDirectory"
+  cd "$REPO_PATH" || exit
+  title "Moving $COMPRESSED_PATH to the repository..."
+  mv $COMPRESSED_PATH $SVN_DIR
+  log "Adding $SVN_DIR to the repository..."
+  git add -v $SVN_DIR
+  log "Committing changes..."
+  git commit -mv "Add $SVN_DIR"
 }
 
 # Function to copy tools to the repository
 copy_tools() {
-  read -p $'\e[32mEnter the path to the tools repository: \e[0m' tools_path
-  if [ -d "$tools_path/.git" ] && [ -d "$tools_path/Symbols" ]; then
+  title "Copying tools to the repository..."
+  cd "$REPO_PATH" || exit
+  if [ -d "$TOOLS_PATH/.git" ] && [ -d "$TOOLS_PATH/Symbols" ]; then
     log "Copying tools to the repository..."
     mkdir -p Tools
-    cp -r "$tools_path/Symbols"/* Tools/
+    cp -r "$TOOLS_PATH/Symbols"/* "${REPO_PATH}/Tools/"
     git add Tools
     git commit -m "Add Tools"
   else
@@ -191,6 +230,8 @@ copy_tools() {
 }
 
 show_repository_stats() {
+  title "Showing repository statistics..."
+  cd "$REPO_PATH" || exit
   echo -e "${Yellow}Repository statistics:${NC}"
   git_objects_data=$(git count-objects -v)
   echo -e "${Yellow}Object count:${NC} \n${git_objects_data}"
@@ -206,8 +247,8 @@ show_repository_stats() {
   echo -e "${Yellow}Object total size after git gc:${NC} ${git_objects_size}"
   echo -e ""
 
-  symbol_library_size=$(du -sh "$CompressedSymbolsDirectory")
-  echo -e "${Yellow}$CompressedSymbolsDirectory size:${NC} ${symbol_library_size}"
+  symbol_library_size=$(du -sh "$COMPRESSED_DIR")
+  echo -e "${Yellow}$COMPRESSED_DIR size:${NC} ${symbol_library_size}"
   tools_size=$(du -sh "Tools")
   echo -e "${Yellow}Tools size:${NC} ${tools_size}"
   grid_resources_size=$(du -sh "gridresources" )
@@ -221,28 +262,25 @@ show_repository_stats() {
 }
 
 cleanup() {
+  cd "$REPO_PATH" || exit
   log "Cleaning up..."
-  if [ -d "$CompressedSymbolsDirectory" ]; then
-    read -p $'\e[32mDo you want to remove the $CompressedSymbolsDirectory) directory? (y/n): \e[0m' choice
+  if [ -d "$COMPRESSED_DIR" ]; then
+    read -p $'\e[32mDo you want to remove the $COMPRESSED_DIR) directory? (y/n): \e[0m' choice
     if [ "$choice" == "y" ]; then
-      rm -rf $CompressedSymbolsDirectory
+      rm -rf $COMPRESSED_DIR
     fi
   fi
 }
 
-# Main script
-start_time=$(date +%s)
-symbols_directory="/c/dev/symbols"
-SVNSymbolLibraryDirectory="/c/dev/SymbolLibraries"
 
-if ! is_svn_directory "$SVNSymbolLibraryDirectory"; then
+if ! is_svn_directory "$SVN_PATH"; then
   echo "No directory provided or not an SVN directory."
   
-  read -p "Would you like to checkout a new SVN symbols directory to $SVNSymbolLibraryDirectory? (y/n): " choice
+  read -p "Would you like to checkout a new SVN symbols directory to $SVN_PATH? (y/n): " choice
   case "$choice" in
     y|Y|yes|Yes)
-      mkdir $SVNSymbolLibraryDirectory
-      svn checkout "https://svn.sensorysoftware.com/svn/repos2/_Trunk/Resources/Symbol libraries" $SVNSymbolLibraryDirectory
+      mkdir $SVN_PATH
+      svn checkout "https://svn.sensorysoftware.com/svn/repos2/_Trunk/Resources/Symbol libraries" $SVN_PATH
       ;;
     *)
       echo "Exiting script."
@@ -250,6 +288,8 @@ if ! is_svn_directory "$SVNSymbolLibraryDirectory"; then
       ;;
   esac
 fi
+
+cd /c/dev || exit
 
 log "Starting symbol migration script..."
 log "Select an operation mode:"
@@ -261,9 +301,9 @@ read -p "Enter your selection: " choice
 case "$choice" in
   fm)
     log "Running full migration..."
-    update_svn_directory "$SVNSymbolLibraryDirectory"
-    decompress_symbol_libraries "$SVNSymbolLibraryDirectory"
-    clone_symbols_repo $symbols_directory
+    update_svn_directory
+    decompress_symbol_libraries 
+    clone_symbols_repo
     checkout_working_branch
     check_and_clear_repo
     create_gitattributes
@@ -281,8 +321,8 @@ case "$choice" in
     ;;
   up)
     log "Updating symbol libraries from SVN..."
-    update_svn_directory "$SVNSymbolLibraryDirectory"
-    decompress_symbol_libraries "$SVNSymbolLibraryDirectory"
+    update_svn_directory
+    decompress_symbol_libraries
     move_symbol_libraries
     show_repository_stats    
 
@@ -301,7 +341,7 @@ case "$choice" in
     exit 0
     ;;
   *)
-    log "Invalid selection. Please try again."
+    log "Invalid selection. Exiting."
     exit 1
     ;;
 esac
