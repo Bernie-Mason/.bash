@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Color variables
+NC='\033[0m'              # Text Reset
+Red='\033[0;31m'
+Green='\033[0;32m'
+Yellow='\033[0;33m'
+UWhite='\033[1;37m'
+Orange='\033[0;33m'
+
+function title() {
+    echo -e "${UWhite}[-- $1 --]${NC}"
+}
+
+function say() {
+    echo -e "${Yellow}$1${NC}"
+}
+
+function get_ssh_pub_key() {
+    SSH_PUB_KEYS=$(ls ~/.ssh/*.pub 2>/dev/null)
+    if [ -z "$SSH_PUB_KEYS" ]; then
+        echo "No public SSH keys found in ~/.ssh directory" >&2
+        return 1
+    fi
+
+    printf "Select one of the following public keys:\n" >&2
+    i=1
+    for SSH_PUB_KEY in $SSH_PUB_KEYS; do
+        printf "%d: %s\n" "$i" "$SSH_PUB_KEY" >&2
+        i=$((i+1))
+    done
+
+    read -p "Enter the number of the public key you want to copy: " SSH_PUB_KEY_INDEX
+    SELECTED_SSH_KEY=$(echo $SSH_PUB_KEYS | cut -d ' ' -f $SSH_PUB_KEY_INDEX)
+
+    # Return the selected public key
+    echo "$SELECTED_SSH_KEY"
+}
+
+function get_ssh_host() {
+    if [ ! -f ~/.ssh/config ]; then
+        printf "No ~/.ssh/config file found" >&2
+        
+		read -p "Enter the username@address of the server: " SSH_ADDRESS
+		echo "$SSH_ADDRESS"
+    fi
+
+    SSH_HOSTS=$(grep -E "[H|h]ost [a-zA-Z0-9\.\-]+" ~/.ssh/config | cut -d ' ' -f 2)
+    printf "Select one of the following hosts:\n" >&2
+    i=1
+    for SSH_HOST in $SSH_HOSTS; do
+        printf "%d: %s\n" "$i" "$SSH_HOST" >&2
+        i=$((i+1))
+    done
+
+    read -p "Enter the number of the host you want to copy the key to: " SSH_HOST_INDEX
+    SELECTED_SSH_HOST=$(echo $SSH_HOSTS | cut -d ' ' -f $SSH_HOST_INDEX)
+
+    # Return the selected host
+    echo "$SELECTED_SSH_HOST"
+}
+
+clear
+while true; do
+    title "ssh helper menu"
+    echo -e "  ${Yellow}cm ${NC}-> Connect to a machine"
+    echo -e "  ${Yellow}ctr ${NC}-> Copy files from local to remote machine"
+    echo -e "  ${Yellow}ctl ${NC}-> Copy files from remote to local machine"
+    echo -e "  ${Yellow}ck ${NC}-> Copy pubkey to remote machine authorized_keys"
+    echo -e "  ${Yellow}q ${NC}-> Exit"
+    echo -e ""
+    read -p "Enter your choice: " choice
+    case $choice in
+        cm)
+            SSH_HOST=$(get_ssh_host)
+            ssh $SSH_HOST
+            ;;
+        ctl)
+            SSH_HOST=$(get_ssh_host)
+            read -p "Enter the remote file you want to copy: " file
+            read -p "Enter the local destination path (press enter to copy to ~/): " dest
+            if [ -z "$file" ]; then
+                echo "File path cannot be empty"
+                continue
+            fi
+            if [ -z "$dest" ]; then
+                $dest="~/"
+            fi
+            scp "$SSH_HOST:$file" "$dest"  && echo "File copied to $SSH_HOST" || echo "Error copying file to $SSH_HOST"
+            ;;
+        ctr)
+            SSH_HOST=$(get_ssh_host)
+            read -p "Enter the local file you want to copy: " file
+            read -p "Enter the remote destination path (press enter to copy to ~/): " dest
+            if [ -z "$file" ]; then
+                echo "File path cannot be empty"
+                continue
+            fi
+            if [ -z "$dest" ]; then
+                dest="~/"
+            fi
+            scp "$file" "$SSH_HOST:$dest" && echo "File copied to $SSH_HOST" || echo "Error copying file to $SSH_HOST"
+            ;;
+        ck)
+            SSH_HOST=$(get_ssh_host)
+            SSH_PUB_KEY=$(get_ssh_pub_key)
+            echo "${Green}--> Copying $SSH_PUB_KEY to $SSH_HOST${NC}"
+            cat $SSH_PUB_KEY | ssh $SSH_HOST "mkdir -p ~/.ssh/ && touch ~/.ssh/authorized_keys && cat >> ~/.ssh/authorized_keys"
+            ;;
+        q)
+            exit 0
+            ;;
+        *)
+            echo "Invalid option"
+            ;;
+    esac
+    clear
+done

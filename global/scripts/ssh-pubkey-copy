@@ -14,11 +14,57 @@ function die() {
 
 function echo_help() {
 	echo "Copy public key from local machine to remote ~/.ssh/authorized_keys file  "
-	echo "First argument should be the path to the public key. E.g. ~/.ssh/bitbucket.pub"
-	echo "Second argument is the hostname of the server"
-	echo "Third argument is the username for the server"
+	echo "1st argument is the hostname of the server"
+	echo "2nd argument is the username for the server"
     echo "-r, --remote-master  show log between remote master (e.g. origin/master"
     die 0
 }
 
-cat $1 | ssh "${2}@${3}" "mkdir -p ~/.ssh/ && touch ~/.ssh/authorized_keys && cat >> ~/.ssh/authorized_keys"
+function get_ssh_pub_key() {
+    SSH_PUB_KEYS=$(ls ~/.ssh/*.pub 2>/dev/null)
+    if [ -z "$SSH_PUB_KEYS" ]; then
+        echo "No public SSH keys found in ~/.ssh directory" >&2
+        return 1
+    fi
+
+    printf "Select one of the following public keys:\n" >&2
+    i=1
+    for SSH_PUB_KEY in $SSH_PUB_KEYS; do
+        printf "%d: %s\n" "$i" "$SSH_PUB_KEY" >&2
+        i=$((i+1))
+    done
+
+    read -p "Enter the number of the public key you want to copy: " SSH_PUB_KEY_INDEX
+    SELECTED_SSH_KEY=$(echo $SSH_PUB_KEYS | cut -d ' ' -f $SSH_PUB_KEY_INDEX)
+
+    # Return the selected public key
+    echo "$SELECTED_SSH_KEY"
+}
+
+function get_ssh_host() {
+    if [ ! -f ~/.ssh/config ]; then
+        printf "No ~/.ssh/config file found" >&2
+        
+		read -p "Enter the username@address of the server: " SSH_ADDRESS
+		echo "$SSH_ADDRESS"
+    fi
+
+    SSH_HOSTS=$(grep -E "[H|h]ost [a-zA-Z0-9\.\-]+" ~/.ssh/config | cut -d ' ' -f 2)
+    printf "Select one of the following hosts:\n" >&2
+    i=1
+    for SSH_HOST in $SSH_HOSTS; do
+        printf "%d: %s\n" "$i" "$SSH_HOST" >&2
+        i=$((i+1))
+    done
+
+    read -p "Enter the number of the host you want to copy the key to: " SSH_HOST_INDEX
+    SELECTED_SSH_HOST=$(echo $SSH_HOSTS | cut -d ' ' -f $SSH_HOST_INDEX)
+
+    # Return the selected host
+    echo "$SELECTED_SSH_HOST"
+}
+
+SSH_HOST=$(get_ssh_host)
+SSH_PUB_KEY=$(get_ssh_pub_key)
+echo "Copying $SSH_PUB_KEY to $SSH_HOST"
+cat $SSH_PUB_KEY | ssh $SSH_HOST "mkdir -p ~/.ssh/ && touch ~/.ssh/authorized_keys && cat >> ~/.ssh/authorized_keys"
