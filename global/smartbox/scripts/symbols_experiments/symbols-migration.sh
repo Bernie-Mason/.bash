@@ -13,34 +13,22 @@ SVN_PATH="$ROOT_PATH/$SVN_DIR"
 REPO_PATH="$ROOT_PATH/symbols"
 COMPRESSED_PATH="$ROOT_PATH/$COMPRESSED_DIR"
 TOOLS_PATH="$ROOT_PATH/tools"
+LOG_FILE="${ROOT_PATH}/symbol_migration.log"
+# VERBOSE=false
 
-#  find "$SVN_PATH" -name "*.zip" -print0 | while IFS= read -r -d '' zip_file; do
-#    substituted=$(sed "s_${SVN_DIR}_${COMPRESSED_DIR}_g" <<< "${zip_file}")
-#    target_dir=$(sed "s_\.zip\$__g" <<< "${substituted}")
-#    dir_name=$(dirname "${substituted}")
-#    base_name=$(basename -s ".zip" "${substituted}")
-#    #echo "${dir_name}/${base_name}"
-#    target_dir="$(dirname "${substituted}")/$(basename -s ".zip" "${substituted}")"
-#    echo "${target_dir}" 
-
-#    #unzip -o -d "$target_dir" "$zip_file" 2>> /c/dev/ziplog.txt
-#    if [ $? -ne 0 ]; then
-#      echo "Error unzipping ${zip_file} to ${target_dir}" >> /c/dev/ziplog.txt
-#    fi
-#  done
-
-# exit
+# if [[ $1 == "--verbose"]]; then
+#   VERBOSE=true
+# fi
 
 # Function to log messages
 log() {
-  echo -e "${Blue}[$(date +'%Y-%m-%d %H:%M:%S')] ${NC}$1"
+  echo -e "${Blue}[$(date +'%Y-%m-%d %H:%M:%S')] ${NC}$1" | tee -a $LOG_FILE
 }
 
 title() {
-  log "${Yellow}[-- $1 --]${NC}"
+  log "${Yellow}[-- $1 --]${NC}" | tee -a $LOG_FILE
 }
 
-# Function to check if a directory is an SVN directory
 is_svn_directory() {
   if [ -d "${SVN_PATH}/.svn" ]; then
     return 0
@@ -49,7 +37,6 @@ is_svn_directory() {
   fi
 }
 
-# Function to update SVN directory
 update_svn_directory() {
   title "Checking if SVN directory needs updating"
   svn status -u "$SVN_PATH" | grep -q '*'
@@ -70,7 +57,6 @@ update_svn_directory() {
   fi
 }
 
-# Function to create SymbolLibrariesCompressed directory and copy files
 decompress_symbol_libraries() {
   title "Decompressing symbol libraries"
   if [ -d "$COMPRESSED_PATH" ]; then
@@ -88,40 +74,57 @@ decompress_symbol_libraries() {
     done
   fi
   mkdir -p $COMPRESSED_PATH
-  log "Copying directories (except does starting with _) from SVN directory to $COMPRESSED_PATH..."
-  for dir in "$SVN_PATH"/*; do
-    if [ -d "$dir" ] && [[ $(basename "$dir") != _* ]]; then
-      cp -r "$dir" $COMPRESSED_PATH/
-    fi
+  log "Copying all files from $SVN_PATH to $COMPRESSED_PATH..."
+  for node in "$SVN_PATH"/*; do
+    log "Copying $node to $COMPRESSED_PATH..."
+    cp -r "$node" $COMPRESSED_PATH/
   done
-  log "Removing zip files..."
-  find $COMPRESSED_PATH -name "*.zip" -type f -delete
 
   log "Unzipping files from ${SVN_PATH} to $COMPRESSED_PATH..."
   echo "Log file for unzipping files" > /c/dev/ziplog.txt
-  find "$SVN_PATH" -name "*.zip" -print0 | while IFS= read -r -d '' zip_file; do
-    local substituted=$(sed "s_${SVN_DIR}_${COMPRESSED_DIR}_g" <<< "${zip_file}")
-    target_dir="$(dirname "${substituted}")/$(basename -s ".zip" "${substituted}")"
-    echo "${target_dir}" 
-    unzip -o -d "$target_dir" "$zip_file" 2>> /c/dev/ziplog.txt
-    if [ $? -ne 0 ]; then
-      echo "Error unzipping ${zip_file} to ${target_dir}" >> /c/dev/ziplog.txt
-    fi
-  done
-  #find $COMPRESSED_DIR -name "*.zip" | xargs -P 5 -I fileName sh -c 'unzip -o -d "$(dirname "fileName")/$(basename -s .zip "fileName")" "fileName" >> /c/dev/ziplog.txt'
-
+  # if [ "$VERBOSE" = true ]; then
+    find "$SVN_PATH" -name "*.zip" -print0 | while IFS= read -r -d '' zip_file; do
+      local substituted=$(sed "s_${SVN_DIR}_${COMPRESSED_DIR}_g" <<< "${zip_file}")
+      target_dir="$(dirname "${substituted}")/$(basename -s ".zip" "${substituted}")"
+      echo "${target_dir}" 
+      unzip -o -d "$target_dir" "$zip_file" 2>> /c/dev/ziplog.txt
+      if [ $? -ne 0 ]; then
+        echo "Error unzipping ${zip_file} to ${target_dir}" >> /c/dev/ziplog.txt
+      fi
+    done
+  # else
+  #   find $COMPRESSED_DIR -name "*.zip" | xargs -P 5 -I fileName sh -c 'unzip -o -d "$(dirname "fileName")/$(basename -s .zip "fileName")" "fileName" >> /c/dev/ziplog.txt'
+  # fi
+  tidy_decompressed_files
 }
 
-# Function to clone the symbols repository
-clone_symbols_repo() {
-  title "Cloning symbols repository"
+tidy_decompressed_files() {
+  title "Tidying files ahead of migration"
+
+  log "Removing zip files..."
+  find $COMPRESSED_PATH -name "*.zip" -type f -delete
+  log "Removing old Grid 2 symbol directories maksym and maksig..."
+  rm -rf $COMPRESSED_PATH/maksym
+  rm -rf $COMPRESSED_PATH/maksig
+  log "Removing empty category extractor directory..."
+  rm -rf "$COMPRESSED_PATH/_Category Extractor"
+  log "Removing symbol swap directory..."
+  rm -rf "$COMPRESSED_PATH/_Symbol Swap"
+  log "Removing symbols libraries overview.pptx..."
+  rm "$COMPRESSED_PATH/Symbol libraries overview.pptx"
+  log "Removing .svn directory..."
+  rm -rf "$COMPRESSED_PATH/.svn"
+}
+
+init_symbols_repo() {
+  title "Initializing symbols repository"
   log "Target repo path is ${REPO_PATH}";
-  read -p $'\e[32mIs a good location to clone the repository? (y/n): \e[0m' choice
+  read -p $'\e[32mIs a good location to init the repository? (y/n): \e[0m' choice
   case "$choice" in
     y|Y|yes|Yes)
       ;;
     *)
-      read -p $'\e[32mEnter the path to clone the repository: \e[0m' ROOT_PATH
+      read -p $'\e[32mEnter the path to init the repository: \e[0m' ROOT_PATH
       ;;
   esac
 
@@ -139,11 +142,17 @@ clone_symbols_repo() {
     esac
   fi
 
-  log "Cloning symbols repository..."
-  git clone ssh://git@bitbucket.thinksmartbox.com:7999/content/symbols.git "${REPO_PATH}"
+  mkdir -p "$REPO_PATH"
+  cd "$REPO_PATH" || exit
+  git init
 }
 
-# Function to check and clear the contents of the symbol repository
+git_set_symbols_remote() {
+  title "Setting symbols remote"
+  cd "$REPO_PATH" || exit
+  git remote add "origin" ssh://git@bitbucket.thinksmartbox.com:7999/content/symbols.git 
+}
+
 check_and_clear_repo() {
   cd "$REPO_PATH" || exit
   if [ "$(ls -A)" != ".git" ]; then
@@ -205,12 +214,17 @@ add_gridresources_submodule() {
 # Function to move SymbolLibraries to the repository
 move_symbol_libraries() {
   cd "$REPO_PATH" || exit
-  title "Moving $COMPRESSED_PATH to the repository..."
-  mv $COMPRESSED_PATH $SVN_DIR
+  title "Copying $COMPRESSED_PATH to the repository..."
+  cp -rf $COMPRESSED_PATH "$REPO_PATH/$SVN_DIR"
+}
+
+git_commit_symbol_libraries() {
+  cd "$REPO_PATH" || exit
+  title "Committing symbol libraries..."
   log "Adding $SVN_DIR to the repository..."
-  git add -v $SVN_DIR
+  git add -v $SVN_DIR >> $LOG_FILE
   log "Committing changes..."
-  git commit -mv "Add $SVN_DIR"
+  git commit -m "Add $SVN_DIR" >> $LOG_FILE
 }
 
 # Function to copy tools to the repository
@@ -221,12 +235,23 @@ copy_tools() {
     log "Copying tools to the repository..."
     mkdir -p Tools
     cp -r "$TOOLS_PATH/Symbols"/* "${REPO_PATH}/Tools/"
-    git add Tools
-    git commit -m "Add Tools"
+    #cp -r "$TOOLS_PATH/PictureIndexEditor" "${REPO_PATH}/Tools/"
+    log "Adding Tools to the repository..."
+    git add -v Tools  >> $LOG_FILE
+    log "Committing Tools..."
+    git commit -m "Add Tools"  >> $LOG_FILE
   else
     log "Invalid tools repository path."
     exit 1
   fi
+}
+
+final_migration_steps() {
+  title "Final migration steps..."
+  log "Removing corrupted file 27617.png that does not exist in master folder."
+  rm "$REPO_PATH\\$SVN_PATH\arasaa\Source\Pictogramas_Color_ID\27617.png"
+
+  
 }
 
 show_repository_stats() {
@@ -247,7 +272,7 @@ show_repository_stats() {
   echo -e "${Yellow}Object total size after git gc:${NC} ${git_objects_size}"
   echo -e ""
 
-  symbol_library_size=$(du -sh "$COMPRESSED_DIR")
+  symbol_library_size=$(du -sh "$COMPRESSED_PATH")
   echo -e "${Yellow}$COMPRESSED_DIR size:${NC} ${symbol_library_size}"
   tools_size=$(du -sh "Tools")
   echo -e "${Yellow}Tools size:${NC} ${tools_size}"
@@ -303,13 +328,15 @@ case "$choice" in
     log "Running full migration..."
     update_svn_directory
     decompress_symbol_libraries 
-    clone_symbols_repo
+    init_symbols_repo
+    git_set_symbols_remote
     checkout_working_branch
     check_and_clear_repo
     create_gitattributes
     #add_gridresources_submodule
-    move_symbol_libraries
     copy_tools
+    move_symbol_libraries
+    git_commit_symbol_libraries
     show_repository_stats
 
     cd ${CURRENT_DIRECTORY} || exit
@@ -323,7 +350,9 @@ case "$choice" in
     log "Updating symbol libraries from SVN..."
     update_svn_directory
     decompress_symbol_libraries
+    checkout_working_branch
     move_symbol_libraries
+    git_commit_symbol_libraries
     show_repository_stats    
 
     cd ${CURRENT_DIRECTORY} || exit
