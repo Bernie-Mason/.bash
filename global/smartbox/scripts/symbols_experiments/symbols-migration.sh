@@ -14,6 +14,7 @@ REPO_PATH="$ROOT_PATH/symbols"
 COMPRESSED_PATH="$ROOT_PATH/$COMPRESSED_DIR"
 TOOLS_PATH="$ROOT_PATH/tools"
 LOG_FILE="${ROOT_PATH}/symbol_migration.log"
+TICKET_ID="MD-151"
 # VERBOSE=false
 
 # if [[ $1 == "--verbose"]]; then
@@ -172,9 +173,9 @@ checkout_working_branch() {
   title "Checking out working branch"
   cd "$REPO_PATH" || exit
   if git show-ref --verify --quiet refs/heads/task/symbol-migration; then
-    git checkout task/symbol-migration
+    git checkout task/${TICKET_ID}-symbol-migration
   else
-    git checkout -b task/symbol-migration
+    git checkout -b task/${TICKET_ID}-symbol-migration
   fi
 }
 
@@ -183,7 +184,7 @@ create_gitattributes() {
   cd "$REPO_PATH" || exit
   echo "* -text" > .gitattributes
   git add .gitattributes
-  git commit -m "Add .gitattributes to disable line ending normalization"
+  git commit -m "Add .gitattributes to disable line ending normalization $TICKET_ID"
 }
 
 add_gridresources_submodule() {
@@ -224,7 +225,28 @@ git_commit_symbol_libraries() {
   log "Adding $SVN_DIR to the repository..."
   git add -v $SVN_DIR >> $LOG_FILE
   log "Committing changes..."
-  git commit -m "Add $SVN_DIR" >> $LOG_FILE
+  git commit -m "Add uncompressed symbol libraries from SVN $TICKET_ID" >> $LOG_FILE
+}
+
+update_tools() {
+  title "Updating tools..."
+  if [ -d "$TOOLS_PATH/.git" ] && [ -d "$TOOLS_PATH/Symbols" ]; then
+    cd "$TOOLS_PATH" || exit
+    local working_directory_is_clean=$(git status --porcelain)
+    if [ -n "$working_directory_is_clean" ]; then
+      log "Working directory is not clean. Stashing changes..."
+      git stash
+    fi
+    git checkout master
+    git pull
+    if [ -n "$working_directory_is_clean" ]; then
+      log "Applying stashed changes..."
+      git stash pop
+    fi
+  else
+    log "Invalid tools repository path."
+    exit 1
+  fi
 }
 
 # Function to copy tools to the repository
@@ -239,7 +261,7 @@ copy_tools() {
     log "Adding Tools to the repository..."
     git add -v Tools  >> $LOG_FILE
     log "Committing Tools..."
-    git commit -m "Add Tools"  >> $LOG_FILE
+    git commit -m "Add symbol tools from tools repo $TICKET_ID"  >> $LOG_FILE
   else
     log "Invalid tools repository path."
     exit 1
