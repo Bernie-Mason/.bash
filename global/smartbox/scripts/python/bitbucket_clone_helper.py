@@ -8,9 +8,12 @@ AUTH_HEADER = {
     'Authorization': f"Basic {AUTH_KEY}"
 }
 
+COLOR_GREY = "\033[0;30m"
+COLOR_WHITE = "\033[0;37m"
 COLOR_BLUE_BOLD = "\033[1;34m"
 COLOR_RED_BOLD = "\033[1;31m"
 COLOR_YELLOW_BOLD = "\033[1;33m"
+COLOR_YELLOW = "\033[0;33m"
 COLOR_GREEN_BOLD = "\033[1;32m"
 COLOR_RESET = "\033[0m"
 
@@ -27,7 +30,7 @@ def fetch_projects():
 
 def fetch_repos(project_key):
     REPO_URL = f"https://bitbucket.thinksmartbox.com/rest/api/latest/projects/{project_key}/repos"
-    print(f"Fetching repository list from {REPO_URL}...")
+    #print(f"{COLOR_GREY}Fetching repository list from {REPO_URL}...{COLOR_RESET}")
     response = requests.get(REPO_URL, headers=AUTH_HEADER)
     if response.status_code == 200:
         repos = response.json().get('values', [])
@@ -41,49 +44,53 @@ def clear_terminal():
 
 def project_menu(project_keys):
     clear_terminal()
+    clone_root = "C:\\dev"
     while True:
-        print(f"{COLOR_BLUE_BOLD}Project Menu:{COLOR_RESET}")
+        print(f"{COLOR_BLUE_BOLD}\nProject Menu:{COLOR_RESET}")
         for i, project_key in enumerate(project_keys):
-            print(f"  {i + 1}. {project_key}")
-        print("  q. Quit")
+            print(f"{COLOR_YELLOW}  {i + 1}. {project_key}{COLOR_RESET}")
+        print(f"{COLOR_WHITE}  c. Change clone root{COLOR_RESET}")
+        print(f"{COLOR_WHITE}  q. Quit{COLOR_RESET}")
+        print("")
 
-        choice = input("Select a project or quit: ").strip().lower()
+        choice = input("Select a project to clone repositories from: ").strip().lower()
         print(choice)
         clear_terminal()
-        print("Terminal cleared")
         if choice == 'q':
             break
+        elif choice == 'c':
+            new_clone_root = input(f"Enter new clone root (current: {clone_root}): ").strip()
+            if new_clone_root:
+                clone_root = new_clone_root
+                print(f"Clone root updated to: {clone_root}")
         elif choice.isdigit() and 1 <= int(choice) <= len(project_keys):
             print(f"Selected project: {project_keys[int(choice) - 1]}")
             project_key = project_keys[int(choice) - 1]
-            repo_menu(project_key)
+            repo_menu(project_key, clone_root)
         else:
             print(f"{COLOR_RED_BOLD}Invalid choice. Please try again.{COLOR_RESET}\n")
 
-def repo_menu(project_key):
+def repo_menu(project_key, clone_root):
     if not AUTH_KEY:
         print(f"{COLOR_RED_BOLD}Please set the AUTH_KEY variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
-    print("repo menu")
-    clone_root = "C:\\dev"
     if not os.path.exists(clone_root):
         os.makedirs(clone_root)
-    print("repo menu")
 
     clear_terminal()
-    print("repo menu")
 
     repos = fetch_repos(project_key)
     while True:
-        print(f"{COLOR_BLUE_BOLD}Repos in {project_key} projects (will clone to /c/dev):{COLOR_RESET}")
+        print(f"\n{COLOR_BLUE_BOLD}Repos in {project_key} projects (will clone to {clone_root}):{COLOR_RESET}")
         for i, repo in enumerate(repos):
-            print(f"  {i + 1}. {repo['name']}")
-        print("  b. Back to project menu")
-        print("  q. Quit")
-
+            print(f"{COLOR_YELLOW}  {i + 1}. {repo['name']}{COLOR_RESET}")
+        print(f"{COLOR_WHITE}  b. Back to project menu{COLOR_RESET}")
+        print(f"{COLOR_WHITE}  q. Quit{COLOR_RESET}\n")
         choice = input("Select a repository to clone, go back, or quit: ").strip().lower()
         clear_terminal()
         if choice == 'q':
             exit()
+        elif choice == 'b':
+            break
         elif choice == 'b':
             break
         elif choice.isdigit() and 1 <= int(choice) <= len(repos):

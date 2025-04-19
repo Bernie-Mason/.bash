@@ -1,0 +1,69 @@
+#!/bin/bash
+# Script to checkout the default branch of a git repository
+# Git does not support the concept of default branches. Instead, we assume that a branch named
+# "main" is the default branch. If it does not exist, we assume that "master" is the default branch.
+# If neither exists, we assume that the first branch in the list of branches is the default branch.
+
+# Usage: gchm [<repository>]
+# If no repository is specified, the current directory is used.
+# If the repository is not a git repository, an error message is displayed and the script exits.    
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+help() {
+    echo "Usage: gchm [<repository>]"
+    echo "If no repository is specified, the current directory is used."
+    echo "If the repository is not a git repository, an error message is displayed and the script exits."
+}
+
+switch_to_default_branch() {
+    local default_branch=$(git branch --list "main" "master" | head -n 1 | sed 's/^[* ] //')
+    
+    if [ -z "$default_branch" ]; then
+        default_branch=$(git branch | head -n 1 | sed 's/^[* ] //')
+    fi
+
+    if [ -z "$default_branch" ]; then
+        die 1 "Error: No branches found in the repository."
+    fi
+
+    git checkout "$default_branch"
+}
+
+check_for_upstream_changes() {
+    local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        echo "No upstream branch set."
+        return 1
+    fi
+
+    local local_commit=$(git rev-parse @)
+    local remote_commit=$(git rev-parse "$upstream")
+    local base_commit=$(git merge-base @ "$upstream")
+
+    if [ $local_commit = $remote_commit ]; then
+        echo "Up to date with upstream."
+    elif [ $local_commit = $base_commit ]; then
+        echo "Need to pull from upstream."
+    elif [ $remote_commit = $base_commit ]; then
+        echo "Need to push to upstream."
+    else
+        echo "Diverged from upstream."
+    fi
+}
+
+die() {
+    local exit_code=$1
+    shift
+    echo -2 "${RED}$@${NC}" >&2
+    exit $exit_code
+}
+
+git rev-parse --is-inside-work-tree > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    die 1 "Error: Not a git repository."
+fi
+
+switch_to_default_branch
+check_for_upstream_changes
