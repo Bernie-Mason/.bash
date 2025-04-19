@@ -84,8 +84,9 @@ while true; do
                 continue
             fi
             if [ -z "$dest" ]; then
-                $dest="~/"
+                $dest="~/$file"
             fi
+            echo "Copying $SSH_HOST:$file to $dest"
             scp "$SSH_HOST:$file" "$dest"  && echo "File copied to $SSH_HOST" || echo "Error copying file to $SSH_HOST"
             ;;
         ctr)
@@ -114,5 +115,4 @@ while true; do
             echo "Invalid option"
             ;;
     esac
-    clear
 done
