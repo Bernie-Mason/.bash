@@ -4,8 +4,10 @@
 
 alias cd-grid="cd ${grid_repository_dir}/Source"
 alias cd-resources="cd /c/dev/gridresources"
+alias cd-inventory="cd /c/dev/publish-inventory"
 alias cd-text="cd /c/dev/text"
 alias cd-speech="cd /c/dev/speech"
+alias cd-symbols="cd /c/dev/symbols"
 alias cd-eriskay="cd /c/dev/eriskay"
 alias cd-looklab="cd /c/dev/looklab"
 alias cd-eyegaze="cd ${eyegaze_repository_dir}"
@@ -23,14 +25,9 @@ alias vs-activate='start ${web_repository_dir}/activate/Activate.sln'
 alias vs-eyegaze='start ${eyegaze_repository_dir}/Source/SensorySoftware.EyeGaze.sln'
 alias vs-crashreporter='start ${web_repository_dir}/CrashReporter/src/SensorySoftware.CrashReporter.Site.sln'
 
-#nuget
+# nuget
 alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
 alias nuget-restore="nuget restore -nocache"
-
-
-# Application builds
-alias grid-debug="grid -d"
-alias grid-release='"${grid_repository_dir}/Source/SensorySoftware.Grids.Grid3.Desktop/bin/x86/Release/net452/Grid 3.exe" &'
 
 # logfile analyser
 alias lfa="${logfile_analyser_exe}"

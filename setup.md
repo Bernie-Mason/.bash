@@ -1,11 +1,11 @@
 # SETUP PROCESS
 
 ## If on Windows, update your windows path to include the following: 
-1. %USERPROFILE%\.bash\_ENTER_HOSTNAME_HERE_\Scripts
-2. %USERPROFILE%\.bash\Global\Scripts
-3. %USERPROFILE%\.bash\Global\Scripts\Powershell
-3. %USERPROFILE%\.bash\Global\Scripts\git
-4. %USERPROFILE%\.bash\Global\Vendor
+- %USERPROFILE%\.bash\global\Scripts
+- %USERPROFILE%\.bash\global\WorkPlace
+- %USERPROFILE%\.bash\global\Scripts\Powershell
+- %USERPROFILE%\.bash\global\Scripts\git
+- %USERPROFILE%\.bash\global\Vendor
 
 ## Create bash configuration files. 
 	1. In .bash/.bash_core create .bashrc, .bash_profile and .gitconfig configuration files as desired. You can run generate-bash-core-files to generate blank files with the correct naming

@@ -216,7 +216,12 @@ add_gridresources_submodule() {
 move_symbol_libraries() {
   cd "$REPO_PATH" || exit
   title "Copying $COMPRESSED_PATH to the repository..."
-  cp -rf $COMPRESSED_PATH "$REPO_PATH/$SVN_DIR"
+  target_dir="$REPO_PATH/libraries/"
+  if [ ! -d "$target_dir" ]; then
+    cp -rf $COMPRESSED_PATH $target_dir
+  else
+    cp -rf "$COMPRESSED_PATH/"* "$target_dir"
+  fi
 }
 
 git_commit_symbol_libraries() {
@@ -372,9 +377,9 @@ case "$choice" in
     log "Updating symbol libraries from SVN..."
     update_svn_directory
     decompress_symbol_libraries
-    checkout_working_branch
+    #checkout_working_branch
     move_symbol_libraries
-    git_commit_symbol_libraries
+    #git_commit_symbol_libraries
     show_repository_stats    
 
     cd ${CURRENT_DIRECTORY} || exit
