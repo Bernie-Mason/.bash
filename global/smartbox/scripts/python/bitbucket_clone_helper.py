@@ -49,8 +49,8 @@ def project_menu(project_keys):
         print(f"{COLOR_BLUE_BOLD}\nProject Menu:{COLOR_RESET}")
         for i, project_key in enumerate(project_keys):
             print(f"{COLOR_YELLOW}  {i + 1}. {project_key}{COLOR_RESET}")
-        print(f"{COLOR_WHITE}  c. Change clone root{COLOR_RESET}")
-        print(f"{COLOR_WHITE}  q. Quit{COLOR_RESET}")
+        print(f"{COLOR_WHITE}  c. change clone root{COLOR_RESET}")
+        print(f"{COLOR_WHITE}  q. quit{COLOR_RESET}")
         print("")
 
         choice = input("Select a project to clone repositories from: ").strip().lower()
