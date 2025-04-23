@@ -1,12 +1,9 @@
 import requests
 import os
 import subprocess
+import json
 
-AUTH_KEY = ""
 PROJECTS_URL = "https://bitbucket.thinksmartbox.com/rest/api/latest/projects"
-AUTH_HEADER = {
-    'Authorization': f"Basic {AUTH_KEY}"
-}
 
 COLOR_GREY = "\033[0;30m"
 COLOR_WHITE = "\033[0;37m"
@@ -17,9 +14,9 @@ COLOR_YELLOW = "\033[0;33m"
 COLOR_GREEN_BOLD = "\033[1;32m"
 COLOR_RESET = "\033[0m"
 
-def fetch_projects():
+def fetch_projects(auth_header):
     print(f"Fetching project list from {PROJECTS_URL}...")
-    response = requests.get(PROJECTS_URL, headers=AUTH_HEADER)
+    response = requests.get(PROJECTS_URL, headers=auth_header)
     if response.status_code == 200:
         projects = response.json().get('values', [])
         project_keys = [project['key'] for project in projects]
@@ -28,10 +25,10 @@ def fetch_projects():
         print(f"Failed to fetch projects. Status code: {response.status_code}")
         return []
 
-def fetch_repos(project_key):
+def fetch_repos(project_key, auth_header):
     REPO_URL = f"https://bitbucket.thinksmartbox.com/rest/api/latest/projects/{project_key}/repos"
     #print(f"{COLOR_GREY}Fetching repository list from {REPO_URL}...{COLOR_RESET}")
-    response = requests.get(REPO_URL, headers=AUTH_HEADER)
+    response = requests.get(REPO_URL, headers=auth_header)
     if response.status_code == 200:
         repos = response.json().get('values', [])
         return repos
@@ -42,7 +39,7 @@ def fetch_repos(project_key):
 def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def project_menu(project_keys):
+def project_menu(project_keys, auth_header):
     clear_terminal()
     clone_root = "C:\\dev"
     while True:
@@ -66,19 +63,16 @@ def project_menu(project_keys):
         elif choice.isdigit() and 1 <= int(choice) <= len(project_keys):
             print(f"Selected project: {project_keys[int(choice) - 1]}")
             project_key = project_keys[int(choice) - 1]
-            repo_menu(project_key, clone_root)
+            repo_menu(project_key, clone_root, auth_header)
         else:
             print(f"{COLOR_RED_BOLD}Invalid choice. Please try again.{COLOR_RESET}\n")
 
-def repo_menu(project_key, clone_root):
-    if not AUTH_KEY:
-        print(f"{COLOR_RED_BOLD}Please set the AUTH_KEY variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
+def repo_menu(project_key, clone_root, auth_header):
     if not os.path.exists(clone_root):
         os.makedirs(clone_root)
-
     clear_terminal()
 
-    repos = fetch_repos(project_key)
+    repos = fetch_repos(project_key, auth_header)
     while True:
         print(f"\n{COLOR_BLUE_BOLD}Repos in {project_key} projects (will clone to {clone_root}):{COLOR_RESET}")
         for i, repo in enumerate(repos):
@@ -112,9 +106,42 @@ def repo_menu(project_key, clone_root):
         else:
             print(f"{COLOR_RED_BOLD}Invalid choice. Please try again.{COLOR_RESET}\n")
 
+def set_auth_key():
+    bash_clone_root = os.path.abspath(__file__)
+    while True:
+        bash_clone_root = os.path.dirname(bash_clone_root)
+        print(f"Checking directory: {bash_clone_root}")
+        if os.path.isdir(os.path.join(bash_clone_root, ".git")):
+            break
+
+    auth_file = os.path.join(bash_clone_root, "auth", "auth.json")
+    if not os.path.exists(auth_file):
+        print(f"{COLOR_RED_BOLD}Auth file not found at {auth_file}. Please create an auth.json file in the auth directory.{COLOR_RESET}")
+        exit()
+    
+    with open(auth_file, 'r') as f:
+        json_string = f.read()
+        try:
+            data = json.loads(json_string)
+            # Access the "bitBucketAuth" value
+            auth_key =  data.get("bitBucketAuth", "")
+            return {
+        'Authorization': f"Basic {auth_key}"
+    }
+        except IndexError:
+            print(f"{COLOR_RED_BOLD}Invalid auth file format. Please check the auth.json file.{COLOR_RESET}")
+            exit()
+
 def main():
-    project_keys = fetch_projects()
-    project_menu(project_keys)
+    auth_header = set_auth_key()
+    if not auth_header:
+        print(f"{COLOR_RED_BOLD}Please set the AUTH_KEY variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
+        exit()
+    
+
+
+    project_keys = fetch_projects(auth_header)
+    project_menu(project_keys, auth_header)
 
 if __name__ == "__main__":
     main()
