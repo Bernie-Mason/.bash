@@ -22,12 +22,12 @@ def fetch_projects(auth_header):
         project_keys = [project['key'] for project in projects]
         return project_keys
     else:
-        print(f"Failed to fetch projects. Status code: {response.status_code}")
+        print(f"{COLOR_RED_BOLD}Failed to fetch projects. Status code: {response.status_code}{COLOR_RESET}")
+        print(f"{COLOR_RED_BOLD}Suggestion to check your authentication token.{COLOR_RESET}")
         return []
 
 def fetch_repos(project_key, auth_header):
     REPO_URL = f"https://bitbucket.thinksmartbox.com/rest/api/latest/projects/{project_key}/repos"
-    #print(f"{COLOR_GREY}Fetching repository list from {REPO_URL}...{COLOR_RESET}")
     response = requests.get(REPO_URL, headers=auth_header)
     if response.status_code == 200:
         repos = response.json().get('values', [])
@@ -107,24 +107,17 @@ def repo_menu(project_key, clone_root, auth_header):
             print(f"{COLOR_RED_BOLD}Invalid choice. Please try again.{COLOR_RESET}\n")
 
 def set_auth_key():
-    bash_clone_root = os.path.abspath(__file__)
-    while True:
-        bash_clone_root = os.path.dirname(bash_clone_root)
-        print(f"Checking directory: {bash_clone_root}")
-        if os.path.isdir(os.path.join(bash_clone_root, ".git")):
-            break
-
-    auth_dir = os.path.join(bash_clone_root, "auth")
-    if not os.path.exists(auth_dir):
-        os.makedirs(auth_dir)
-        print(f"{COLOR_YELLOW}Auth directory not found. Created: {auth_dir}{COLOR_RESET}")
-
-    auth_file = os.path.join(auth_dir, "auth.json")
+    scriptPath = os.path.abspath(__file__)
+    scriptDirectory = os.path.dirname(scriptPath)
+    auth_file = os.path.join(scriptDirectory, "auth.json")
     if not os.path.exists(auth_file):
         with open(auth_file, 'w') as f:
             json.dump({AUTH_KEY_NAME: ""}, f, indent=4)
-            print(f"{COLOR_YELLOW}Auth file not found. Created: {auth_file}{COLOR_RESET}")
-            print(f"{COLOR_YELLOW}Please set the bitBucketAuth variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
+            print(f"{COLOR_YELLOW}Auth file not found. Created it next to the script: {auth_file}{COLOR_RESET}")
+            print(f"{COLOR_YELLOW}Please set the bitBucketAuth variable in {auth_file} to a BitBucket bearer token.{COLOR_RESET}")
+            print(f"{COLOR_YELLOW}You can generate a token from your Bitbucket account settings.{COLOR_RESET}")
+        
+            print(f"{COLOR_YELLOW}Make sure to save the file after editing.{COLOR_RESET}")
             print(f"{COLOR_YELLOW}Then run the script again.{COLOR_RESET}")
             exit()
     
@@ -146,8 +139,6 @@ def main():
     if not auth_header:
         print(f"{COLOR_RED_BOLD}Please set the AUTH_KEY variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
         exit()
-    
-
 
     project_keys = fetch_projects(auth_header)
     project_menu(project_keys, auth_header)
