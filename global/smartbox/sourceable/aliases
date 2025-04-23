@@ -6,5 +6,5 @@ alias clear-speech-cache="clear-package-cache 'sensorysoftware.speechlib'"
 alias clear-text-cache="clear-package-cache 'sensorysoftware.text' 'sensorysoftware.text.desktop'"
 alias clear-eyegaze-cache="clear-package-cache 'sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop'"
 
-alias dotnet-upgrade="python3 ~/.bash/global/scripts/python/dotnet_migrate.py"
+alias dotnet-upgrade="python ~/.bash/global/scripts/python/dotnet_migrate.py"
 alias clone-helper="python ~/.bash/global/smartbox/scripts/python/bitbucket_clone_helper.py"

@@ -4,7 +4,7 @@ import subprocess
 import json
 
 PROJECTS_URL = "https://bitbucket.thinksmartbox.com/rest/api/latest/projects"
-
+AUTH_KEY_NAME = "bitBucketAuth"
 COLOR_GREY = "\033[0;30m"
 COLOR_WHITE = "\033[0;37m"
 COLOR_BLUE_BOLD = "\033[1;34m"
@@ -114,19 +114,28 @@ def set_auth_key():
         if os.path.isdir(os.path.join(bash_clone_root, ".git")):
             break
 
-    auth_file = os.path.join(bash_clone_root, "auth", "auth.json")
+    auth_dir = os.path.join(bash_clone_root, "auth")
+    if not os.path.exists(auth_dir):
+        os.makedirs(auth_dir)
+        print(f"{COLOR_YELLOW}Auth directory not found. Created: {auth_dir}{COLOR_RESET}")
+
+    auth_file = os.path.join(auth_dir, "auth.json")
     if not os.path.exists(auth_file):
-        print(f"{COLOR_RED_BOLD}Auth file not found at {auth_file}. Please create an auth.json file in the auth directory.{COLOR_RESET}")
-        exit()
+        with open(auth_file, 'w') as f:
+            json.dump({AUTH_KEY_NAME: ""}, f, indent=4)
+            print(f"{COLOR_YELLOW}Auth file not found. Created: {auth_file}{COLOR_RESET}")
+            print(f"{COLOR_YELLOW}Please set the bitBucketAuth variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
+            print(f"{COLOR_YELLOW}Then run the script again.{COLOR_RESET}")
+            exit()
     
     with open(auth_file, 'r') as f:
         json_string = f.read()
         try:
             data = json.loads(json_string)
-            # Access the "bitBucketAuth" value
-            auth_key =  data.get("bitBucketAuth", "")
+            # Access the AUTH_KEY_NAME value
+            auth_key =  data.get(AUTH_KEY_NAME, "")
             return {
-        'Authorization': f"Basic {auth_key}"
+        'Authorization': f"Bearer {auth_key}"
     }
         except IndexError:
             print(f"{COLOR_RED_BOLD}Invalid auth file format. Please check the auth.json file.{COLOR_RESET}")

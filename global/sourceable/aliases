@@ -132,7 +132,6 @@ alias gchh='git checkout .'
 alias gchp='git checkout -'
 alias gchb='git checkout -b'
 alias gcht='git checkout --track' # provide origin/branchname to create branchname
-alias gchm='git checkout master'
 alias gchr='git rev-parse --abbrev-ref --symbolic-full-name HEAD@{upstream} | xargs git checkout'
 alias grbi='git remote -v show origin'
 alias gst='git stash'
