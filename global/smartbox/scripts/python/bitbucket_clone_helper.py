@@ -116,7 +116,7 @@ def set_auth_key():
             print(f"{COLOR_YELLOW}Auth file not found. Created it next to the script: {auth_file}{COLOR_RESET}")
             print(f"{COLOR_YELLOW}Please set the bitBucketAuth variable in {auth_file} to a BitBucket bearer token.{COLOR_RESET}")
             print(f"{COLOR_YELLOW}You can generate a token from your Bitbucket account settings.{COLOR_RESET}")
-        
+            print(f"{COLOR_YELLOW}Open the file and set the value for {AUTH_KEY_NAME}.{COLOR_RESET}")
             print(f"{COLOR_YELLOW}Make sure to save the file after editing.{COLOR_RESET}")
             print(f"{COLOR_YELLOW}Then run the script again.{COLOR_RESET}")
             exit()
