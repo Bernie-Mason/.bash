@@ -1,4 +1,36 @@
 #!/bin/bash
+# Color variables
+COLOR_BLUE="\033[1;34m"
+COLOR_GREEN="\033[1;32m"
+COLOR_YELLOW="\033[1;33m"
+COLOR_RED="\033[1;31m"
+COLOR_RESET="\033[0m"
+LAST_ERROR_MESSAGE=""
+
+log-info() {
+    echo -e "${COLOR_BLUE}[INFO]${COLOR_RESET} $1"
+}
+
+log-warn() {
+    echo -e "${COLOR_YELLOW}[WARN]${COLOR_RESET} $1"
+}
+
+log-error() {
+    LAST_ERROR_MESSAGE="$1"
+    echo -e "${COLOR_RED}[ERROR]${COLOR_RESET} $1" >&2
+}
+
+log-success() {
+    echo -e "${COLOR_GREEN}[SUCCESS]${COLOR_RESET} $1"
+}
+
+get-last-error() {
+    if [[ $1 == "format" ]]; then
+      echo -e "${COLOR_RED}[ERROR]${COLOR_RESET} $LAST_ERROR_MESSAGE"
+    else
+      echo "$LAST_ERROR_MESSAGE"
+    fi
+}
 
 function say() {
 	echo -e "$@" >&2

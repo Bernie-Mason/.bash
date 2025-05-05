@@ -12,7 +12,7 @@ UYellow='\033[4;33m'      # Yellow
 UWhite='\033[4;37m'       # White
 
 function title() {
-    echo "${UYellow}${1}${NC}"
+    echo -e "<- ${UYellow}${1}${NC} ->"
 }
 
 CLONE_ROOT=$1
