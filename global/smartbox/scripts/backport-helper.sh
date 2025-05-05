@@ -395,6 +395,123 @@ function inspect-dependencies() {
     handle-changed-dependencies changed_dependencies mainline_versions
 }
 
+function get-modified-dependencies() {
+    local git_ref1=$1
+    local git_ref2=$2
+    local props_file="Source/Directory.Build.Props"
+    declare -n modified_dependencies=$3
+
+    log-info "Comparing dependencies between $git_ref1 and $git_ref2..."
+
+    # Parse dependencies for both refs
+    declare -A versions_ref1
+    declare -A versions_ref2
+    parse-dependency-versions "$git_ref1" "$props_file" versions_ref1
+    parse-dependency-versions "$git_ref2" "$props_file" versions_ref2
+
+    # Compare dependencies
+    for repo_name in "${!versions_ref1[@]}"; do
+        if [[ "${versions_ref1[$repo_name]}" != "${versions_ref2[$repo_name]}" ]]; then
+            modified_dependencies["$repo_name"]="${versions_ref1[$repo_name]}"
+            log-info "Dependency modified: $repo_name (Version: ${versions_ref1[$repo_name]} -> ${versions_ref2[$repo_name]})"
+        fi
+    done
+}
+
+# Handle rebase conflicts
+function handle-rebase-conflicts() {
+    log-warn "Rebase failed due to conflicts."
+    while true; do
+        echo -e "${COLOR_YELLOW}Options:${COLOR_RESET}"
+        echo "1. Open merge tool"
+        echo "2. Add resolved code and continue rebase"
+        echo "3. Abort rebase and exit"
+        echo "4. Continue rebase"
+        read -p "Select an option: " choice
+        case $choice in
+            1)
+                git mergetool || log-error "Failed to open merge tool."
+                ;;
+            2)
+                git add -A || log-error "Failed to add resolved code."
+                git rebase --continue || log-error "Failed to continue rebase."
+                ;;
+            3)
+                git rebase --abort || log-error "Failed to abort rebase."
+                exit 1
+                ;;
+            4)
+                git rebase --continue || log-error "Failed to continue rebase."
+                ;;
+            *)
+                log-warn "Invalid choice. Please try again."
+                ;;
+        esac
+    done
+}
+
+function compare-modified-dependencies() {
+    local release_branch=$1
+    local mainline_branch=$2
+    declare -A requires_release_branch
+
+    # Compare current branch dependency versions to mainline branch
+    declare -A modified_dependencies
+    get-modified-dependencies "HEAD" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
+
+    # Compare mainline branch dependency versions to release branch
+    declare -A release_dependencies
+    get-modified-dependencies "$REMOTE/$release_branch" "$REMOTE/$MAINLINE_BRANCH" release_dependencies
+
+    for repo_name in "${!release_dependencies[@]}"; do
+        if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
+            log-info "Dependency $repo_name requires a release branch."
+            requires_release_branch["$repo_name"]="${modified_dependencies[$repo_name]}"
+            # Handle release branch creation and backporting
+            # (Implementation omitted for brevity)
+        fi
+
+}
+
+# Perform a backport
+function perform-backport() {
+    log-info "Performing backport for branch $CURRENT_BRANCH..."
+    ensure-up-to-date-with-mainline || {
+        log-warn "Failed to ensure the branch is up-to-date."  
+        return 1
+    }
+
+    local version_out="" patch_out=""
+    detect-version-to-backport version_out patch_out || {
+        log-warn "Failed to detect version to backport."
+        return 1
+    }
+
+    release_branch="release/${version_out}"
+    if check-release-branch-exists "$release_branch"; then
+        create-backport-branch "$release_branch" "$patch_out"
+    else
+        log-error "Release branch $release_branch does not exist. Exiting."
+        return 1
+    fi
+
+    # Compare current branch dependency versions to mainline branch
+    declare -A modified_dependencies
+    get-modified-dependencies "HEAD" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
+
+    # Compare mainline branch dependency versions to release branch
+    declare -A release_dependencies
+    get-modified-dependencies "$REMOTE/$release_branch" "$REMOTE/$MAINLINE_BRANCH" release_dependencies
+
+    for repo_name in "${!release_dependencies[@]}"; do
+        if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
+            log-info "Dependency $repo_name requires a release branch."
+            # Handle release branch creation and backporting
+            # (Implementation omitted for brevity)
+        fi
+    done
+}
+
 function display-menu() {
     local branch=$(git rev-parse --abbrev-ref HEAD)
     echo -e "==========================="
@@ -432,21 +549,7 @@ while true; do
     read -p "Select an option: " choice
     case $choice in
         1)
-            ensure-up-to-date-with-mainline || {
-                log-warn "Failed to ensure the branch is up-to-date."
-                continue
-            }
-
-            version_out="" patch_out=""
-            detect-version-to-backport version_out patch_out || {
-                log-warn "Failed to detect version to backport."
-                continue
-            }
-
-            release_branch="release/${version_out}"
-            if check-release-branch-exists "$release_branch"; then
-                create-backport-branch "$release_branch" "$patch_out"
-            fi
+            perform-backport || continue
             ;;
         2)
         
