@@ -13,6 +13,7 @@ REMOTE="origin"
 MAINLINE_BRANCH="master"
 ERROR=""
 CURRENT_BRANCH=""
+TICKET_ID=""
 
 ## set verbosity level depending on flag
 if [[ $1 == "-v" ]]; then
@@ -22,6 +23,84 @@ else
 fi
 
 source $logging_utils_path
+
+function set-ticket-id() {
+    local branch_name=$1
+    if [[ $branch_name =~ ([A-Z]{2,6}-[0-9]{1,8}) ]]; then
+        TICKET_ID="${BASH_REMATCH[1]}"
+        log-info "Detected ticket identifier: $TICKET_ID"
+    else
+        log-error "Failed to extract ticket identifier from branch name: $branch_name"
+        exit 1
+    fi
+}
+
+# Ensure we are in the grid repository
+function ensure-in-grid-repo() {
+    local is_quiet=false
+    if [[ $1 == "quiet" ]]; then
+        is_quiet=true
+    fi
+
+    $is_quiet || log-info "Checking if the current directory is a Git repository..."
+    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+        log-warn "You are not in a Git repository."
+        if [[ -z "$GRID_REPO_DIR" ]]; then
+            log-error "GRID_REPO_DIR environment variable is not set. Cannot navigate to the grid repository."
+            exit 1
+        fi
+        read -p "Do you want to navigate to the grid repository at $GRID_REPO_DIR? (y/n): " choice
+        if [[ "$choice" != "y" ]]; then
+            log-error "Aborting script as we are not in the grid repository."
+            exit 1
+        fi
+        cd "$GRID_REPO_DIR" || {
+            log-error "Failed to navigate to $GRID_REPO_DIR."
+            exit 1
+        }
+    fi
+
+    $is_quiet || log-info "Checking if the repository remote contains 'apps/grid.git'..."
+    if ! git remote -v | grep -q "apps/grid.git"; then
+        log-error "The current repository is not the grid repository (missing 'apps/grid.git' in remotes)."
+        exit 1
+    fi
+
+    # Store the GRID_DIR variable for later use
+    GRID_DIR=$(git rev-parse --show-toplevel)
+    $is_quiet || log-info "Grid repository detected at $GRID_DIR."
+}
+
+# Ensure the working directory is clean and extract ticket identifier
+function pre-script-check() {
+    log-info "Performing pre-menu checks..."
+
+    ensure-in-grid-repo
+
+    # Ensure the working directory is clean
+    if [[ -n $(git status --porcelain) ]]; then
+        log-error "Working directory is not clean. Please commit or stash your changes before proceeding."
+        exit 1
+    fi
+
+    # Extract ticket identifier from the branch name
+    local current_branch=$(git rev-parse --abbrev-ref HEAD)
+    set-ticket-id "$current_branch" || exit 1
+
+    # Confirm the branch to work with
+    read -p "Do you want to work with the current branch ($current_branch, Ticket: $TICKET_ID)? (y/n): " choice
+    if [[ "$choice" != "y" ]]; then
+        if ! command -v gchu &> /dev/null; then
+            die 0 "Please check out the branch you wish to backport and re-run the script."
+        fi
+        read -p "Enter the branch pattern to checkout: " branch_pattern
+        gchu "$branch_pattern" ||  die 1 "Failed to checkout branch matching pattern $branch_pattern."
+        current_branch=$(git rev-parse --abbrev-ref HEAD)
+        set-ticket-id "$current_branch" || exit 1
+        log-info "Switched to branch: $current_branch"
+    fi
+    CURRENT_BRANCH=$current_branch
+}
 
 function ensure-up-to-date-with-mainline() {
     title "Ensuring the current branch is up-to-date with its remote and based on $REMOTE/$MAINLINE_BRANCH..."
@@ -316,61 +395,6 @@ function inspect-dependencies() {
     handle-changed-dependencies changed_dependencies mainline_versions
 }
 
-# Ensure we are in the grid repository
-function ensure-in-grid-repo() {
-    local is_quiet=false
-    if [[ $1 == "quiet" ]]; then
-        is_quiet=true
-    fi
-
-    $is_quiet || log-info "Checking if the current directory is a Git repository..."
-    if ! git rev-parse --is-inside-work-tree &>/dev/null; then
-        log-warn "You are not in a Git repository."
-        if [[ -z "$GRID_REPO_DIR" ]]; then
-            log-error "GRID_REPO_DIR environment variable is not set. Cannot navigate to the grid repository."
-            exit 1
-        fi
-        read -p "Do you want to navigate to the grid repository at $GRID_REPO_DIR? (y/n): " choice
-        if [[ "$choice" != "y" ]]; then
-            log-error "Aborting script as we are not in the grid repository."
-            exit 1
-        fi
-        cd "$GRID_REPO_DIR" || {
-            log-error "Failed to navigate to $GRID_REPO_DIR."
-            exit 1
-        }
-    fi
-
-    $is_quiet || log-info "Checking if the repository remote contains 'apps/grid.git'..."
-    if ! git remote -v | grep -q "apps/grid.git"; then
-        log-error "The current repository is not the grid repository (missing 'apps/grid.git' in remotes)."
-        exit 1
-    fi
-
-    # Store the GRID_DIR variable for later use
-    GRID_DIR=$(git rev-parse --show-toplevel)
-    $is_quiet || log-info "Grid repository detected at $GRID_DIR."
-}
-
-# Ensure the current branch is the desired one
-function ensure-correct-branch() {
-    local current_branch=$(git rev-parse --abbrev-ref HEAD)
-    log-info "Current branch: $current_branch"
-    read -p "Is this the branch you wish to backport? (y/n): " choice
-    if [[ "$choice" == "n" ]]; then
-        if ! command -v gchu &> /dev/null; then
-            log-info "Please check out the branch you wish to backport and re-run the script."
-            break
-        fi
-        read -p "Enter the branch pattern to checkout: " branch_pattern
-        gchu "$branch_pattern" ||  die 1 "Failed to checkout branch matching pattern $branch_pattern."
-        current_branch=$(git rev-parse --abbrev-ref HEAD)
-        log-info "Switched to branch: $current_branch"
-    fi
-    CURRENT_BRANCH=$current_branch
-    log-info "You are on the correct branch: $CURRENT_BRANCH."
-}
-
 function display-menu() {
     local branch=$(git rev-parse --abbrev-ref HEAD)
     echo -e "==========================="
@@ -394,8 +418,7 @@ function show-help() {
     echo -e "q. Quit: Exit the script."
 }
 
-ensure-in-grid-repo
-ensure-correct-branch
+pre-script-check || die 1 "Pre-script checks failed."
 clear 
 
 # Main script
