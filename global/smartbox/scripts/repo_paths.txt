@@ -1,0 +1,7 @@
+SpeechEngine=/c/dev/speech
+EyeGaze=/c/dev/eyegaze
+LakeLib=/c/dev/smartboxlink
+GridPhone=/c/dev/gridphone
+Speech=/c/dev/speech
+Shared=/c/dev/shared
+Eriskay=/c/dev/eriskaylib

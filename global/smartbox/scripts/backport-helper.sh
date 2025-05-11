@@ -14,6 +14,17 @@ MAINLINE_BRANCH="master"
 ERROR=""
 CURRENT_BRANCH=""
 TICKET_ID=""
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+
+declare -A PROPS_TO_REPO_MAP=(
+    ["EyeGaze"]="libs/eyegaze.git"
+    ["GridPhone"]="libs/gridphone.git"
+    ["Shared"]="libs/shared.git"
+    ["Speech"]="apps/speech.git"
+    ["Eriskay"]="libs/eriskaylib.git"
+    ["SpeechEngine"]="apps/grid.git"
+    ["LakeLib"]="apps/smartboxlink.git"
+)
 
 ## set verbosity level depending on flag
 if [[ $1 == "-v" ]]; then
@@ -73,7 +84,7 @@ function ensure-in-grid-repo() {
 
 # Ensure the working directory is clean and extract ticket identifier
 function pre-script-check() {
-    log-info "Performing pre-menu checks..."
+    title "Performing pre-menu checks..."
 
     ensure-in-grid-repo
 
@@ -112,6 +123,7 @@ function ensure-up-to-date-with-mainline() {
     log-info "Checking if the current branch is up-to-date with $REMOTE/$MAINLINE_BRANCH..."
     local mainline_tip=$(git rev-parse $REMOTE/$MAINLINE_BRANCH)
     local branch_base=$(git merge-base @ $REMOTE/$MAINLINE_BRANCH)
+    local current_branch=$(git rev-parse --abbrev-ref HEAD)
 
     if [[ "$branch_base" != "$mainline_tip" ]]; then
         log-warn "The working branch $current_branch is not based on the tip of $REMOTE/$MAINLINE_BRANCH."
@@ -127,7 +139,6 @@ function ensure-up-to-date-with-mainline() {
 
     # Check the status of the current working branch
     log-info "Checking the status of the working branch $current_branch relative to its upstream..."
-    local current_branch=$(git rev-parse --abbrev-ref HEAD)
     local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
 
     if [[ -z "$upstream" ]]; then
@@ -241,10 +252,10 @@ function create-backport-branch() {
 }
 
 # Parse the dependency versions from a given props file
-function parse-dependency-versions() {
+function parse-versions-from-props() {
     local git_ref=$1
-    local props_file=$2
-    declare -n versions_ref=$3  # Use a name reference for the output array
+    local props_file="Source/Directory.Build.props"
+    declare -n versions_ref=$2  # Use a name reference for the output array
 
     log-info "Parsing dependency versions from $props_file at ref $git_ref..."
 
@@ -261,36 +272,11 @@ function parse-dependency-versions() {
         local version=$(echo "$line" | grep -oP '\[.*?\]' | tr -d '[]')
         if [[ -n "$repo_name" && -n "$version" ]]; then
             versions_ref["$repo_name"]="$version"
-            VERBOSE && log-info "Found dependency: $repo_name with version $version"
+            $VERBOSE && log-info "Found dependency: $repo_name with version $version"
         fi
     done < <(echo "$file_contents" | grep -oP '<\w+Version>\[.*?\]</\w+Version>')
 
     log-success "Parsed dependency versions from $props_file at ref $git_ref."
-}
-
-# Compare dependency versions between current and mainline
-function compare-dependency-versions() {
-    declare -n current=$1  # Reference to the current branch's versions
-    declare -n mainline=$2  # Reference to the mainline branch's versions
-    declare -n changed=$3  # Reference to the output array for changed dependencies
-
-    log-info "Comparing dependency versions..."
-    for repo_name in "${!current[@]}"; do
-        local current_version=${current["$repo_name"]}
-        local mainline_version=${mainline["$repo_name"]}
-        if [[ "$current_version" != "$mainline_version" ]]; then
-            log-warn "Version mismatch for $repo_name: current=$current_version, $MAINLINE_BRANCH=$mainline_version"
-            changed["$repo_name"]="$current_version"
-        fi
-    done
-
-    if [[ ${#changed[@]} -eq 0 ]]; then
-        log-info "No dependency version changes detected."
-        return 1
-    fi
-
-    log-success "Dependency version changes detected."
-    return 0
 }
 
 # Handle changed dependencies and allow the user to create branches
@@ -372,23 +358,53 @@ function handle-changed-dependencies() {
     done
 }
 
-# Main inspect_dependencies function
 function inspect-dependencies() {
 
-    log-info "Inspecting dependencies for changes..."
+    title "Inspecting dependencies for changes..."
+    ensure-up-to-date-with-mainline || {
+        log-warn "Failed to ensure the branch is up-to-date."  
+        return 1
+    }
+
+    local version_out="" patch_out=""
+    detect-version-to-backport version_out patch_out || {
+        log-warn "Failed to detect version to backport."
+        return 1
+    }
+
+    release_branch="release/${version_out}"
+    if check-release-branch-exists "$release_branch"; then
+        create-backport-branch "$release_branch" "$patch_out"
+    else
+        log-error "Release branch $release_branch does not exist. Exiting."
+        return 1
+    fi
+
+    declare -A modified_dependencies
+    compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
+
+    if [[ ${#modified_dependencies[@]} -eq 0 ]]; then
+        log-info "No dependencies that require release branches found."
+        return 0
+    fi
+
+    for repo_name in "${!modified_dependencies[@]}"; do
+        log-info "Dependency $repo_name requires a release branch."
+    done
+
     grid_dir=$(git rev-parse --show-toplevel)
     local props_file="Source/Directory.Build.props"
 
-    # Parse current branch's dependency versions
+    #Parse current branch's dependency versions
     declare -A current_versions
     local current_head=$(git rev-parse HEAD)
-    parse-dependency-versions $current_head "$props_file" current_versions || die 1 "Failed to parse dependency versions for $current_branch."
+    parse-versions-from-props $current_head "$props_file" current_versions || die 1 "Failed to parse dependency versions for $current_branch."
 
     declare -A mainline_versions
     local mainline_head=$(git rev-parse $REMOTE/$MAINLINE_BRANCH)
-    parse-dependency-versions $mainline_head "$props_file" mainline_versions || die 1 "Failed to parse dependency versions for $REMOTE/$MAINLINE_BRANCH."
+    parse-versions-from-props $mainline_head "$props_file" mainline_versions || die 1 "Failed to parse dependency versions for $REMOTE/$MAINLINE_BRANCH."
 
-    # Compare versions and handle changes
+    #Compare versions and handle changes
     declare -A changed_dependencies
     compare-dependency-versions current_versions mainline_versions changed_dependencies
 
@@ -396,26 +412,53 @@ function inspect-dependencies() {
 }
 
 function get-modified-dependencies() {
-    local git_ref1=$1
-    local git_ref2=$2
-    local props_file="Source/Directory.Build.Props"
-    declare -n modified_dependencies=$3
-
-    log-info "Comparing dependencies between $git_ref1 and $git_ref2..."
-
-    # Parse dependencies for both refs
-    declare -A versions_ref1
-    declare -A versions_ref2
-    parse-dependency-versions "$git_ref1" "$props_file" versions_ref1
-    parse-dependency-versions "$git_ref2" "$props_file" versions_ref2
+    declare -n versions_ref1=$1
+    declare -n versions_ref2=$2
+    declare -n modified=$3
 
     # Compare dependencies
     for repo_name in "${!versions_ref1[@]}"; do
         if [[ "${versions_ref1[$repo_name]}" != "${versions_ref2[$repo_name]}" ]]; then
-            modified_dependencies["$repo_name"]="${versions_ref1[$repo_name]}"
-            log-info "Dependency modified: $repo_name (Version: ${versions_ref1[$repo_name]} -> ${versions_ref2[$repo_name]})"
+            modified["$repo_name"]="${versions_ref1[$repo_name]}"
+            $VERBOSE && log-info "Dependency modified: $repo_name ($1: ${versions_ref1[$repo_name]} -> $2: ${versions_ref2[$repo_name]})"
         fi
     done
+}
+
+function compare-modified-dependencies() {
+    local release_branch=$1
+    local mainline_branch=$2
+    declare -n requires_release_branch=$3
+    local props_file="Source/Directory.Build.props"
+
+    declare -A modified_dependencies
+    declare -A release_dependencies
+    
+    local current_head=$(git rev-parse HEAD)
+    local mainline_head=$(git rev-parse "$REMOTE/$MAINLINE_BRANCH")
+    local release_head=$(git rev-parse "$REMOTE/$release_branch")
+    declare -A head_versions
+    declare -A mainline_versions
+    declare -A release_versions
+    parse-versions-from-props "$current_head" head_versions
+    parse-versions-from-props "$mainline_head" mainline_versions
+    parse-versions-from-props "$release_head" release_versions
+
+    # Compare current branch dependency versions to mainline branch
+    get-modified-dependencies head_versions mainline_versions modified_dependencies
+
+    # Compare mainline branch dependency versions to release branch
+    get-modified-dependencies release_versions mainline_versions release_dependencies
+
+    for repo_name in "${!release_dependencies[@]}"; do
+        if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
+            log-info "Dependency $repo_name requires a release branch."
+            requires_release_branch["$repo_name"]="${modified_dependencies[$repo_name]}"
+            # Handle release branch creation and backporting
+            # (Implementation omitted for brevity)
+        fi
+    done
+
 }
 
 # Handle rebase conflicts
@@ -450,32 +493,9 @@ function handle-rebase-conflicts() {
     done
 }
 
-function compare-modified-dependencies() {
-    local release_branch=$1
-    local mainline_branch=$2
-    declare -A requires_release_branch
-
-    # Compare current branch dependency versions to mainline branch
-    declare -A modified_dependencies
-    get-modified-dependencies "HEAD" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
-
-    # Compare mainline branch dependency versions to release branch
-    declare -A release_dependencies
-    get-modified-dependencies "$REMOTE/$release_branch" "$REMOTE/$MAINLINE_BRANCH" release_dependencies
-
-    for repo_name in "${!release_dependencies[@]}"; do
-        if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
-            log-info "Dependency $repo_name requires a release branch."
-            requires_release_branch["$repo_name"]="${modified_dependencies[$repo_name]}"
-            # Handle release branch creation and backporting
-            # (Implementation omitted for brevity)
-        fi
-
-}
-
 # Perform a backport
 function perform-backport() {
-    log-info "Performing backport for branch $CURRENT_BRANCH..."
+    title "Performing backport for branch $CURRENT_BRANCH..."
     ensure-up-to-date-with-mainline || {
         log-warn "Failed to ensure the branch is up-to-date."  
         return 1
@@ -495,21 +515,25 @@ function perform-backport() {
         return 1
     fi
 
-    # Compare current branch dependency versions to mainline branch
     declare -A modified_dependencies
-    get-modified-dependencies "HEAD" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
+    compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
 
-    # Compare mainline branch dependency versions to release branch
-    declare -A release_dependencies
-    get-modified-dependencies "$REMOTE/$release_branch" "$REMOTE/$MAINLINE_BRANCH" release_dependencies
+    if [[ ${#modified_dependencies[@]} -eq 0 ]]; then
+        log-info "No dependencies that require release branches found."
+        return 0
+    fi
 
-    for repo_name in "${!release_dependencies[@]}"; do
-        if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
-            log-info "Dependency $repo_name requires a release branch."
-            # Handle release branch creation and backporting
-            # (Implementation omitted for brevity)
-        fi
+    for repo_name in "${!modified_dependencies[@]}"; do
+        log-info "Dependency $repo_name requires a release branch."
     done
+
+    # for repo_name in "${!release_dependencies[@]}"; do
+    #     if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
+    #         log-info "Dependency $repo_name requires a release branch."
+    #         # Handle release branch creation and backporting
+    #         # (Implementation omitted for brevity)
+    #     fi
+    # done
 }
 
 function display-menu() {
@@ -518,6 +542,7 @@ function display-menu() {
     echo -e "${COLOR_BLUE}Backport Helper Menu. Branch -> ${branch}:${COLOR_RESET}"
     echo -e "${COLOR_GREEN}1. Backport current branch${COLOR_RESET}"
     echo -e "${COLOR_GREEN}2. Inspect dependencies for changes${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}3. Perform individual actions${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}h. Show help${COLOR_RESET}"
     echo -e "${COLOR_YELLOW}q. Quit${COLOR_RESET}"
     echo -e "==========================="
@@ -533,6 +558,35 @@ function show-help() {
     echo -e "2. Inspect dependencies for changes: Check for dependency version changes."
     echo -e "h. Show help: Display this help message."
     echo -e "q. Quit: Exit the script."
+}
+
+function show-sub-menu() {
+    echo -e "${COLOR_YELLOW}Sub-menu options:${COLOR_RESET}"
+    echo -e "1. Check for necessary repos"
+    echo -e "b. return to main menu"
+    echo -e "q. Quit"
+
+    read -p "Select an option: " choice
+    case $choice in
+        1)
+            log-info "${COLOR_YELLOW}Checking for necessary repositories...${COLOR_RESET}"
+            if [[ ! -d "$SCRIPT_DIR/repo_path_checker.sh" ]]; then
+                log-error "$SCRIPT_DIR/repo_path_checker.sh not found. Please check the path."
+                return 1
+            fi
+            $SCRIPT_DIR/repo_path_checker.sh
+            ;;
+        b|B)
+            return 0
+            ;;
+        q|Q)
+            log-info "Exiting Backport Helper."
+            exit 0
+            ;;
+        *)
+            log-warn "Invalid choice. Please try again."
+            ;;
+    esac
 }
 
 pre-script-check || die 1 "Pre-script checks failed."
@@ -552,13 +606,17 @@ while true; do
             perform-backport || continue
             ;;
         2)
+            inspect-dependencies || continue
         
-            ensure-in-grid-repo "quiet"
-            ensure-up-to-date-with-mainline || {
-                log-warn "Failed to ensure the branch is up-to-date."
-                continue
-            }
-            inspect-dependencies
+            # ensure-in-grid-repo "quiet"
+            # ensure-up-to-date-with-mainline || {
+            #     log-warn "Failed to ensure the branch is up-to-date."
+            #     continue
+            # }
+            # inspect-dependencies
+            ;;
+        3) 
+            show-sub-menu
             ;;
         h|H)
             show-help
