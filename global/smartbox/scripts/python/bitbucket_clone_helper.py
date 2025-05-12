@@ -100,9 +100,25 @@ def repo_menu(project_key, clone_root, auth_header):
                     print(f"{COLOR_GREEN_BOLD}Successfully cloned {repo_name}.{COLOR_RESET}\n")
                 else:
                     print(f"{COLOR_RED_BOLD}Failed to clone {repo_name}. Exit code: {result.returncode}{COLOR_RESET}\n")
+
+                current_dir = os.getcwd()
+                os.chdir(repo_path)
+                print(f"{COLOR_YELLOW}Do you want to turn on git maintenance for {repo_name}? (y/n): {COLOR_RESET}")
+                choice = input().strip().lower()
+                if choice == 'y':
+                    result = subprocess.run(["git", "maintenance", "start"])
+                    if result.returncode == 0:
+                        print(f"{COLOR_GREEN_BOLD}Git maintenance turned on for {repo_name}.{COLOR_RESET}\n")
+                    else:
+                        print(f"{COLOR_RED_BOLD}Failed to turn on git maintenance for {repo_name}. Exit code: {result.returncode}{COLOR_RESET}\n")
+                else:
+                    print(f"{COLOR_YELLOW}Skipped turning on git maintenance for {repo_name}.{COLOR_RESET}\n")
+
+                os.chdir(current_dir)
             
             else:
                 print(f"{COLOR_YELLOW_BOLD}Repository {repo_name} already exists at {repo_path}{COLOR_RESET}\n")
+
         else:
             print(f"{COLOR_RED_BOLD}Invalid choice. Please try again.{COLOR_RESET}\n")
 
