@@ -15,6 +15,12 @@ ERROR=""
 CURRENT_BRANCH=""
 TICKET_ID=""
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
+HELPER_SCRIPTS="$SCRIPT_DIR/backport_helper_tools"
+REPO_CHECKER_SCRIPT="$HELPER_SCRIPTS/repo_path_checker.sh"
+REPO_PATH_CACHE="$HELPER_SCRIPTS/repo_paths.txt"
+declare -A HEAD_VERSIONS
+declare -A MAINLINE_VERSIONS
+declare -A RELEASE_VERSIONS
 
 declare -A PROPS_TO_REPO_MAP=(
     ["EyeGaze"]="libs/eyegaze.git"
@@ -99,17 +105,17 @@ function pre-script-check() {
     set-ticket-id "$current_branch" || exit 1
 
     # Confirm the branch to work with
-    read -p "Do you want to work with the current branch ($current_branch, Ticket: $TICKET_ID)? (y/n): " choice
-    if [[ "$choice" != "y" ]]; then
-        if ! command -v gchu &> /dev/null; then
-            die 0 "Please check out the branch you wish to backport and re-run the script."
-        fi
-        read -p "Enter the branch pattern to checkout: " branch_pattern
-        gchu "$branch_pattern" ||  die 1 "Failed to checkout branch matching pattern $branch_pattern."
-        current_branch=$(git rev-parse --abbrev-ref HEAD)
-        set-ticket-id "$current_branch" || exit 1
-        log-info "Switched to branch: $current_branch"
-    fi
+    # read -p "Do you want to work with the current branch ($current_branch, Ticket: $TICKET_ID)? (y/n): " choice
+    # if [[ "$choice" != "y" ]]; then
+    #     if ! command -v gchu &> /dev/null; then
+    #         die 0 "Please check out the branch you wish to backport and re-run the script."
+    #     fi
+    #     read -p "Enter the branch pattern to checkout: " branch_pattern
+    #     gchu "$branch_pattern" ||  die 1 "Failed to checkout branch matching pattern $branch_pattern."
+    #     current_branch=$(git rev-parse --abbrev-ref HEAD)
+    #     set-ticket-id "$current_branch" || exit 1
+    #     log-info "Switched to branch: $current_branch"
+    # fi
     CURRENT_BRANCH=$current_branch
 }
 
@@ -241,7 +247,7 @@ function create-backport-branch() {
 
     local branch_base_commit=$(git merge-base @ $REMOTE/$MAINLINE_BRANCH)
     log-info "Rebasing ${new_branch} onto $release_branch skipping commits from the merge base $branch_base_commit..."
-    git rebase -i --onto "$release_branch" $branch_base_commit "$new_branch" || die 1 "Interactive rebase failed. Resolve conflicts and try again."
+    git rebase -i --onto "$release_branch" $branch_base_commit "$new_branch" || handle-rebase-conflicts
 
     read -p "Do you want to push the new branch ${new_branch} to $REMOTE? (y/n): " choice
     if [[ "$choice" != "y" ]]; then
@@ -256,8 +262,6 @@ function parse-versions-from-props() {
     local git_ref=$1
     local props_file="Source/Directory.Build.props"
     declare -n versions_ref=$2  # Use a name reference for the output array
-
-    log-info "Parsing dependency versions from $props_file at ref $git_ref..."
 
     # Get the contents of the file at the specified Git ref
     local file_contents
@@ -282,7 +286,6 @@ function parse-versions-from-props() {
 # Handle changed dependencies and allow the user to create branches
 function handle-changed-dependencies() {
     declare -n changed_dependencies=$1
-    declare -n mainline_versions=$2
 
     log-info "Listing changed dependencies..."
     PS3="Select a dependency to create a branch for (or type 'q' to quit): "
@@ -292,12 +295,29 @@ function handle-changed-dependencies() {
             continue
         fi
 
-        # Navigate to the repository
-        local repo_path="C:/dev/$repo_name"
-        if [[ ! -d "$repo_path" ]]; then
-            log-error "Repository $repo_name not found at $repo_path."
-            break
+        $REPO_CHECKER_SCRIPT $repo_name --suppress-info
+        # get repo path from repo_paths.txt
+        declare -A repo_paths
+
+        if [[ -f $REPO_PATH_CACHE ]]; then
+            while IFS='=' read -r key value; do
+                repo_paths["$key"]="$value"
+            done < "$REPO_PATH_CACHE"
+        else
+            # error and continue
+            log-error "Could not find $REPO_PATH_CACHE data file. Skipping $repo_name..."
+            continue
         fi
+
+        local repo_path=repo_paths["$repo_name"]
+        log-info "Using repo path of $repo_path"
+
+        # Navigate to the repository
+        # local repo_path="C:/dev/$repo_name"
+        # if [[ ! -d "$repo_path" ]]; then
+        #     log-error "Repository $repo_name not found at $repo_path."
+        #     break
+        # fi
         cd "$repo_path" || {
             log-error "Failed to navigate to $repo_path."
             break
@@ -324,15 +344,15 @@ function handle-changed-dependencies() {
         ensure-up-to-date-with-mainline
 
         # Check for release branches
-        local release_branch="release/${mainline_versions["$repo_name"]}"
+        local release_branch="release/${MAINLINE_VERSIONS["$repo_name"]}"
         if git ls-remote --heads $REMOTE "$release_branch" | grep -q "$release_branch"; then
             log-info "Release branch $release_branch exists."
         else
             log-warn "Release branch $release_branch does not exist."
-            log-info "Looking for tags matching version ${mainline_versions["$repo_name"]}..."
-            local tags=$(git tag -l "*${mainline_versions["$repo_name"]}*")
+            log-info "Looking for tags matching version ${MAINLINE_VERSIONS["$repo_name"]}..."
+            local tags=$(git tag -l "*${MAINLINE_VERSIONS["$repo_name"]}*")
             if [[ -z "$tags" ]]; then
-                log-error "No tags found matching version ${mainline_versions["$repo_name"]}."
+                log-error "No tags found matching version ${MAINLINE_VERSIONS["$repo_name"]}."
                 break
             fi
             log-info "Found tags: $tags"
@@ -356,59 +376,6 @@ function handle-changed-dependencies() {
         git rebase -i "$release_branch" || log-error "Interactive rebase failed. Resolve conflicts and try again."
         break
     done
-}
-
-function inspect-dependencies() {
-
-    title "Inspecting dependencies for changes..."
-    ensure-up-to-date-with-mainline || {
-        log-warn "Failed to ensure the branch is up-to-date."  
-        return 1
-    }
-
-    local version_out="" patch_out=""
-    detect-version-to-backport version_out patch_out || {
-        log-warn "Failed to detect version to backport."
-        return 1
-    }
-
-    release_branch="release/${version_out}"
-    if check-release-branch-exists "$release_branch"; then
-        create-backport-branch "$release_branch" "$patch_out"
-    else
-        log-error "Release branch $release_branch does not exist. Exiting."
-        return 1
-    fi
-
-    declare -A modified_dependencies
-    compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
-
-    if [[ ${#modified_dependencies[@]} -eq 0 ]]; then
-        log-info "No dependencies that require release branches found."
-        return 0
-    fi
-
-    for repo_name in "${!modified_dependencies[@]}"; do
-        log-info "Dependency $repo_name requires a release branch."
-    done
-
-    grid_dir=$(git rev-parse --show-toplevel)
-    local props_file="Source/Directory.Build.props"
-
-    #Parse current branch's dependency versions
-    declare -A current_versions
-    local current_head=$(git rev-parse HEAD)
-    parse-versions-from-props $current_head "$props_file" current_versions || die 1 "Failed to parse dependency versions for $current_branch."
-
-    declare -A mainline_versions
-    local mainline_head=$(git rev-parse $REMOTE/$MAINLINE_BRANCH)
-    parse-versions-from-props $mainline_head "$props_file" mainline_versions || die 1 "Failed to parse dependency versions for $REMOTE/$MAINLINE_BRANCH."
-
-    #Compare versions and handle changes
-    declare -A changed_dependencies
-    compare-dependency-versions current_versions mainline_versions changed_dependencies
-
-    handle-changed-dependencies changed_dependencies mainline_versions
 }
 
 function get-modified-dependencies() {
@@ -437,25 +404,23 @@ function compare-modified-dependencies() {
     local current_head=$(git rev-parse HEAD)
     local mainline_head=$(git rev-parse "$REMOTE/$MAINLINE_BRANCH")
     local release_head=$(git rev-parse "$REMOTE/$release_branch")
-    declare -A head_versions
-    declare -A mainline_versions
-    declare -A release_versions
-    parse-versions-from-props "$current_head" head_versions
-    parse-versions-from-props "$mainline_head" mainline_versions
-    parse-versions-from-props "$release_head" release_versions
+    parse-versions-from-props "$current_head" HEAD_VERSIONS
+    parse-versions-from-props "$mainline_head" MAINLINE_VERSIONS
+    parse-versions-from-props "$release_head" RELEASE_VERSIONS
 
     # Compare current branch dependency versions to mainline branch
-    get-modified-dependencies head_versions mainline_versions modified_dependencies
+    get-modified-dependencies HEAD_VERSIONS MAINLINE_VERSIONS modified_dependencies
 
     # Compare mainline branch dependency versions to release branch
-    get-modified-dependencies release_versions mainline_versions release_dependencies
+    get-modified-dependencies RELEASE_VERSIONS MAINLINE_VERSIONS release_dependencies
 
     for repo_name in "${!release_dependencies[@]}"; do
         if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
-            log-info "Dependency $repo_name requires a release branch."
             requires_release_branch["$repo_name"]="${modified_dependencies[$repo_name]}"
-            # Handle release branch creation and backporting
-            # (Implementation omitted for brevity)
+            # Show the versions at the different refs to demonstrate the need for a release branch
+            # log-info "Dependency $repo_name requires a release branch."
+            # log-info "Versions: HEAD: ${HEAD_VERSIONS[$repo_name]}, Mainline: ${MAINLINE_VERSIONS[$repo_name]}, Release: ${RELEASE_VERSIONS[$repo_name]}"
+
         fi
     done
 
@@ -515,25 +480,67 @@ function perform-backport() {
         return 1
     fi
 
-    declare -A modified_dependencies
-    compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified_dependencies
+    declare -A modified
+    compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified
 
-    if [[ ${#modified_dependencies[@]} -eq 0 ]]; then
+    for repo_name in "${!modified[@]}"; do
+        log-info "Dependency $repo_name requires a release branch."
+        log-info "Versions: HEAD: ${HEAD_VERSIONS[$repo_name]}, Mainline: ${MAINLINE_VERSIONS[$repo_name]}, Release: ${RELEASE_VERSIONS[$repo_name]}"
+    done
+
+     if [[ ${#modified[@]} -eq 0 ]]; then
         log-info "No dependencies that require release branches found."
         return 0
     fi
 
-    for repo_name in "${!modified_dependencies[@]}"; do
-        log-info "Dependency $repo_name requires a release branch."
-    done
+    handle-changed-dependencies modified
 
+    # Handle release branch creation and backporting
+    # (Implementation omitted for brevity)
     # for repo_name in "${!release_dependencies[@]}"; do
-    #     if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
+    #     if [[ -n "${modified[$repo_name]}" ]]; then
     #         log-info "Dependency $repo_name requires a release branch."
     #         # Handle release branch creation and backporting
     #         # (Implementation omitted for brevity)
     #     fi
     # done
+}
+
+function inspect-dependencies() {
+
+    title "Inspecting dependencies for changes..."
+
+    read -p "Do you want to get up-to-date with the mainline (y/n)? " choice
+    if [[ "$choice" == "y" ]]; then
+        ensure-up-to-date-with-mainline || {
+            log-warn "Failed to ensure the branch is up-to-date."  
+            return 1
+        }
+    fi
+
+    local version_out="" patch_out=""
+    detect-version-to-backport version_out patch_out || {
+        log-warn "Failed to detect version to backport."
+        return 1
+    }
+
+    release_branch="release/${version_out}"
+    check-release-branch-exists "$release_branch"
+
+    declare -A modified
+    compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified
+
+    for repo_name in "${!modified[@]}"; do
+        log-info "Dependency $repo_name requires a release branch."
+        log-info "Versions: HEAD: ${HEAD_VERSIONS[$repo_name]}, Mainline: ${MAINLINE_VERSIONS[$repo_name]}, Release: ${RELEASE_VERSIONS[$repo_name]}"
+    done
+
+     if [[ ${#modified[@]} -eq 0 ]]; then
+        log-info "No dependencies that require release branches found."
+        return 0
+    fi
+
+    #handle-changed-dependencies modified
 }
 
 function display-menu() {
@@ -570,11 +577,12 @@ function show-sub-menu() {
     case $choice in
         1)
             log-info "${COLOR_YELLOW}Checking for necessary repositories...${COLOR_RESET}"
-            if [[ ! -d "$SCRIPT_DIR/repo_path_checker.sh" ]]; then
-                log-error "$SCRIPT_DIR/repo_path_checker.sh not found. Please check the path."
+            if [[ ! -f "$REPO_CHECKER_SCRIPT" ]]; then
+                log-error "$REPO_CHECKER_SCRIPT not found. Please check the path."
                 return 1
             fi
-            $SCRIPT_DIR/repo_path_checker.sh
+
+            $REPO_CHECKER_SCRIPT
             ;;
         b|B)
             return 0

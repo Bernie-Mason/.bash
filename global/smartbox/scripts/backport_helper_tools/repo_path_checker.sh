@@ -10,20 +10,8 @@ COLOR_RED="\033[1;31m"
 COLOR_RESET="\033[0m"
 SUPPRESS_ERRORS=false
 SUPPRESS_INFO=false
-
-while test $# -gt 0; do
-  case "$1" in
-    -s|--suppress-errors)
-        SUPPRESS_ERRORS=true;
-        shift
-        ;;  
-    -i|--suppress-info)
-        SUPPRESS_INFO=true;
-        shift
-        ;;
-esac
-done
-
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+OUTPUT="$SCRIPT_DIR/repo_paths.txt"
 
 source $logging_utils_path
 
@@ -37,8 +25,24 @@ declare -A PROPS_TO_REPO_MAP=(
     ["LakeLib"]="apps/smartboxlink.git"
 )
 
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
-OUTPUT="$SCRIPT_DIR/repo_paths.txt"
+REPO_TO_CHECK=$1
+
+while test $# -gt 0; do
+    case "$1" in
+        -s|--suppress-errors)
+            SUPPRESS_ERRORS=true;
+            shift
+            ;;  
+        -i|--suppress-info)
+            SUPPRESS_INFO=true;
+            shift
+            ;;
+        *)
+            shift
+            continue
+            ;;
+    esac
+done
 
 function validate-repo-path() {
     local repo_path=$1
@@ -60,6 +64,32 @@ function validate-repo-path() {
     return 0
 }
 
+function get-valid-repo-path() {
+    local repo_name=$1
+    $SUPPRESS_INFO || log-info "Checking for $repo_name with value ${PROPS_TO_REPO_MAP[$repo_name]}" 
+
+    if [[ -n "${REPO_PATHS[$repo_name]}" ]]; then
+        validate-repo-path "${REPO_PATHS[$repo_name]}" "$repo_name"
+        if [[ $? -ne 0 ]]; then
+            $SUPPRESS_ERRORS || log-error "$repo_name exists in ${REPO_PATHS[$repo_name]} but is invalid. Removing from $OUTPUT."
+            sed -i "/$repo_name=/d" $OUTPUT
+        else
+            $SUPPRESS_INFO || log-info "$repo_name exists in $OUTPUT and is valid."
+            return 0 
+        fi
+    fi
+
+    read -p "Enter path to the $repo_name repository: " repo_path
+    echo "Validating $repo_name at $repo_path..."
+    validate-repo-path "$repo_path" "$repo_name" || { 
+        $SUPPRESS_ERRORS || log-error "Validation failed for $repo_name at $repo_path. Exiting."
+        exit 1
+    }
+    $SUPPRESS_INFO || log-info "Validation passed for $repo_name at $repo_path."
+    
+    echo "$repo_name=$repo_path" >> $OUTPUT
+}
+
 declare -A REPO_PATHS
 
 if [[ -f $OUTPUT ]]; then
@@ -71,26 +101,21 @@ if [[ -f $OUTPUT ]]; then
     done < "$OUTPUT"
 fi
 
-for repo_name in "${!PROPS_TO_REPO_MAP[@]}"; do
-    $SUPPRESS_INFO || log-info "Checking for $repo_name with value ${PROPS_TO_REPO_MAP[$repo_name]}" 
-
-    if [[ -n "${REPO_PATHS[$repo_name]}" ]]; then
-        validate-repo-path "${REPO_PATHS[$repo_name]}" "$repo_name"
-        if [[ $? -ne 0 ]]; then
-            $SUPPRESS_ERRORS || log-error "$repo_name exists in ${REPO_PATHS[$repo_name]} but is invalid. Removing from $OUTPUT."
-            sed -i "/$repo_name=/d" $OUTPUT
-        else
-            $SUPPRESS_INFO || log-info "Skipping $repo_name as it is already in the $OUTPUT file and is valid."
-            continue 
-        fi
+if [[ ! -z "$REPO_TO_CHECK" ]]; then
+    if [[ ! ${PROPS_TO_REPO_MAP[$REPO_TO_CHECK]} ]]; then
+        log-error "Error: Invalid repository name '$REPO_TO_CHECK'."
+        ## Display valid repository names
+        ## and exit with error code 1
+        log-info "Valid repository names (case sensitive) are:"
+        for repo_name in "${!PROPS_TO_REPO_MAP[@]}"; do
+            log-info " -> $repo_name"
+        done
+        exit 1
     fi
 
-    read -p "Enter the path to the $repo_name repository: " repo_path
-    validate-repo-path "$repo_path" "$repo_name" || { 
-        $SUPPRESS_ERRORS || log-error "Validation failed for $repo_name at $repo_path. Exiting."
-        exit 1
-    }
-    $SUPPRESS_INFO || log-info "Validation passed for $repo_name at $repo_path."
-    
-    echo "$repo_name=$repo_path" >> $OUTPUT
-done
+    get-valid-repo-path "$REPO_TO_CHECK"
+else
+    for repo_name in "${!PROPS_TO_REPO_MAP[@]}"; do
+        get-valid-repo-path "$repo_name"
+    done
+fi
