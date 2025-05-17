@@ -51,6 +51,10 @@ function die() {
 }
 
 function validate-git-repo(){
+<<<<<<< HEAD
+=======
+    $VERBOSE && title "Validating git repository..."
+>>>>>>> task/test
     # Check if we are in a git repository
     if ! git rev-parse --is-inside-work-tree &>/dev/null; then
         die 1 "Not in a git repository. Exiting."
@@ -69,10 +73,19 @@ function validate-git-repo(){
             die 1 "Please commit or stash your changes before running this script."
         fi
     fi
+<<<<<<< HEAD
+=======
+
+    $VERBOSE && log-info "Git repository validated."
+>>>>>>> task/test
 }
 
 # If not target branch argument provided then we discover the default branch
 function set-target-branch-as-default() {
+<<<<<<< HEAD
+=======
+    $VERBOSE && title "Setting target branch as default..."
+>>>>>>> task/test
     TARGET_BRANCH=$(git branch --list "main" "master" | head -n 1 | sed 's/^[* ] //')
     if [ -z "$TARGET_BRANCH" ]; then
         die 1 "Error: No branches found in the repository."
@@ -89,9 +102,18 @@ function set-target-branch-as-default() {
             esac
         done
     fi
+<<<<<<< HEAD
 }
 
 function rebase-onto-target() {
+=======
+    $VERBOSE && log-info "Using target branch: $TARGET_BRANCH"
+}
+
+function rebase-onto-target() {
+    $VERBOSE && title "Rebasing the current branch $CURRENT_BRANCH onto $TARGET_BRANCH..."
+
+>>>>>>> task/test
     # Fetch the latest changes from the remote to ensure we are syncing our branch with the latest changes of the target branch
     $VERBOSE && log-info "Fetching the latest changes from $REMOTE..."
     git fetch -q $REMOTE || die 1 "Failed to fetch from $REMOTE."
@@ -109,13 +131,22 @@ function rebase-onto-target() {
         else
             $VERBOSE && log-warn "Skipping rebase onto $REMOTE/$TARGET_BRANCH."
         fi
+<<<<<<< HEAD
     else
         $VERBOSE && log-info "The working branch $CURRENT_BRANCH is based on the tip of $REMOTE/$TARGET_BRANCH."
+=======
+    else            
+        $VERBOSE && log-info "No rebase action required as the working branch $CURRENT_BRANCH is already based on the tip of $REMOTE/$TARGET_BRANCH."
+>>>>>>> task/test
     fi
 }
 
 function set-remote()
 {
+<<<<<<< HEAD
+=======
+    $VERBOSE && title "Setting remote..."
+>>>>>>> task/test
     # Get the remote name. Check if there are multiple remotes and prompt the user to choose one.
     if [[ $(git remote | wc -l) -gt 1 ]]; then
         log-info "Multiple remotes found. Please choose one:"
@@ -127,7 +158,11 @@ function set-remote()
         REMOTE=$(git remote)
     fi
 
+<<<<<<< HEAD
     echo "Using remote: $REMOTE"
+=======
+    $VERBOSE && log-info "Using remote: $REMOTE"
+>>>>>>> task/test
 }
 
 function check-branch-against-upstream() {
@@ -177,6 +212,11 @@ function check-branch-against-upstream() {
             $VERBOSE && log-warn "Skipping rebase operation."
         fi
     fi
+<<<<<<< HEAD
+=======
+
+    $VERBOSE && log-info "Branch $CURRENT_BRANCH checked against upstream $upstream."
+>>>>>>> task/test
 }
 
 validate-git-repo
