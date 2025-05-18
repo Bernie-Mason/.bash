@@ -9,25 +9,32 @@ VERBOSE=false
 REMOTE=""
 TARGET_BRANCH=""
 CURRENT_BRANCH=""
+UPSTREAM=""
 CHANGES_STASHED=false
+DID_REBASE=false
+SYNC_UPSTREAM=false
 
 source $logging_utils_path
+source $git_utils_path
+
 function help() {
-    log-info "Usage: $0 [-v] [-h] [branch]"
-    log-info "  -v|-V: Enable verbose mode"
-    log-info "  -h|-H: Enable verbose mode"
+    log-info "Usage: $0 [-u] [-v] [-h] [branch]"
+    log-info "  -u|-upstream: Sync the current branch with its upstream branch"
+    log-info "  -v|-verbose: Enable verbose mode"
+    log-info "  -h|-help: show this help message"
     log-info "  branch: The branch to rebase onto (default if none specific: main or master)"
     log-info "  If both main and master branches exist, you will be prompted to choose one."
-    die 0 "Exiting."
+    die 0 ""
 }
 
 # Handle optional arguments. All arguments are optional.
 # switch through the arguments
-while getopts ":Vverbose:Hhelp" opt; do
+while getopts ":verbose:help:upstream" opt; do
     case $opt in
-        V|v|verbose) VERBOSE=true ;;
-        H|h|help) help; ;;
-        \?) help; ;;
+        v|verbose) VERBOSE=true ;;
+        u|upstream) SYNC_UPSTREAM=true; ;;
+        h|help) help ;;
+        \?) help ;;
     esac
 done
 shift $((OPTIND - 1))
@@ -38,11 +45,6 @@ else
     TARGET_BRANCH=""
 fi
 
-# print arguments
-# log-info "TARGET_BRANCH: $TARGET_BRANCH"
-# log-info "verbose: $VERBOSE"
-# exit
-
 function die() {
     local exit_code=$1
     shift
@@ -51,10 +53,7 @@ function die() {
 }
 
 function validate-git-repo(){
-<<<<<<< HEAD
-=======
     $VERBOSE && title "Validating git repository..."
->>>>>>> task/test
     # Check if we are in a git repository
     if ! git rev-parse --is-inside-work-tree &>/dev/null; then
         die 1 "Not in a git repository. Exiting."
@@ -73,19 +72,13 @@ function validate-git-repo(){
             die 1 "Please commit or stash your changes before running this script."
         fi
     fi
-<<<<<<< HEAD
-=======
 
     $VERBOSE && log-info "Git repository validated."
->>>>>>> task/test
 }
 
 # If not target branch argument provided then we discover the default branch
 function set-target-branch-as-default() {
-<<<<<<< HEAD
-=======
     $VERBOSE && title "Setting target branch as default..."
->>>>>>> task/test
     TARGET_BRANCH=$(git branch --list "main" "master" | head -n 1 | sed 's/^[* ] //')
     if [ -z "$TARGET_BRANCH" ]; then
         die 1 "Error: No branches found in the repository."
@@ -102,18 +95,12 @@ function set-target-branch-as-default() {
             esac
         done
     fi
-<<<<<<< HEAD
-}
-
-function rebase-onto-target() {
-=======
     $VERBOSE && log-info "Using target branch: $TARGET_BRANCH"
 }
 
 function rebase-onto-target() {
     $VERBOSE && title "Rebasing the current branch $CURRENT_BRANCH onto $TARGET_BRANCH..."
 
->>>>>>> task/test
     # Fetch the latest changes from the remote to ensure we are syncing our branch with the latest changes of the target branch
     $VERBOSE && log-info "Fetching the latest changes from $REMOTE..."
     git fetch -q $REMOTE || die 1 "Failed to fetch from $REMOTE."
@@ -128,25 +115,18 @@ function rebase-onto-target() {
         read -p "Do you want to rebase $CURRENT_BRANCH onto $REMOTE/$TARGET_BRANCH? (y/n): " choice
         if [[ "$choice" == "y" ]]; then
             git rebase -q $REMOTE/$TARGET_BRANCH || die 1 "Rebase onto $REMOTE/$TARGET_BRANCH failed. Resolve conflicts and try again."
+            DID_REBASE=true
         else
             $VERBOSE && log-warn "Skipping rebase onto $REMOTE/$TARGET_BRANCH."
         fi
-<<<<<<< HEAD
-    else
-        $VERBOSE && log-info "The working branch $CURRENT_BRANCH is based on the tip of $REMOTE/$TARGET_BRANCH."
-=======
     else            
         $VERBOSE && log-info "No rebase action required as the working branch $CURRENT_BRANCH is already based on the tip of $REMOTE/$TARGET_BRANCH."
->>>>>>> task/test
     fi
 }
 
-function set-remote()
+function set-git-parameters()
 {
-<<<<<<< HEAD
-=======
-    $VERBOSE && title "Setting remote..."
->>>>>>> task/test
+    $VERBOSE && title "Setting remote and finding upstream..."
     # Get the remote name. Check if there are multiple remotes and prompt the user to choose one.
     if [[ $(git remote | wc -l) -gt 1 ]]; then
         log-info "Multiple remotes found. Please choose one:"
@@ -158,65 +138,69 @@ function set-remote()
         REMOTE=$(git remote)
     fi
 
-<<<<<<< HEAD
-    echo "Using remote: $REMOTE"
-=======
+    $SYNC_UPSTREAM && UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+
     $VERBOSE && log-info "Using remote: $REMOTE"
->>>>>>> task/test
 }
 
-function check-branch-against-upstream() {
-    $VERBOSE && log-info "Checking the status of the working branch $CURRENT_BRANCH relative to its upstream..."
-    local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-
-    if [[ -z "$upstream" ]]; then
+function ensure-upstream-branch() {
+    $VERBOSE && title "Ensuring upstream branch is set..."
+    # Check if the upstream branch is set
+    if [[ -z "$UPSTREAM" ]]; then
         $VERBOSE && log-warn "No upstream branch set for $CURRENT_BRANCH."
         read -p "Do you want to you want to push your current branch? (y/n): " choice
         if [[ "$choice" == "y" ]]; then
             git push || die 1 "Failed to set upstream branch."
-            upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+            UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+            return 0
         else
             $VERBOSE && log-warn "Skipping upstream branch setup."
             return 0
         fi
     fi
+}
+
+function check-current-branch-against-upstream() {
+    $VERBOSE && log-info "Checking the status of the working branch $CURRENT_BRANCH relative to its upstream..."
+    
+    if [[ -z "$UPSTREAM" ]]; then
+        log-info "No upstream branch set for $CURRENT_BRANCH. Skipping check."
+        return 0
+    fi
 
     local local_commit=$(git rev-parse @) # Current commit of the working branch
-    local remote_commit=$(git rev-parse "$upstream") # Current commit of the upstream branch
-    local base_commit=$(git merge-base @ "$upstream") # Common ancestor of the working branch and upstream
+    local remote_commit=$(git rev-parse "$UPSTREAM") # Current commit of the upstream branch
+    local base_commit=$(git merge-base @ "$UPSTREAM") # Common ancestor of the working branch and upstream
 
     if [[ "$local_commit" == "$remote_commit" ]]; then
-        $VERBOSE && log-info "The working branch $CURRENT_BRANCH is up-to-date with $upstream."
+        $VERBOSE && log-info "The working branch $CURRENT_BRANCH is up-to-date with $UPSTREAM."
     elif [[ "$local_commit" == "$base_commit" ]]; then
-        $VERBOSE && log-warn "The working branch $CURRENT_BRANCH is behind $upstream."
-        read -p "Do you want to pull the latest changes from $upstream? (y/n): " choice
+        $VERBOSE && log-warn "The working branch $CURRENT_BRANCH is behind $UPSTREAM."
+        read -p "Do you want to pull the latest changes from $UPSTREAM? (y/n): " choice
         if [[ "$choice" == "y" ]]; then
-            git pull || die 1 "Failed to pull changes from $upstream."
+            git pull || die 1 "Failed to pull changes from $UPSTREAM."
         else
             $VERBOSE && log-warn "Skipping pull operation."
         fi
     elif [[ "$remote_commit" == "$base_commit" ]]; then
-        $VERBOSE && log-warn "The working branch $CURRENT_BRANCH is ahead of $upstream."
-        read -p "Do you want to push your changes to $upstream? (y/n): " choice
+        $VERBOSE && log-warn "The working branch $CURRENT_BRANCH is ahead of $UPSTREAM."
+        read -p "Do you want to push your changes to $UPSTREAM? (y/n): " choice
         if [[ "$choice" == "y" ]]; then
-            git push || die 1 "Failed to push changes to $upstream."
+            git push || die 1 "Failed to push changes to $UPSTREAM."
         else
             $VERBOSE && log-warn "Skipping push operation."
         fi
     else
-        $VERBOSE && log-warn "The working branch $CURRENT_BRANCH has diverged from $upstream."
-        read -p "Do you want to rebase onto $upstream? (y/n): " choice
+        $VERBOSE && log-warn "The working branch $CURRENT_BRANCH has diverged from $UPSTREAM."
+        read -p "Do you want to rebase onto $UPSTREAM? (y/n): " choice
         if [[ "$choice" == "y" ]]; then
-            git rebase "$upstream" || die 1 "Rebase failed. Resolve conflicts and try again."
+            git rebase "$UPSTREAM" || die 1 "Rebase failed. Resolve conflicts and try again."
         else
             $VERBOSE && log-warn "Skipping rebase operation."
         fi
     fi
-<<<<<<< HEAD
-=======
 
-    $VERBOSE && log-info "Branch $CURRENT_BRANCH checked against upstream $upstream."
->>>>>>> task/test
+    $VERBOSE && log-info "Branch $CURRENT_BRANCH checked against upstream $UPSTREAM."
 }
 
 validate-git-repo
@@ -232,9 +216,74 @@ if [ "$CURRENT_BRANCH" == "$TARGET_BRANCH" ]; then
     die 1 "No need to update the current branch ($TARGET_BRANCH) onto itself."
 fi
 
-set-remote
+set-git-parameters
+
+if [[ ! -z "$UPSTREAM" ]]; then
+    status=$(get-upstream-status)
+    case "$status" in
+        "no-upstream")
+            log-warn "No upstream branch set for $CURRENT_BRANCH. Skipping check."
+            ;;
+        "up-to-date")
+            log-info "The working branch $CURRENT_BRANCH is up-to-date with $UPSTREAM."
+            ;;
+        "behind")
+            log-warn "The working branch $CURRENT_BRANCH is behind $UPSTREAM."
+            read -p "Do you want to pull the latest changes from $UPSTREAM? (y/n): " choice
+            if [[ "$choice" == "y" ]]; then
+                git pull || die 1 "Failed to pull changes from $UPSTREAM."
+            else
+                log-warn "Skipping pull operation."
+            fi
+            ;;
+        "ahead")
+            log-warn "The working branch $CURRENT_BRANCH is ahead of $UPSTREAM."
+            read -p "Do you want to push your changes to $UPSTREAM? (y/n): " choice
+            if [[ "$choice" == "y" ]]; then
+                git push || die 1 "Failed to push changes to $UPSTREAM."
+            else
+                log-warn "Skipping push operation."
+            fi
+            ;;
+        "diverged")
+            log-warn "The working branch $CURRENT_BRANCH has diverged from $UPSTREAM."
+            read -p "Do you want to rebase onto $UPSTREAM? (y/n): " choice
+            if [[ "$choice" == "y" ]]; then
+                git rebase "$UPSTREAM" || die 1 "Rebase failed. Resolve conflicts and try again."
+            else
+                log-warn "Skipping rebase operation."
+            fi
+            ;;
+        *)
+            log-warn "Unknown upstream status: $status"
+            ;;
+    esac
+fi
+
 rebase-onto-target
-check-branch-against-upstream
+
+if [ $SYNC_UPSTREAM = true ]; then
+    if [[ -z "$UPSTREAM" ]]; then
+        ensure-upstream-branch
+    else
+        if [ "$DID_REBASE" = true ]; then
+            local local_commit=$(git rev-parse @) # Current commit of the working branch
+            local remote_commit=$(git rev-parse "$UPSTREAM") # Current commit of the upstream branch
+
+            if [[ "$local_commit" != "$remote_commit" ]]; then
+                $VERBOSE && log-info "As we have rebased the current branch $CURRENT_BRANCH onto $TARGET_BRANCH, we need to push the changes to the remote branch."
+                read -p "Do you want to push (force-with-lease) the changes to $UPSTREAM? (y/n): " choice
+                if [[ "$choice" == "y" ]]; then
+                    git push --force-with-lease || die 1 "Failed to push changes to $UPSTREAM."
+                else
+                    $VERBOSE && log-warn "Skipping push operation."
+                fi
+            fi
+        else
+            check-current-branch-against-upstream
+        fi
+    fi
+fi
 
 if [ "$CHANGES_STASHED" = true ]; then
     git stash pop || die 1 "Failed to apply stashed changes."

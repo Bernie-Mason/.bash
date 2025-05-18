@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # ~/.bashrc
 #
@@ -15,6 +16,7 @@
 
 function source_all_bash_files(){
 	local FOLDER_TO_BE_SOURCED=${HOME}/.bash/${HOSTNAME}/sourceable
+	# find all files in directory and subdirectories
 	for i in $(find $FOLDER_TO_BE_SOURCED -type f); do
 		. $i
 	done;

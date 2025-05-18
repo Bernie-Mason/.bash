@@ -10,3 +10,24 @@
 #         git diff "$@"
 #     fi
 # }
+
+function get-upstream-status() {
+    local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+    if [[ -z "$upstream" ]]; then
+        echo "no-upstream"
+    fi
+
+    local local_commit=$(git rev-parse @) # Current commit of the working branch
+    local remote_commit=$(git rev-parse "$upstream") # Current commit of the upstream branch
+    local base_commit=$(git merge-base @ "$upstream") # Common ancestor of the working branch and upstream
+
+    if [[ "$local_commit" == "$remote_commit" ]]; then
+        echo "up-to-date"
+    elif [[ "$local_commit" == "$base_commit" ]]; then
+        echo "behind"
+    elif [[ "$remote_commit" == "$base_commit" ]]; then
+        echo "ahead"
+    else
+        echo "diverged"
+    fi
+}
