@@ -53,15 +53,15 @@ function die() {
 
 function validate-git-repo(){
     $VERBOSE && title "Validating git repository..."
-    # Check if we are in a git repository
+
+    $VERBOSE && log-info "Checking for git repository..."
     if ! git rev-parse --is-inside-work-tree &>/dev/null; then
         die 1 "Not in a git repository. Exiting."
     fi
 
-    # Check if there are any uncommitted changes
+    $VERBOSE && log-info "Checking for uncommitted changes..."
     if ! git diff-index --quiet HEAD --; then
         log-warn "There are uncommitted changes."
-        # Offer to stash changes
         read -p "Do you want to stash them? (y/n): " choice
         if [[ "$choice" == "y" ]]; then
             git stash || die 1 "Failed to stash changes."
@@ -75,7 +75,44 @@ function validate-git-repo(){
     $VERBOSE && log-info "Git repository validated."
 }
 
-# If not target branch argument provided then we discover the default branch
+function set-git-parameters()
+{
+    $VERBOSE && title "Setting current branch, remote and finding upstream..."
+    
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    if [ "$CURRENT_BRANCH" == "$TARGET_BRANCH" ]; then
+        die 1 "No need to update the current branch ($TARGET_BRANCH) onto itself."
+    fi
+    $VERBOSE && log-info "Current branch: $CURRENT_BRANCH"
+
+    if [[ $(git remote | wc -l) -gt 1 ]]; then
+        log-info "Multiple remotes found. Please choose one:"
+        select remote in $(git remote); do
+            REMOTE=$remote
+            break
+        done
+    else
+        REMOTE=$(git remote)
+    fi
+
+    if [[ -z "$REMOTE" ]]; then
+        $SYNC_UPSTREAM = false
+        $VERBOSE && log-warn "No remote found. Skipping upstream branch setup."
+    else
+        $VERBOSE && log-info "Remote: $REMOTE"
+    fi
+
+    if [ $SYNC_UPSTREAM = true ]; then
+        $SYNC_UPSTREAM && UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+
+        if [[ -z "$UPSTREAM" ]]; then
+            $VERBOSE && log-warn "No upstream branch found."
+        else
+            $VERBOSE && log-info "Upstream branch: $UPSTREAM"
+        fi
+    fi
+}
+
 function set-target-branch-as-default() {
     $VERBOSE && title "Setting target branch as default..."
     TARGET_BRANCH=$(git branch --list "main" "master" | head -n 1 | sed 's/^[* ] //')
@@ -118,9 +155,16 @@ function rebase-onto-target() {
 
     if [[ "$branch_base" != "$target_tip" ]]; then
         log-info "The working branch $CURRENT_BRANCH is not based on the tip of $rebase_target."
+        # read -p "How would you like to rebase? (interactive/normal): " rebase_type
+        # case $rebase_type in
+        #     interactive|normal) ;;
+        #     *) die 0 "Invalid rebase type. Exiting." ;;
+        # esac
+
+
         read -p "Do you want to rebase $CURRENT_BRANCH onto $rebase_target? (y/n): " choice
         if [[ "$choice" == "y" ]]; then
-            git rebase -q $rebase_target || die 1 "Rebase onto $rebase_target failed. Resolve conflicts and try again."
+            git rebase -i $rebase_target || die 1 "Rebase onto $rebase_target failed. Resolve conflicts and try again."
             log-success "Successfully rebased $CURRENT_BRANCH onto $rebase_target."
         else
             die 0 "Skipping rebase onto $rebase_target."
@@ -128,35 +172,6 @@ function rebase-onto-target() {
     else            
         $VERBOSE && log-info "No rebase action required as the working branch $CURRENT_BRANCH is already based on the tip of $REMOTE/$TARGET_BRANCH."
     fi
-}
-
-function set-git-parameters()
-{
-    $VERBOSE && title "Setting current branch, remote and finding upstream..."
-    
-    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-    if [ "$CURRENT_BRANCH" == "$TARGET_BRANCH" ]; then
-        die 1 "No need to update the current branch ($TARGET_BRANCH) onto itself."
-    fi
-
-    if [[ $(git remote | wc -l) -gt 1 ]]; then
-        log-info "Multiple remotes found. Please choose one:"
-        select remote in $(git remote); do
-            REMOTE=$remote
-            break
-        done
-    else
-        REMOTE=$(git remote)
-    fi
-
-    if [[ -z "$REMOTE" ]]; then
-        $SYNC_UPSTREAM = false
-        $VERBOSE && log-warn "No remote found. Skipping upstream branch setup."
-    fi
-
-    $SYNC_UPSTREAM && UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-
-    $VERBOSE && log-info "Using remote: $REMOTE"
 }
 
 function ensure-upstream-branch() {
@@ -214,7 +229,7 @@ if [ $SYNC_UPSTREAM = true ]; then
         # and we need to force push the changes to the remote branch. However, if no rebase occured
         # then we need to check the status of the upstream branch and offer to pull or push changes
         status=$(get-upstream-status)
-        switch "$status" in
+        case "$status" in
             "no-upstream") ;;
             "up-to-date") ;;
             "behind")

@@ -1,32 +1,31 @@
 #!/bin/bash
-# Color variables
-COLOR_BLUE="\033[1;34m"
-COLOR_GREEN="\033[1;32m"
-COLOR_YELLOW="\033[1;33m"
-COLOR_RED="\033[1;31m"
-COLOR_RESET="\033[0m"
+
 LAST_ERROR_MESSAGE=""
+TITLE_COUNT=0
+SUB_TITLE_COUNT=0
+INDENTATION=1
+# Colours from env
 
 log-info() {
-    echo -e "${COLOR_BLUE}[INFO]${COLOR_RESET} $1"
+    echo -e "${IBlue}$(printf ' %.0s' $(seq 1 $INDENTATION))INFO:${Color_Off} $1"
 }
 
 log-warn() {
-    echo -e "${COLOR_YELLOW}[WARN]${COLOR_RESET} $1"
+    echo -e "${Yellow}$(printf ' %.0s' $(seq 1 $INDENTATION))WARN:${Color_Off} $1"
 }
 
 log-error() {
     LAST_ERROR_MESSAGE="$1"
-    echo -e "${COLOR_RED}[ERROR]${COLOR_RESET} $1" >&2
+    echo -e "${Red}$(printf ' %.0s' $(seq 1 $INDENTATION))ERROR:${Color_Off} $1" >&2
 }
 
 log-success() {
-    echo -e "${COLOR_GREEN}[SUCCESS]${COLOR_RESET} $1"
+    echo -e "${Green}$(printf ' %.0s' $(seq 1 $INDENTATION))SUCCESS:${Color_Off} $1"
 }
 
 get-last-error() {
     if [[ $1 == "format" ]]; then
-      echo -e "${COLOR_RED}[ERROR]${COLOR_RESET} $LAST_ERROR_MESSAGE"
+      echo -e "${Red}$(printf ' %.0s' $(seq 1 $INDENTATION))ERROR:${Color_Off} $LAST_ERROR_MESSAGE"
     else
       echo "$LAST_ERROR_MESSAGE"
     fi
@@ -42,6 +41,37 @@ function die() {
 }
 
 function title() {
-  echo -e "${Green}>> $@"${NC} >&2
-  echo ""
+  INDENTATION=1
+  TITLE_COUNT=$((TITLE_COUNT + 1))
+  echo -e "${IGreen}$(printf ' %.0s' $(seq 1 $INDENTATION))$TITLE_COUNT - $1${Color_Off}" #\033[93;100m - \033[95;100;1m
+  ## When printing a title we wish to set the indentation to 2 spaces. All logging functions should respect this.
+  INDENTATION=3
+  ## We also reset the sub title count
+  SUB_TITLE_COUNT=0
+}
+
+function subtitle() {
+  INDENTATION=3
+  echo -e "${Green}$(printf ' %.0s' $(seq 1 $INDENTATION))$TITLE_COUNT.$SUB_TITLE_COUNT - $1${Color_Off}"
+  SUB_TITLE_COUNT=$((SUB_TITLE_COUNT + 1))
+  INDENTATION=5
+}
+
+function sample() {
+  ## Regiular colours
+  echo -e "Regular colours"
+  for i in $(seq 40 47); do
+    for j in $(seq 30 37); do
+      echo -e "\033[${i};${j}m Regular: ${i};${j} \033[0m  \033[${i};${j};1m Bold: ${i};${j} \033[0m  \033[${i};${j};4m Underline: ${i};${j} \033[0m"
+      echo -e ""
+    done
+  done
+
+  echo -e "High Intensity colours"
+  for i in $(seq 100 107); do
+    for j in $(seq 90 97); do
+      echo -e "\033[${i};${j}m High Intensity: ${i};${j} \033[0m  \033[${i};${j};1m Bold: ${i};${j} \033[0m"
+      echo -e ""
+    done
+  done
 }

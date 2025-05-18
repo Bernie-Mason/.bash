@@ -3,6 +3,11 @@
 # A script to assist with backporting branches to release branches.
 # Author: Bernie
 # Date: 2025-05-04
+#
+# Dependencies:
+# - scripts
+# - gchu
+# - git-base-update
 
 COLOR_BLUE="\033[1;34m"
 COLOR_GREEN="\033[1;32m"
@@ -117,80 +122,6 @@ function pre-script-check() {
     #     log-info "Switched to branch: $current_branch"
     # fi
     CURRENT_BRANCH=$current_branch
-}
-
-function ensure-up-to-date-with-mainline() {
-    title "Ensuring the current branch is up-to-date with its remote and based on $REMOTE/$MAINLINE_BRANCH..."
-
-    # Fetch the latest changes from the remote
-    git fetch -q $REMOTE || die 1 "Failed to fetch from $REMOTE."
-
-    # Check if the current branch is based on the tip of the mainline branch
-    log-info "Checking if the current branch is up-to-date with $REMOTE/$MAINLINE_BRANCH..."
-    local mainline_tip=$(git rev-parse $REMOTE/$MAINLINE_BRANCH)
-    local branch_base=$(git merge-base @ $REMOTE/$MAINLINE_BRANCH)
-    local current_branch=$(git rev-parse --abbrev-ref HEAD)
-
-    if [[ "$branch_base" != "$mainline_tip" ]]; then
-        log-warn "The working branch $current_branch is not based on the tip of $REMOTE/$MAINLINE_BRANCH."
-        read -p "Do you want to rebase $current_branch onto $REMOTE/$MAINLINE_BRANCH? (y/n): " choice
-        if [[ "$choice" == "y" ]]; then
-            git rebase -q $REMOTE/$MAINLINE_BRANCH || die 1 "Rebase onto $REMOTE/$MAINLINE_BRANCH failed. Resolve conflicts and try again."
-        else
-            log-warn "Skipping rebase onto $REMOTE/$MAINLINE_BRANCH."
-        fi
-    else
-        log-info "The working branch $current_branch is based on the tip of $REMOTE/$MAINLINE_BRANCH."
-    fi
-
-    # Check the status of the current working branch
-    log-info "Checking the status of the working branch $current_branch relative to its upstream..."
-    local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-
-    if [[ -z "$upstream" ]]; then
-        log-warn "No upstream branch set for $current_branch."
-        read -p "Do you want to you want to push your current branch? (y/n): " choice
-        if [[ "$choice" == "y" ]]; then
-            git push || die 1 "Failed to set upstream branch."
-            upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-        else
-            log-warn "Skipping upstream branch setup."
-            return 0
-        fi
-    fi
-
-    # Check if the working branch is behind or ahead of its upstream
-    local local_commit=$(git rev-parse @)
-    local remote_commit=$(git rev-parse "$upstream")
-    local base_commit=$(git merge-base @ "$upstream")
-
-    if [[ "$local_commit" == "$remote_commit" ]]; then
-        log-info "The working branch $current_branch is up-to-date with $upstream."
-    elif [[ "$local_commit" == "$base_commit" ]]; then
-        log-warn "The working branch $current_branch is behind $upstream."
-        read -p "Do you want to pull the latest changes from $upstream? (y/n): " choice
-        if [[ "$choice" == "y" ]]; then
-            git pull || die 1 "Failed to pull changes from $upstream."
-        else
-            log-warn "Skipping pull operation."
-        fi
-    elif [[ "$remote_commit" == "$base_commit" ]]; then
-        log-warn "The working branch $current_branch is ahead of $upstream."
-        read -p "Do you want to push your changes to $upstream? (y/n): " choice
-        if [[ "$choice" == "y" ]]; then
-            git push || die 1 "Failed to push changes to $upstream."
-        else
-            log-warn "Skipping push operation."
-        fi
-    else
-        log-warn "The working branch $current_branch has diverged from $upstream."
-        read -p "Do you want to rebase onto $upstream? (y/n): " choice
-        if [[ "$choice" == "y" ]]; then
-            git rebase "$upstream" || die 1 "Rebase failed. Resolve conflicts and try again."
-        else
-            log-warn "Skipping rebase operation."
-        fi
-    fi
 }
 
 function detect-version-to-backport() {
@@ -461,7 +392,8 @@ function handle-rebase-conflicts() {
 # Perform a backport
 function perform-backport() {
     title "Performing backport for branch $CURRENT_BRANCH..."
-    ensure-up-to-date-with-mainline || {
+    title "Ensuring the current branch is up-to-date with its remote and based on $REMOTE/$MAINLINE_BRANCH..."
+    git-base-update -upstream || {
         log-warn "Failed to ensure the branch is up-to-date."  
         return 1
     }
@@ -512,7 +444,7 @@ function inspect-dependencies() {
 
     read -p "Do you want to get up-to-date with the mainline (y/n)? " choice
     if [[ "$choice" == "y" ]]; then
-        ensure-up-to-date-with-mainline || {
+        git-base-update -upstream || {
             log-warn "Failed to ensure the branch is up-to-date."  
             return 1
         }
