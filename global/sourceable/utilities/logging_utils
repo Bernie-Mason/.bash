@@ -41,6 +41,11 @@ function die() {
 }
 
 function title() {
+  if [[ $2 == "reset-count" ]]; then
+    TITLE_COUNT=0
+    SUB_TITLE_COUNT=0
+  fi
+
   INDENTATION=1
   TITLE_COUNT=$((TITLE_COUNT + 1))
   echo -e "${IGreen}$(printf ' %.0s' $(seq 1 $INDENTATION))$TITLE_COUNT - $1${Color_Off}" #\033[93;100m - \033[95;100;1m
@@ -57,7 +62,61 @@ function subtitle() {
   INDENTATION=5
 }
 
-function sample() {
+function read-user-input() {
+    local prompt="$1"
+    local input
+    local -a valid_options=()
+    if [[ -n "$2" ]]; then
+        # If a second argument is provided, treat it as the name of an array variable
+        declare -n options_ref="$2"
+        valid_options=("${options_ref[@]}")
+    fi
+
+    while true; do
+        printf "${IYellow}$prompt${Color_Off} " >&2
+        read input
+        if [[ ${#valid_options[@]} -eq 0 ]]; then
+            echo "$input"
+            return
+        else
+            for option in "${valid_options[@]}"; do
+                if [[ "$input" == "$option" ]]; then
+                    echo "$input"
+                    return
+                fi
+            done
+            # If we reach here, input was not valid; re-prompt
+        fi
+    done
+}
+
+function read-user-choice() {
+    local prompt="$1"
+    local -a options=()
+    local input
+
+    # Get the options array by name
+    declare -n options_ref="$2"
+    options=("${options_ref[@]}")
+
+    # Print the numbered list
+    echo -e "${IYellow}$prompt${Color_Off}" >&2 # Print prompt to stderr. Hack to avoid printing to stdout with interactive prompts
+    for i in "${!options[@]}"; do
+        printf "  ${Yellow}%d) %s${Color_Off}\n" "$((i+1))" "${options[$i]}" >&2
+    done
+
+    while true; do
+        printf "Enter the number of your choice: " >&2
+        read input
+        if [[ "$input" =~ ^[0-9]+$ ]] && (( input >= 1 && input <= ${#options[@]} )); then
+            echo "${options[$((input-1))]}"
+            return
+        fi
+        # Invalid input, re-prompt
+    done
+}
+
+function sample_colours() {
   ## Regiular colours
   echo -e "Regular colours"
   for i in $(seq 40 47); do

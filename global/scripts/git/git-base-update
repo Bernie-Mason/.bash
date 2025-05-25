@@ -12,6 +12,7 @@ CURRENT_BRANCH=""
 UPSTREAM=""
 CHANGES_STASHED=false
 SYNC_UPSTREAM=false
+YES_NO=("y" "n")
 
 source $logging_utils_path
 source $git_utils_path
@@ -44,6 +45,18 @@ else
     TARGET_BRANCH=""
 fi
 
+function log-info-verbose() {
+    if [ "$VERBOSE" = true ]; then
+        log-info "$@"
+    fi
+}
+
+function log-warn-verbose() {
+    if [ "$VERBOSE" = true ]; then
+        log-warn "$@"
+    fi
+}
+
 function die() {
     local exit_code=$1
     shift
@@ -54,15 +67,16 @@ function die() {
 function validate-git-repo(){
     $VERBOSE && title "Validating git repository..."
 
-    $VERBOSE && log-info "Checking for git repository..."
+    log-info-verbose "Checking for git repository..."
     if ! git rev-parse --is-inside-work-tree &>/dev/null; then
         die 1 "Not in a git repository. Exiting."
     fi
 
-    $VERBOSE && log-info "Checking for uncommitted changes..."
+    log-info-verbose "Checking for uncommitted changes..."
     if ! git diff-index --quiet HEAD --; then
         log-warn "There are uncommitted changes."
-        read -p "Do you want to stash them? (y/n): " choice
+
+        choice=$(read-user-input "Do you want to stash them? (y/n) " YES_NO)
         if [[ "$choice" == "y" ]]; then
             git stash || die 1 "Failed to stash changes."
             CHANGES_STASHED=true
@@ -72,7 +86,7 @@ function validate-git-repo(){
         fi
     fi
 
-    $VERBOSE && log-info "Git repository validated."
+    log-info-verbose "Git repository validated."
 }
 
 function set-git-parameters()
@@ -83,7 +97,7 @@ function set-git-parameters()
     if [ "$CURRENT_BRANCH" == "$TARGET_BRANCH" ]; then
         die 1 "No need to update the current branch ($TARGET_BRANCH) onto itself."
     fi
-    $VERBOSE && log-info "Current branch: $CURRENT_BRANCH"
+    log-info-verbose "Current branch: $CURRENT_BRANCH"
 
     if [[ $(git remote | wc -l) -gt 1 ]]; then
         log-info "Multiple remotes found. Please choose one:"
@@ -97,18 +111,18 @@ function set-git-parameters()
 
     if [[ -z "$REMOTE" ]]; then
         $SYNC_UPSTREAM = false
-        $VERBOSE && log-warn "No remote found. Skipping upstream branch setup."
+        log-warn-verbose "No remote found. Skipping upstream branch setup."
     else
-        $VERBOSE && log-info "Remote: $REMOTE"
+        log-info-verbose "Remote: $REMOTE"
     fi
 
     if [ $SYNC_UPSTREAM = true ]; then
         $SYNC_UPSTREAM && UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
 
         if [[ -z "$UPSTREAM" ]]; then
-            $VERBOSE && log-warn "No upstream branch found."
+            log-warn-verbose "No upstream branch found."
         else
-            $VERBOSE && log-info "Upstream branch: $UPSTREAM"
+            log-info-verbose "Upstream branch: $UPSTREAM"
         fi
     fi
 }
@@ -131,7 +145,7 @@ function set-target-branch-as-default() {
             esac
         done
     fi
-    $VERBOSE && log-info "Using target branch: $TARGET_BRANCH"
+    log-info-verbose "Using target branch: $TARGET_BRANCH"
 }
 
 function rebase-onto-target() {
@@ -140,16 +154,16 @@ function rebase-onto-target() {
     local rebase_target=""
     if [[ ! -z "$REMOTE" ]]; then
         # Fetch the latest changes from the remote to ensure we are syncing our branch with the latest changes of the target branch
-        $VERBOSE && log-info "Fetching the latest changes from $REMOTE..."
+        log-info-verbose "Fetching the latest changes from $REMOTE..."
         git fetch -q $REMOTE $TARGET_BRANCH || die 1 "Failed to fetch from $REMOTE."
         rebase_target="$REMOTE/$TARGET_BRANCH"
     else
-        $VERBOSE && log-warn "No remote found. Rebasing on to local branch only."
+        log-warn-verbose "No remote found. Rebasing on to local branch only."
         rebase_target="$TARGET_BRANCH"
     fi
 
     # Check if the current branch is based on the tip of the mainline branch
-    $VERBOSE && log-info "Checking if the current branch is up-to-date with $rebase_target..."
+    log-info-verbose "Checking if the current branch is up-to-date with $rebase_target..."
     local target_tip=$(git rev-parse $rebase_target)
     local branch_base=$(git merge-base @ $rebase_target)
 
@@ -161,8 +175,7 @@ function rebase-onto-target() {
         #     *) die 0 "Invalid rebase type. Exiting." ;;
         # esac
 
-
-        read -p "Do you want to rebase $CURRENT_BRANCH onto $rebase_target? (y/n): " choice
+        choice=$(read-user-input "Do you want to rebase $CURRENT_BRANCH onto $rebase_target?" YES_NO)
         if [[ "$choice" == "y" ]]; then
             git rebase -i $rebase_target || die 1 "Rebase onto $rebase_target failed. Resolve conflicts and try again."
             log-success "Successfully rebased $CURRENT_BRANCH onto $rebase_target."
@@ -170,7 +183,7 @@ function rebase-onto-target() {
             die 0 "Skipping rebase onto $rebase_target."
         fi
     else            
-        $VERBOSE && log-info "No rebase action required as the working branch $CURRENT_BRANCH is already based on the tip of $REMOTE/$TARGET_BRANCH."
+        log-info-verbose "No rebase action required as the working branch $CURRENT_BRANCH is already based on the tip of $REMOTE/$TARGET_BRANCH."
     fi
 }
 
@@ -178,14 +191,14 @@ function ensure-upstream-branch() {
     $VERBOSE && title "Ensuring upstream branch is set..."
     # Check if the upstream branch is set
     if [[ -z "$UPSTREAM" ]]; then
-        $VERBOSE && log-warn "No upstream branch set for $CURRENT_BRANCH."
-        read -p "Do you want to you want to push your current branch? (y/n): " choice
+        log-warn-verbose "No upstream branch set for $CURRENT_BRANCH."
+        choice=$(read-user-input "Do you want to set the upstream branch for $CURRENT_BRANCH?" YES_NO)
         if [[ "$choice" == "y" ]]; then
             git push || die 1 "Failed to set upstream branch."
             UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
             return 0
         else
-            $VERBOSE && log-warn "Skipping upstream branch setup."
+            log-warn-verbose "Skipping upstream branch setup."
             return 0
         fi
     fi
@@ -203,19 +216,19 @@ if [[ ! -z "$UPSTREAM" ]]; then
     status=$(get-upstream-status)
     case "$status" in
         "no-upstream") ;;
-        "up-to-date") $VERBOSE && log-info "The working branch $CURRENT_BRANCH is up-to-date with $UPSTREAM." ;;
+        "up-to-date") log-info-verbose "The working branch $CURRENT_BRANCH is up-to-date with $UPSTREAM." ;;
         "behind")
             log-warn "The working branch $CURRENT_BRANCH is behind $UPSTREAM. Before you rebase, you may want to pull the latest changes."
-            read -p "Do you want to pull the latest changes from $UPSTREAM? (y/n): " choice
+            choice=$(read-user-input "Do you want to pull the latest changes from $UPSTREAM?" YES_NO)
             if [[ "$choice" == "y" ]]; then
                 git pull || die 1 "Failed to pull changes from $UPSTREAM."
             else
                 log-warn "Skipping pull operation."
             fi
             ;;
-        "ahead") $VERBOSE && log-warn "The working branch $CURRENT_BRANCH is ahead of $UPSTREAM." ;;
-        "diverged") $VERBOSE && log-warn "The working branch $CURRENT_BRANCH has diverged from $UPSTREAM.";;
-        *) $VERBOSE && log-warn "Unknown upstream status: $status" ;;
+        "ahead") log-warn-verbose "The working branch $CURRENT_BRANCH is ahead of $UPSTREAM." ;;
+        "diverged") log-warn-verbose "The working branch $CURRENT_BRANCH has diverged from $UPSTREAM.";;
+        *) log-warn-verbose "Unknown upstream status: $status" ;;
     esac
 fi
 
@@ -233,30 +246,30 @@ if [ $SYNC_UPSTREAM = true ]; then
             "no-upstream") ;;
             "up-to-date") ;;
             "behind")
-                $VERBOSE && log-warn "The working branch $CURRENT_BRANCH is behind $UPSTREAM."
-                read -p "Do you want to pull the latest changes from $UPSTREAM? (y/n): " choice
+                log-warn-verbose "The working branch $CURRENT_BRANCH is behind $UPSTREAM."
+                choice=$(read-user-input "Do you want to pull the latest changes from $UPSTREAM?" YES_NO)
                 if [[ "$choice" == "y" ]]; then
                     git pull || die 1 "Failed to pull changes from $UPSTREAM."
                 else
-                    $VERBOSE && log-warn "Skipping pull operation."
+                    log-warn-verbose "Skipping pull operation."
                 fi
                 ;;
             "ahead")
-                $VERBOSE && log-warn "The working branch $CURRENT_BRANCH is ahead of $UPSTREAM."
-                read -p "Do you want to push your changes to $UPSTREAM? (y/n): " choice
+                log-warn-verbose "The working branch $CURRENT_BRANCH is ahead of $UPSTREAM."
+                choice=$(read-user-input "Do you want to push your changes to $UPSTREAM?" YES_NO)
                 if [[ "$choice" == "y" ]]; then
                     git push || die 1 "Failed to push changes to $UPSTREAM."
                 else
-                    $VERBOSE && log-warn "Skipping push operation."
+                    log-warn-verbose "Skipping push operation."
                 fi
                 ;;
             "diverged")
                     log-info "As we have rebased the current branch $CURRENT_BRANCH onto $TARGET_BRANCH, we need to push the changes to the remote branch."
-                    read -p "Do you want to push (force-with-lease) the changes to $UPSTREAM? (y/n): " choice
+                    choice=$(read-user-input "Do you want to push (force-with-lease) the changes to $UPSTREAM? (y/n):" YES_NO)
                     if [[ "$choice" == "y" ]]; then
                         git push --force-with-lease || die 1 "Failed to push changes to $UPSTREAM."
                     else
-                        $VERBOSE && log-warn "Skipping push operation."
+                        log-warn-verbose "Skipping push operation."
                     fi
                 ;;
             *)
@@ -268,5 +281,5 @@ fi
 
 if [ "$CHANGES_STASHED" = true ]; then
     git stash pop || die 1 "Failed to apply stashed changes."
-    $VERBOSE && log-info "Stashed changes applied."
+    log-info-verbose "Stashed changes applied."
 fi

@@ -124,7 +124,7 @@ while test $# -gt 0; do
 done
 
 $DEBUG && say "Debug output"
-title "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
+echo -e "${Green}Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\"${NC}"
 git status || die 1 "gchu FATAL: Not a git repository" 
 
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
@@ -162,7 +162,7 @@ if [[ $MATCHCOUNT -eq 0 ]]; then
 fi
 
 if (($MATCHCOUNT > 1)); then
-  title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
+  echo -e "${Green}More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:${NC}"
 
 formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
@@ -181,10 +181,10 @@ formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
   say -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
 fi
 
-title "Checking out ${NC}${MATCHING_BRANCH}"
+echo -e "${Green}Checking out ${NC}${MATCHING_BRANCH}${NC}"
 
 if $WILL_TRACK; then
-  title "Tracking selected. Checking for an existing local branch..."
+  echo -e "${Green}Tracking selected. Checking for an existing local branch...${NC}"
   local_match=$(git branch -vv | grep ${MATCHING_BRANCH} | grep -Eo "[[:alnum:]]+\/[^ ]*" | head -1)
   if [[ ! -z $local_match ]]; then
     say "Local branch \"${local_match}\" exists for remote: \"${MATCHING_BRANCH}\""

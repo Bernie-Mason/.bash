@@ -1,0 +1,35 @@
+{
+    "GridSetName": "SampleGridSet",
+    "GridSetDescription": "Sample grid set for demonstration purposes.",
+    "GridSetLanguage": "en-GB",
+    "TranslatableItems": [
+        {
+            "ItemName": "SampleItem1",
+            "ItemDescription": "This is a sample item for demonstration.",
+            "ItemType": "String",
+            "ItemValue": "SampleValue1",
+            "Locations": [
+                {
+                    "GridName": "Start",
+                    "X": 1,
+                    "Y": 2,
+                    "IsWordList": false
+                },
+                {
+                    "GridName": "Second",
+                    "X": 1,
+                    "Y": 2,
+                    "IsWordList": false
+                }
+            ]
+        },
+        {
+            "ItemName": "SampleItem2",
+            "ItemDescription": "This is another sample item.",
+            "ItemType": "Integer",
+            "ItemValue": 42
+        }
+    ],
+
+    
+}

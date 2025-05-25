@@ -14,6 +14,7 @@ COLOR_GREEN="\033[1;32m"
 COLOR_YELLOW="\033[1;33m"
 COLOR_RED="\033[1;31m"
 COLOR_RESET="\033[0m"
+YES_NO=("y" "n")
 REMOTE="origin"  
 MAINLINE_BRANCH="master"
 ERROR=""
@@ -36,7 +37,6 @@ declare -A PROPS_TO_REPO_MAP=(
     ["SpeechEngine"]="apps/grid.git"
     ["LakeLib"]="apps/smartboxlink.git"
 )
-
 ## set verbosity level depending on flag
 if [[ $1 == "-v" ]]; then
     VERBOSE=true
@@ -45,6 +45,13 @@ else
 fi
 
 source $logging_utils_path
+
+
+function log-info-verbose() {
+    if $VERBOSE; then
+        log-info "$1"
+    fi
+}
 
 function set-ticket-id() {
     local branch_name=$1
@@ -71,7 +78,7 @@ function ensure-in-grid-repo() {
             log-error "GRID_REPO_DIR environment variable is not set. Cannot navigate to the grid repository."
             exit 1
         fi
-        read -p "Do you want to navigate to the grid repository at $GRID_REPO_DIR? (y/n): " choice
+        choice=$(read-user-input "Do you want to navigate to the grid repository at $GRID_REPO_DIR? (y/n)" YES_NO)
         if [[ "$choice" != "y" ]]; then
             log-error "Aborting script as we are not in the grid repository."
             exit 1
@@ -132,9 +139,13 @@ function detect-version-to-backport() {
         local major_minor=${BASH_REMATCH[1]}
         local patch=${BASH_REMATCH[2]}
         log-info "Latest detected version of Major.Minor.Patch: $major_minor.$patch"
-        read -p "Do you want to use the patch version of $patch? (y/n): " choice
+
+        choice=$(read-user-input "Do you want to use the patch version of $patch? (y/n)" YES_NO)
+        # read -p "Do you want to use the patch version of $patch? (y/n): " choice
         if [[ "$choice" != "y" ]]; then
-            read -p "Enter the new patch version (e.g. 94): " new_patch
+            new_patch=$(read-user-input "Enter the new patch version (e.g. 94)")
+
+            # read -p "Enter the new patch version (e.g. 94): " new_patch
             if [[ ! $new_patch =~ ^[0-9]+$ ]]; then
                 log-error "Invalid patch version. Exiting."
                 return 1
@@ -179,8 +190,9 @@ function create-backport-branch() {
     local branch_base_commit=$(git merge-base @ $REMOTE/$MAINLINE_BRANCH)
     log-info "Rebasing ${new_branch} onto $release_branch skipping commits from the merge base $branch_base_commit..."
     git rebase -i --onto "$release_branch" $branch_base_commit "$new_branch" || handle-rebase-conflicts
+    choice=$(read-user-input "Do you want to push the new branch ${new_branch} to $REMOTE? (y/n)" YES_NO)
 
-    read -p "Do you want to push the new branch ${new_branch} to $REMOTE? (y/n): " choice
+    # read -p "Do you want to push the new branch ${new_branch} to $REMOTE? (y/n): " choice
     if [[ "$choice" != "y" ]]; then
         log-warn "Skipping push operation."
         return 0
@@ -257,13 +269,16 @@ function handle-changed-dependencies() {
         # Detect the current branch
         local current_branch=$(git rev-parse --abbrev-ref HEAD)
         log-info "Current branch: $current_branch"
-        read -p "Do you want to use this branch for backporting? (y/n): " use_current_branch
+        use_current_branch=$(read-user-input "Do you want to use this branch for backporting? (y/n)" YES_NO)
+
+        # read -p "Do you want to use this branch for backporting? (y/n): " use_current_branch
         if [[ "$use_current_branch" != "y" ]]; then
             if ! command -v gchu &> /dev/null; then
                 log-info "Please check out the branch you wish to backport and re-run the script."
                 break
             fi
-            read -p "Enter the branch pattern to checkout: " branch_pattern
+            branch_pattern=$(read-user-input "Enter the branch pattern to checkout: $release_branch?")
+            # read -p "Enter the branch pattern to checkout: " branch_pattern
             gchu "$branch_pattern" || {
                 log-error "Failed to checkout branch matching pattern $branch_pattern."
                 break
@@ -272,7 +287,10 @@ function handle-changed-dependencies() {
         fi
 
         # Ensure the branch is up-to-date with $REMOTE/$MAINLINE_BRANCH
-        ensure-up-to-date-with-mainline
+        git-base-update -upstream || {
+            log-warn "Failed to ensure the branch is up-to-date with $REMOTE/$MAINLINE_BRANCH."
+            break
+        }
 
         # Check for release branches
         local release_branch="release/${MAINLINE_VERSIONS["$repo_name"]}"
@@ -287,7 +305,9 @@ function handle-changed-dependencies() {
                 break
             fi
             log-info "Found tags: $tags"
-            read -p "Do you want to create a release branch $release_branch? (y/n): " create_release_branch
+            create_release_branch=$(read-user-input "Do you want to create a release branch $release_branch? (y/n)" YES_NO)
+
+            # read -p "Do you want to create a release branch $release_branch? (y/n): " create_release_branch
             if [[ "$create_release_branch" == "y" ]]; then
                 git checkout -b "$release_branch" "${tags[0]}" || {
                     log-error "Failed to create release branch $release_branch."
@@ -316,6 +336,10 @@ function get-modified-dependencies() {
 
     # Compare dependencies
     for repo_name in "${!versions_ref1[@]}"; do
+        # Instead of checking that the version strings are not equal we should compare the version numbers
+        # A versio could be a single number, e.g. 1, or a version with multiple parts, e.g. 1.2.3. The first number
+        # will have priority followed by the second and so on. The numbers should be compared as integers.
+
         if [[ "${versions_ref1[$repo_name]}" != "${versions_ref2[$repo_name]}" ]]; then
             modified["$repo_name"]="${versions_ref1[$repo_name]}"
             $VERBOSE && log-info "Dependency modified: $repo_name ($1: ${versions_ref1[$repo_name]} -> $2: ${versions_ref2[$repo_name]})"
@@ -348,13 +372,8 @@ function compare-modified-dependencies() {
     for repo_name in "${!release_dependencies[@]}"; do
         if [[ -n "${modified_dependencies[$repo_name]}" ]]; then
             requires_release_branch["$repo_name"]="${modified_dependencies[$repo_name]}"
-            # Show the versions at the different refs to demonstrate the need for a release branch
-            # log-info "Dependency $repo_name requires a release branch."
-            # log-info "Versions: HEAD: ${HEAD_VERSIONS[$repo_name]}, Mainline: ${MAINLINE_VERSIONS[$repo_name]}, Release: ${RELEASE_VERSIONS[$repo_name]}"
-
         fi
     done
-
 }
 
 # Handle rebase conflicts
@@ -391,7 +410,7 @@ function handle-rebase-conflicts() {
 
 # Perform a backport
 function perform-backport() {
-    title "Performing backport for branch $CURRENT_BRANCH..."
+    title "Performing backport for branch $CURRENT_BRANCH..." "reset-count"
     title "Ensuring the current branch is up-to-date with its remote and based on $REMOTE/$MAINLINE_BRANCH..."
     git-base-update -upstream || {
         log-warn "Failed to ensure the branch is up-to-date."  
@@ -416,7 +435,7 @@ function perform-backport() {
     compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified
 
     for repo_name in "${!modified[@]}"; do
-        log-info "Dependency $repo_name requires a release branch."
+        log-info "Dependency $repo_name may require a release branch."
         log-info "Versions: HEAD: ${HEAD_VERSIONS[$repo_name]}, Mainline: ${MAINLINE_VERSIONS[$repo_name]}, Release: ${RELEASE_VERSIONS[$repo_name]}"
     done
 
@@ -425,7 +444,7 @@ function perform-backport() {
         return 0
     fi
 
-    handle-changed-dependencies modified
+    # handle-changed-dependencies modified
 
     # Handle release branch creation and backporting
     # (Implementation omitted for brevity)
@@ -439,10 +458,10 @@ function perform-backport() {
 }
 
 function inspect-dependencies() {
+    title "Inspecting dependencies for changes..." "reset-count"
 
-    title "Inspecting dependencies for changes..."
-
-    read -p "Do you want to get up-to-date with the mainline (y/n)? " choice
+    choice=$(read-user-input "Do you want to get up-to-date with the mainline? (y/n)" YES_NO)
+    # read -p "Do you want to get up-to-date with the mainline (y/n)? " choice
     if [[ "$choice" == "y" ]]; then
         git-base-update -upstream || {
             log-warn "Failed to ensure the branch is up-to-date."  
@@ -463,7 +482,7 @@ function inspect-dependencies() {
     compare-modified-dependencies "$release_branch" "$REMOTE/$MAINLINE_BRANCH" modified
 
     for repo_name in "${!modified[@]}"; do
-        log-info "Dependency $repo_name requires a release branch."
+        log-info "Dependency $repo_name may require a release branch."
         log-info "Versions: HEAD: ${HEAD_VERSIONS[$repo_name]}, Mainline: ${MAINLINE_VERSIONS[$repo_name]}, Release: ${RELEASE_VERSIONS[$repo_name]}"
     done
 
@@ -471,8 +490,6 @@ function inspect-dependencies() {
         log-info "No dependencies that require release branches found."
         return 0
     fi
-
-    #handle-changed-dependencies modified
 }
 
 function display-menu() {
@@ -501,13 +518,14 @@ function show-help() {
 
 function show-sub-menu() {
     echo -e "${COLOR_YELLOW}Sub-menu options:${COLOR_RESET}"
-    echo -e "1. Check for necessary repos"
+    echo -e "c. Check for necessary repos"
+    echo -e "v. Toggle verbose mode (current: $VERBOSE)"
     echo -e "b. return to main menu"
     echo -e "q. Quit"
 
     read -p "Select an option: " choice
     case $choice in
-        1)
+        c|C)
             log-info "${COLOR_YELLOW}Checking for necessary repositories...${COLOR_RESET}"
             if [[ ! -f "$REPO_CHECKER_SCRIPT" ]]; then
                 log-error "$REPO_CHECKER_SCRIPT not found. Please check the path."
@@ -515,6 +533,15 @@ function show-sub-menu() {
             fi
 
             $REPO_CHECKER_SCRIPT
+            ;;
+        v|V)
+            if $VERBOSE; then
+                VERBOSE=false
+                log-info "Verbose mode disabled."
+            else
+                VERBOSE=true
+                log-info "Verbose mode enabled."
+            fi
             ;;
         b|B)
             return 0

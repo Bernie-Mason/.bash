@@ -64,25 +64,4 @@ fi
 
 git rebase -i "$default_branch"
 
-# if [ $? -ne 0 ]; then
-#     die 1 "Error: Unable to checkout to $default_branch."
-# fi
-# upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null) 
-# if [ $? -ne 0 ]; then
-#     echo "No upstream branch set."
-#     exit 1
-# fi
-# local_commit=$(git rev-parse @)
-# remote_commit=$(git rev-parse "$upstream")
-# base_commit=$(git merge-base @ "$upstream")
-# if [ $local_commit = $remote_commit ]; then
-#     echo "Up to date with upstream."
-# elif [ $local_commit = $base_commit ]; then
-#     git pull
-# elif [ $remote_commit = $base_commit ]; then
-#     die 1 "Error $default_branch is ahead of its upstream ($upstream)."
-# else
-#     echo "Diverged from upstream."
-# fi
-
 
