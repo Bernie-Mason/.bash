@@ -7,16 +7,20 @@ INDENTATION=1
 # Colours from env
 
 log-info() {
-    echo -e "${IBlue}$(printf ' %.0s' $(seq 1 $INDENTATION))INFO:${Color_Off} $1"
+    echo -e "${IBlue}$(printf ' %.0s' $(seq 1 $INDENTATION))INFO :${Color_Off} $1"
 }
 
 log-warn() {
-    echo -e "${Yellow}$(printf ' %.0s' $(seq 1 $INDENTATION))WARN:${Color_Off} $1"
+    echo -e "${Yellow}$(printf ' %.0s' $(seq 1 $INDENTATION))WARN :${Color_Off} $1"
 }
 
 log-error() {
     LAST_ERROR_MESSAGE="$1"
+    SHOULD_EXIT=${2:-false}
     echo -e "${Red}$(printf ' %.0s' $(seq 1 $INDENTATION))ERROR:${Color_Off} $1" >&2
+    if [[ $SHOULD_EXIT == true ]]; then
+        exit 1
+    fi
 }
 
 log-success() {
@@ -102,7 +106,7 @@ function read-user-choice() {
     # Print the numbered list
     echo -e "${IYellow}$prompt${Color_Off}" >&2 # Print prompt to stderr. Hack to avoid printing to stdout with interactive prompts
     for i in "${!options[@]}"; do
-        printf "  ${Yellow}%d) %s${Color_Off}\n" "$((i+1))" "${options[$i]}" >&2
+        printf "  %d)${Yellow} %s${Color_Off}\n" "$((i+1))" "${options[$i]}" >&2
     done
 
     while true; do

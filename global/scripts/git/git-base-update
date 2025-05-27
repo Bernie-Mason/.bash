@@ -208,8 +208,8 @@ validate-git-repo
 [ -z "$TARGET_BRANCH" ] && set-target-branch-as-default
 set-git-parameters
 
-# Optional upstream work. We expect that the user is about to rebase the current branch onto the target branch
-# which means that the upstream branch will diverge from the current branch. As such being ahead or diverged from the 
+# Optional upstream work. We expect that the user is about to rebase the current branch onto a target branch
+# which means that any upstream branch may diverge from the current branch. As such being ahead or diverged from the 
 # upstream currently does not matter. We will only check if the upstream branch is behind the current branch
 # and will offer to pull the changes in this case.
 if [[ ! -z "$UPSTREAM" ]]; then
