@@ -143,7 +143,7 @@ if [[ $MATCHCOUNT -eq 0 ]]; then
         read -p "Enter y/Y or anything else to exit: " search_remotes
         case "$search_remotes" in
             [yY]*) 
-                GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes --strict"
+                GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes --strict --track"
                 gchu $PATTERN $GIT_BRANCH_ACTIONS
                 die $?
                 ;;

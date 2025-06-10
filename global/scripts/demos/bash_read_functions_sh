@@ -2,63 +2,10 @@
 
 # Utility function to read user input with optional validation
 # Usage: result=$(read-user-input "Prompt message" valid_options_array)
-function read-user-input() {
-    local prompt="$1"
-    local input
-    local -a valid_options=()
-    if [[ -n "$2" ]]; then
-        # If a second argument is provided, treat it as the name of an array variable
-        declare -n options_ref="$2"
-        valid_options=("${options_ref[@]}")
-    fi
 
-    while true; do
-        read -p "$prompt" input
-        if [[ ${#valid_options[@]} -eq 0 ]]; then
-            echo "$input"
-            return
-        else
-            for option in "${valid_options[@]}"; do
-                if [[ "$input" == "$option" ]]; then
-                    echo "$input"
-                    return
-                fi
-            done
-            # If we reach here, input was not valid; re-prompt
-        fi
-    done
-}
+source $logging_utils_path
 
-function read-user-choice() {
-    local prompt="$1"
-    local -a options=()
-    local input
-
-    # Get the options array by name
-    declare -n options_ref="$2"
-    options=("${options_ref[@]}")
-
-    # Print the numbered list
-    echo "$prompt" >&2 # Print prompt to stderr. Hack to avoid printing to stdout with interactive prompts
-    for i in "${!options[@]}"; do
-        #printf with color
-        # Using ANSI escape codes for color
-        icolor="\033[1;33m"  # Yellow
-        Color_Off="\033[0m"  # Reset color
-        printf "${icolor}  %d) %s${Color_Off}\n" "$((i+1))" "${options[$i]}" >&2
-        printf "  %d) %s\n" "$((i+1))" "${options[$i]}" >&2
-    done
-
-    while true; do
-        read -p "Enter the number of your choice: " input
-        if [[ "$input" =~ ^[0-9]+$ ]] && (( input >= 1 && input <= ${#options[@]} )); then
-            echo "${options[$((input-1))]}"
-            return
-        fi
-        # Invalid input, re-prompt
-    done
-}
-
+sample_colours
 
 # --- Demo usage for read_user_chose ---
 
