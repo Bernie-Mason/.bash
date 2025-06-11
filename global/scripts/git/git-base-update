@@ -192,9 +192,9 @@ function ensure-upstream-branch() {
     # Check if the upstream branch is set
     if [[ -z "$UPSTREAM" ]]; then
         log-warn-verbose "No upstream branch set for $CURRENT_BRANCH."
-        choice=$(read-user-input "Do you want to set the upstream branch for $CURRENT_BRANCH?" YES_NO)
+        choice=$(read-user-input "Do you want to push $CURRENT_BRANCH to $REMOTE? (y/n)" YES_NO)
         if [[ "$choice" == "y" ]]; then
-            git push || die 1 "Failed to set upstream branch."
+            git push -u origin HEAD  || die 1 "Failed to set upstream branch."
             UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
             return 0
         else
