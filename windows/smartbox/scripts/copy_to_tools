@@ -8,7 +8,7 @@ cp ~/.bash/global/scripts/git/gchu ${BIN_COPY_PATH}/git-unique-checkout
 sed --in-place "s_gchu_git-unique-checkout_g" ${BIN_COPY_PATH}/git-unique-checkout
 cp ~/.bash/global/scripts/git/griu ${BIN_COPY_PATH}/git-unique-rebase
 sed --in-place "s_griu_git-unique-rebase_g" ${BIN_COPY_PATH}/git-unique-rebase
-cp ~/.bash/global/scripts/nuget-pack $BIN_COPY_PATH
+cp ~/.bash/global/scripts/dotnet-pack $BIN_COPY_PATH
 cp ~/.bash/global/scripts/msbuild32 $BIN_COPY_PATH
 cp ~/.bash/global/scripts/git/format-branches $BIN_COPY_PATH
 

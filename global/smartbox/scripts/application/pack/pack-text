@@ -8,7 +8,7 @@
 _repository_dir - absolute path to directory of the text repository
 #
 # Required scripts: 
-#   nuget-pack
+#   dotnet-pack
 #   clear-text-cache
 #
 # Optional scripts: 
@@ -74,7 +74,7 @@ echo "
 TEXT_PROJ_PATH="${text_repository_dir}/Source/SensorySoftware.Text/SensorySoftware.Text.csproj"
 TEXT_DESKTOP_PROJ_PATH="${text_repository_dir}/Source/SensorySoftware.Text.Desktop/SensorySoftware.Text.Desktop.csproj"
 
-nuget-pack $TEXT_PROJ_PATH $TEXT_DESKTOP_PROJ_PATH
+dotnet-pack $TEXT_PROJ_PATH $TEXT_DESKTOP_PROJ_PATH
 
 echo " 
 -- Removing cached packages --

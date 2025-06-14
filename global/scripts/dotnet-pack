@@ -1,0 +1,31 @@
+#!/bin/bash
+# 
+# Required env variables: 
+#   local_package_store - absolute path to directory of your personal local nuget package cache
+
+
+say() {
+    echo "$@" >&1
+}
+ 
+die() {
+    say "$2"
+    exit "$1"
+}
+
+if [[ $1 = "" || $1 = "-h" || $1 = "help" ]]; then
+	die 2 "Please supply any number of project directories to pack. E.g. \"C:\Dev\MyRepo\MyProject.csproj\""
+fi
+
+if [[ ! -d  "${local_package_store}" ]]; then
+	say "No local package store. Creating one at ${local_package_store}"
+	mkdir "${local_package_store}" 
+fi
+
+cd ${local_package_store}
+for ARG in "$@"
+do
+	echo "Packing $ARG"
+    dotnet pack $ARG --output "${local_package_store}" --configuration Release --version-suffix "local" --include-symbols --include-source
+done 
+cd -
