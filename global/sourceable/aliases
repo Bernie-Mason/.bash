@@ -121,6 +121,10 @@ alias glom='git log --oneline master..HEAD'
 alias glod='git log --oneline --decorate'
 alias glodg='git log --oneline --decorate --graph'
 alias glodga='git log --oneline --decorate --graph --all'
+alias glogadog='git log --oneline --decorate --graph --all'
+alias gl="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)' --all"
+# alias gl2="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(auto)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)"
+
 
 ## Git branching alias
 alias gb='git branch'

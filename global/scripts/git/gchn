@@ -7,7 +7,7 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all or remotes action.
 #
-# Depends on formatBranches script
+# Depends on format-branches script
 
 NC='\033[0m'              # Text Reset
 Red='\033[0;31m'

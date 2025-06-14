@@ -8,7 +8,7 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all action.
 #
-# Depends on formatBranches script
+# Depends on formatBrformat-branchesanches script
 
 NC='\033[0m'              # Text Reset
 Red='\033[0;31m'
@@ -108,7 +108,7 @@ test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository 
 if (($MATCHCOUNT > 1)); then
   title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
 
-  formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+  format-branches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
   echo ""
   re="^[0-9]+$"

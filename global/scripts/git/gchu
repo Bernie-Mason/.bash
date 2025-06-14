@@ -8,7 +8,7 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all or remotes action.
 #
-# Depends on formatBranches script
+# Depends on format-branches script
 
 NC='\033[0m'              # Text Reset
 Red='\033[0;31m'
@@ -169,10 +169,10 @@ fi
 if (($MATCHCOUNT > 1)); then
   echo -e "${Green}More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:${NC}"
 
-  # Modern replacement for custom formatBranches script
+  # Modern replacement for custom format-branches script
   # choice=$(read-user-choice "Please select a ${GIT_REF} to checkout:" BRANCHES)
 
-  formatBranches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+  format-branches $RAINBOW_OUTPUT "${BRANCHES[@]}"
 
   echo ""
   re="^[0-9]+$"
