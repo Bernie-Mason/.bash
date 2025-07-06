@@ -151,6 +151,7 @@ def set_auth_key():
             exit()
 
 def main():
+
     auth_header = set_auth_key()
     if not auth_header:
         print(f"{COLOR_RED_BOLD}Please set the AUTH_KEY variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
