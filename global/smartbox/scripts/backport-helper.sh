@@ -106,7 +106,6 @@ function pre-script-check() {
 
     ensure-in-grid-repo
 
-    # Ensure the working directory is clean
     if [[ -n $(git status --porcelain) ]]; then
         log-error "Working directory is not clean. Please commit or stash your changes before proceeding."
         exit 1
@@ -393,13 +392,15 @@ function handle-rebase-conflicts() {
             2)
                 git add -A || log-error "Failed to add resolved code."
                 git rebase --continue || log-error "Failed to continue rebase."
+                break
                 ;;
             3)
                 git rebase --abort || log-error "Failed to abort rebase."
-                exit 1
+                break
                 ;;
             4)
                 git rebase --continue || log-error "Failed to continue rebase."
+                break
                 ;;
             *)
                 log-warn "Invalid choice. Please try again."
@@ -443,18 +444,6 @@ function perform-backport() {
         log-info "No dependencies that require release branches found."
         return 0
     fi
-
-    # handle-changed-dependencies modified
-
-    # Handle release branch creation and backporting
-    # (Implementation omitted for brevity)
-    # for repo_name in "${!release_dependencies[@]}"; do
-    #     if [[ -n "${modified[$repo_name]}" ]]; then
-    #         log-info "Dependency $repo_name requires a release branch."
-    #         # Handle release branch creation and backporting
-    #         # (Implementation omitted for brevity)
-    #     fi
-    # done
 }
 
 function inspect-dependencies() {
