@@ -52,6 +52,7 @@ STRICT=false
 REMOTES=false
 RAINBOW_OUTPUT=false;
 DEBUG=false;
+STASHED_CURRENT_CHANGES=false;
 
 while test $# -gt 0; do
   case "$1" in
@@ -122,6 +123,26 @@ while test $# -gt 0; do
       ;;
   esac
 done
+
+# Check for uncommited changes. If any, prompt to stash. Otherwise exit.
+if [[ -n $(git status --porcelain) ]]; then
+    log-warn "You have uncommitted changes in your working directory. Please commit or stash them before proceeding."
+    read -p "Would you like to stash them now? (y/N): " confirm
+    case "$confirm" in
+        [yY]*) 
+            git stash push -m "Stash before checking out another branch $(date +'%Y-%m-%d %H:%M:%S')"
+            if [[ $? != 0 ]]; then
+                log-error "Failed to stash changes. Exiting..." true
+            else
+                log-info "Changes stashed successfully."
+                STASHED_CURRENT_CHANGES=true;
+            fi
+            ;;
+        *) 
+            log-error "Please commit or stash your changes before using gchu. Exiting..." true
+            ;;
+    esac
+fi
 
 $DEBUG && log-info "Debug output"
 log-info "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
@@ -216,4 +237,20 @@ if [[ $? != 0 ]]; then
    log-warn "Failed to checkout with git checkout$GIT_CHECKOUT_ACTIONS $MATCHING_BRANCH with code $?"
 else
    log-success "Successfully checked out ${GIT_REF} \"${MATCHING_BRANCH}\""
+fi
+
+if [[ $STASHED_CURRENT_CHANGES == true ]]; then
+    log-info "Would you like to apply the changes you stashed?"
+    read -p "Enter y/Y or anything else to skip: " apply_stash
+    case "$apply_stash" in
+        [yY]*) 
+            git stash pop
+            if [[ $? != 0 ]]; then
+                log-error "Failed to apply stashed changes. You may need to resolve conflicts manually. Exiting..." true
+            else
+                log-info "Stashed changes applied successfully."
+            fi
+            ;;
+        *) log-info "You can apply your stashed changes later with 'git stash pop'.";; 
+    esac
 fi

@@ -169,18 +169,33 @@ function check-release-branch-exists() {
         log-error "Release branch ${release_branch} does not exist."
         return 1
     fi
+
 }
 
 function create-backport-branch() {
-    local release_branch=$1
+    local release_branch="$REMOTE/$1"
     local patch_version=$2
     local current_branch=$(git rev-parse --abbrev-ref HEAD)
     local new_branch="${current_branch}-${patch_version}"
+    local should_force_with_lease=false
 
     log-info "Checking if new branch ${new_branch} already exists..."
     if git branch --list "$new_branch" | grep -q "$new_branch"; then
-        log-error "Branch ${new_branch} already exists. Exiting."
-        return 1
+        log-info "Branch ${new_branch} already exists.."
+        # ask the user if they want to delete the existing branch, try to apply the existing changes, create a new one, or exit
+        choice=$(read-user-input "Branch ${new_branch} already exists. Do you want to (d)elete it and any remote branch and create a new, (a)pply changes to it or (e)xit? (d/a/e)" "dae")
+        if [[ "$choice" == "d" ]]; then 
+            git branch -D "$new_branch" || die 1 "Failed to delete existing branch ${new_branch}."
+            log-info "Deleted existing branch ${new_branch}."
+            # Check for remote branch and delete if exists
+            if git ls-remote --heads $REMOTE "$new_branch" | grep -q "$new_branch"; then
+                git push $REMOTE --delete "$new_branch" || log-warn "Failed to delete remote branch ${new_branch}."
+                log-info "Deleted remote branch ${new_branch}."
+            fi
+        else
+            log-info "Exiting..."
+            exit 0
+        fi
     fi
 
     log-info "Creating a new branch ${new_branch}..."
@@ -197,6 +212,11 @@ function create-backport-branch() {
         return 0
     fi
     git push -u $REMOTE "$new_branch" || log-error "Failed to push new branch ${new_branch}."
+
+    choice=$(read-user-input "Do you want to return to the ${current_branch}? (y/n)" YES_NO)
+    if [[ "$choice" == "y" ]]; then 
+        git checkout "$current_branch" || log-error "Failed to checkout ${current_branch}."
+    fi
 }
 
 # Parse the dependency versions from a given props file
