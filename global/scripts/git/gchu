@@ -8,10 +8,11 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all or remotes action.
 #
-# Depends on format-branches script
+# Depends on 
+# -> format-branches script. Required on path
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
 
 NC='\033[0m'              # Text Reset
-Red='\033[0;31m'
 Green='\033[0;32m'
 Yellow='\033[0;33m'
 UWhite='\033[4;37m'
@@ -124,7 +125,10 @@ while test $# -gt 0; do
   esac
 done
 
-# Check for uncommited changes. If any, prompt to stash. Otherwise exit.
+if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+  log-error "gchu FATAL: Not a git repository" true
+fi
+
 if [[ -n $(git status --porcelain) ]]; then
     log-warn "You have uncommitted changes in your working directory. Please commit or stash them before proceeding."
     read -p "Would you like to stash them now? (y/N): " confirm
@@ -147,11 +151,6 @@ fi
 $DEBUG && log-info "Debug output"
 log-info "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
 
-# Check if we are in a git repository
-if ! git rev-parse --is-inside-work-tree &>/dev/null; then
-  log-error "gchu FATAL: Not a git repository" true
-fi
-
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
@@ -168,7 +167,7 @@ if [[ $MATCHCOUNT -eq 0 ]]; then
                 gchu $PATTERN $GIT_BRANCH_ACTIONS
                 die $?
                 ;;
-            *) log-error "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red} for the pattern: ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" true;; 
+            *) log-error "No matching ${GIT_REF} in the repository \"$(basename `git rev-parse --show-toplevel`)\" for the pattern: \"${PATTERN}\" Exiting..." true;; 
         esac
     else
         log-info "Failed to find remote branch. Would you like to search the local branches with the same pattern?"
@@ -178,7 +177,7 @@ if [[ $MATCHCOUNT -eq 0 ]]; then
                 gchu $PATTERN -s
                 die $?
                 ;;
-            *) log-error "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red} for the pattern: ${NC}\"${PATTERN}\"${Red} Exiting...${NC}" true;; 
+            *) log-error "No matching ${GIT_REF} in the repository \"$(basename `git rev-parse --show-toplevel`)\" for the pattern: \"${PATTERN}\" Exiting..." true;; 
         esac
     fi
   else

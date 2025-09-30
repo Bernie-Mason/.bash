@@ -4,6 +4,10 @@
 # If no branch is specified, it defaults to the main or master branch. If both exist, it will prompt the user to choose one.
 # The script will also check for uncommitted changes and will not proceed if any are found.
 # The script will also check if the current branch is the default branch and will not proceed if it is.
+#
+# Depends on:
+# -> git_utils script. Requires sourcing by setting the git_utils_path environment variable
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
 
 VERBOSE=false
 REMOTE=""

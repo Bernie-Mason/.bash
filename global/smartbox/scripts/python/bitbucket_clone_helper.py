@@ -42,11 +42,13 @@ def clear_terminal():
 def project_menu(project_keys, auth_header):
     clear_terminal()
     clone_root = "C:\\dev"
+    clone_protocol = "ssh"
     while True:
         print(f"{COLOR_BLUE_BOLD}\nProject Menu:{COLOR_RESET}")
         for i, project_key in enumerate(project_keys):
             print(f"{COLOR_YELLOW}  {i + 1}. {project_key}{COLOR_RESET}")
         print(f"{COLOR_WHITE}  c. change clone root{COLOR_RESET}")
+        print(f"{COLOR_WHITE}  p. change clone protocol (current: {clone_protocol}):{COLOR_RESET}")
         print(f"{COLOR_WHITE}  q. quit{COLOR_RESET}")
         print("")
 
@@ -55,6 +57,13 @@ def project_menu(project_keys, auth_header):
         clear_terminal()
         if choice == 'q':
             break
+        if choice == 'p':
+            new_protocol = input(f"Enter new clone protocol (ssh/https) (current: {clone_protocol}): ").strip().lower()
+            if new_protocol in ['ssh', 'https']:
+                clone_protocol = new_protocol
+                print(f"Clone protocol updated to: {clone_protocol}")
+            else:
+                print(f"{COLOR_RED_BOLD}Invalid protocol. Please enter 'ssh' or 'https'.{COLOR_RESET}\n")
         elif choice == 'c':
             new_clone_root = input(f"Enter new clone root (current: {clone_root}): ").strip()
             if new_clone_root:
@@ -63,11 +72,11 @@ def project_menu(project_keys, auth_header):
         elif choice.isdigit() and 1 <= int(choice) <= len(project_keys):
             print(f"Selected project: {project_keys[int(choice) - 1]}")
             project_key = project_keys[int(choice) - 1]
-            repo_menu(project_key, clone_root, auth_header)
+            repo_menu(project_key, clone_root, auth_header, clone_protocol)
         else:
             print(f"{COLOR_RED_BOLD}Invalid choice. Please try again.{COLOR_RESET}\n")
 
-def repo_menu(project_key, clone_root, auth_header):
+def repo_menu(project_key, clone_root, auth_header, clone_protocol):
     if not os.path.exists(clone_root):
         os.makedirs(clone_root)
     clear_terminal()
@@ -90,11 +99,15 @@ def repo_menu(project_key, clone_root, auth_header):
         elif choice.isdigit() and 1 <= int(choice) <= len(repos):
             repo = repos[int(choice) - 1]
             repo_name = repo['name']
-            ssh_url = next(link['href'] for link in repo['links']['clone'] if link['name'] == 'ssh')
+            url = next(link['href'] for link in repo['links']['clone'] if link['name'] == 'ssh')
+
+            if clone_protocol == 'https':
+                url = next(link['href'] for link in repo['links']['clone'] if link['name'] == 'http')
+
             repo_path = os.path.join(clone_root, repo_name)
             if not os.path.exists(repo_path):
-                print(f"Cloning {repo_name} from {ssh_url} into {repo_path}...")
-                result = subprocess.run(["git", "clone", ssh_url, repo_path])
+                print(f"Cloning {repo_name} from {url} into {repo_path}...")
+                result = subprocess.run(["git", "clone", url, repo_path])
                 if result.returncode == 0:
                     clear_terminal()
                     print(f"{COLOR_GREEN_BOLD}Successfully cloned {repo_name}.{COLOR_RESET}\n")

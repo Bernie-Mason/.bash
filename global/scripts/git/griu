@@ -6,12 +6,13 @@
 # If more than one match is found, the tool provides a list of options that may be selected.
 #
 # By default the script only searches local branches. However it can also search remotes by 
-# providing the all action.
+# providing the all or remotes action.
 #
-# Depends on formatBrformat-branchesanches script
+# Depends on:
+# -> format-branches script. Required on path
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
 
 NC='\033[0m'              # Text Reset
-Red='\033[0;31m'
 Green='\033[0;32m'
 Yellow='\033[0;33m'
 UWhite='\033[4;37m'
@@ -20,23 +21,23 @@ Black='\033[0;30m'
 source $logging_utils_path
 
 function fetchForRemotes() {
-      echo "$1 selected as checkout candidates, performing a git fetch to ensure branch list is up-to-date."
-      git fetch
+    log-info "$1 selected as rebase candidates, performing a git fetch to ensure branch list is up-to-date."
+    git fetch
 }
 
 function rebaseBranchOntoMaster() {
-    title "Rebasing $1 branch onto origin/master."
-    $2 && echo "Fetching to rebase onto latest origin/master."
+    log-info "Rebasing $1 branch onto origin/master."
+    $2 && log-info "Fetching to rebase onto latest origin/master."
     $2 && git fetch
 
-		git checkout $1
-		git rebase -i origin/master;
-		git checkout -
+    git checkout $1
+    git rebase -i origin/master;
+    git checkout -
 }
 
-function echo_help() {
-	echo -e "${UWhite}Rebase current branch onto target branch with a identifier.${NC}"
-	echo -e "First argument should be your string pattern for target branch in question. Supports grep operations."
+function print_help() {
+    echo -e "${UWhite}Rebase current branch onto target branch with an identifier.${NC}"
+    echo -e "First argument should be your string pattern for target branch in question. Supports grep operations."
     echo -e " "
     echo -e "\$griu identifier [actions]"
     echo -e " "
@@ -45,88 +46,177 @@ function echo_help() {
     echo -e "-u, --update      ${Yellow}rebase target branch onto master first${NC}"
     echo -e "-r, --remotes     ${Yellow}select from just remote branches (will fetch first)${NC}"
     echo -e "-a, --all         ${Yellow}select from local and remote branches (will fetch first)${NC}"
-    echo -e "-g, --tags        ${Yellow}tag to checkout${NC}"
+    echo -e "-s, --strict      ${Yellow}Do not look in remote/locals if match is not found${NC}"
+    echo -e "-g, --tags        ${Yellow}tag to rebase onto${NC}"
+    echo -e "-b, --rainbow     ${Yellow}RAINBOW OUTPUT MODE${NC}"
+    echo -e "-d, --debug       ${Yellow}enable debug output${NC}"
     die 0
 }
 
 PATTERN="$1"
-test -z "$PATTERN" && echo_help
+test -z "$PATTERN" && print_help
 GIT_BRANCH_ACTIONS="--list"
 REBASE_TARGET_FIRST=false
 RAINBOW_OUTPUT=false
 GIT_REF="branch"
-DEBUG=false;
+STRICT=false
+REMOTES=false
+DEBUG=false
 
 while test $# -gt 0; do
-  case "$1" in
-    -h|--help)
-      echo_help
-      ;;
-    -d|--debug)
-      DEBUG=true;
-      shift
-      ;;
-    -a|--all)
-      fetchForRemotes "All branches"
-      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --all"
-      shift
-      ;;
-  	-r|--remotes)
-      fetchForRemotes "Remote branches"
-      GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
-      shift
-      ;;
-    -u|--update)
-      REBASE_TARGET_FIRST=true
-      shift
-      ;;
-    -g|--tags)
-      fetchForRemotes "Tags"
-      GIT_REF="tag"
-      shift
-      ;;
-    -b|--rainbow)
-      RAINBOW_OUTPUT=true;
-      shift
-      ;;
-    *)
-	  shift
-      continue
-      ;;
-  esac
+    case "$1" in
+        -h|--help)
+            print_help
+            ;;
+        -d|--debug)
+            DEBUG=true
+            shift
+            ;;
+        -a|--all)
+            fetchForRemotes "All branches"
+            GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --all"
+            shift
+            ;;
+        -r|--remotes)
+            fetchForRemotes "Remote branches"
+            GIT_BRANCH_ACTIONS="${GIT_BRANCH_ACTIONS} --remotes"
+            REMOTES=true
+            shift
+            ;;
+        -u|--update)
+            REBASE_TARGET_FIRST=true
+            shift
+            ;;
+        -s|--strict)
+            STRICT=true
+            shift
+            ;;
+        -g|--tags)
+            fetchForRemotes "Tags"
+            GIT_REF="tag"
+            shift
+            ;;
+        -b|--rainbow)
+            RAINBOW_OUTPUT=true
+            shift
+            ;;
+        *)
+            shift
+            continue
+            ;;
+    esac
 done
 
-$DEBUG && echo "Debug output"
-title "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
+if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    log-error "griu FATAL: Not a git repository" true
+fi
+
+if [[ -n $(git status --porcelain) ]]; then
+    log-warn "You have uncommitted changes in your working directory. Please commit or stash them before proceeding."
+    read -p "Would you like to stash them now? (y/N): " confirm
+    case "$confirm" in
+        [yY]*) 
+            git stash push -m "Stash before rebasing $(date +'%Y-%m-%d %H:%M:%S')"
+            if [[ $? != 0 ]]; then
+                log-error "Failed to stash changes. Exiting..." true
+            else
+                log-info "Changes stashed successfully."
+                STASHED_CURRENT_CHANGES=true
+            fi
+            ;;
+        *) 
+            log-error "Please commit or stash your changes before using griu. Exiting..." true
+            ;;
+    esac
+fi
+
+$DEBUG && log-info "Debug output enabled"
+log-info "Finding \"$GIT_REF\" matching the pattern \"${PATTERN}\""
+
 MATCHING_BRANCH=$(git $GIT_REF $GIT_BRANCH_ACTIONS | grep -i $PATTERN | sed -E 's/\* (\(HEAD detached at )?//g' )
 BRANCHES=($MATCHING_BRANCH)
 MATCHCOUNT="${#BRANCHES[@]}"
-$DEBUG && echo "Match count: $MATCHCOUNT"
+$DEBUG && log-info "Match count: $MATCHCOUNT"
 
-test $MATCHCOUNT -eq 0 && die 1 "${Red}No matching ${GIT_REF} in the repository ${NC}\"$(basename `git rev-parse --show-toplevel`)\"${Red}  ${NC}\"${PATTERN}\"${Red} Exiting...${NC}"
-
-if (($MATCHCOUNT > 1)); then
-  title "More than one match. Select the one you want. E.g. type \"1\" to checkout the first item in the list:"
-
-  format-branches $RAINBOW_OUTPUT "${BRANCHES[@]}"
-
-  echo ""
-  re="^[0-9]+$"
-  read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
-  echo -e "Value read in: \"$SELECTED_NUMBER\""
-  if ! [[ $SELECTED_NUMBER =~ $re ]]; then
-      die 1 "${Red}Not a valid option. Exiting...${NC}"
-  fi
-  if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
-      die 1 "\"$SELECTED_NUMBER\" ${Red}is of bounds. exiting...${NC}"
-  fi
-  MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
-  echo -e "${Yellow}The selected ${GIT_REF} is:${NC} \"$MATCHING_BRANCH\""
+if [[ $MATCHCOUNT -eq 0 ]]; then
+    if ! $STRICT; then
+        if ! $REMOTES; then
+            log-info "Failed to find local branch. Would you like to search the remotes with the same pattern?"
+            read -p "Enter y/Y or anything else to exit: " search_remotes
+            case "$search_remotes" in
+                [yY]*) 
+                    griu $PATTERN -r -s
+                    die $?
+                    ;;
+                *) log-error "No matching ${GIT_REF} in the repository \"$(basename `git rev-parse --show-toplevel`)\" for the pattern: \"${PATTERN}\" Exiting..." true;; 
+            esac
+        else
+            log-info "Failed to find remote branch. Would you like to search the local branches with the same pattern?"
+            read -p "Enter y/Y or anything else to exit: " search_locals
+            case "$search_locals" in
+                [yY]*) 
+                    griu $PATTERN -s
+                    die $?
+                    ;;
+                *) log-error "No matching ${GIT_REF} in the repository \"$(basename `git rev-parse --show-toplevel`)\" for the pattern: \"${PATTERN}\" Exiting..." true;; 
+            esac
+        fi
+    else
+        log-error "No matching ${GIT_REF} in the repository \"$(basename `git rev-parse --show-toplevel`)\" for the pattern: \"${PATTERN}\" Exiting..." true
+    fi
 fi
 
+if (($MATCHCOUNT > 1)); then
+    echo -e "${Green}More than one match. Select the one you want. E.g. type \"1\" to rebase onto the first item in the list:${NC}"
+
+    format-branches $RAINBOW_OUTPUT "${BRANCHES[@]}"
+
+    echo ""
+    re="^[0-9]+$"
+    read -p "Enter number {1-$MATCHCOUNT}: " SELECTED_NUMBER
+    log-info "Value read in: \"$SELECTED_NUMBER\""
+    if ! [[ $SELECTED_NUMBER =~ $re ]]; then
+        log-error "Not a valid option. Exiting..." true
+    fi
+    if (( $SELECTED_NUMBER < 1 || $SELECTED_NUMBER > $MATCHCOUNT )); then
+        log-error "\"$SELECTED_NUMBER\" is out of bounds. exiting..." true
+    fi
+
+    MATCHING_BRANCH=${BRANCHES[$((--SELECTED_NUMBER))]}
+    log-info "The selected ${GIT_REF} is: \"$MATCHING_BRANCH\""
+else
+    MATCHING_BRANCH=${BRANCHES[0]}
+    log-info "Found single matching ${GIT_REF}: \"$MATCHING_BRANCH\""
+fi
 
 $REBASE_TARGET_FIRST && rebaseBranchOntoMaster $MATCHING_BRANCH true
 
-title "Rebasing onto ${MATCHING_BRANCH}"
+log-info "Rebasing onto ${MATCHING_BRANCH}"
 
-git rebase -i $MATCHING_BRANCH
+if $DEBUG; then
+    GIT_TRACE=1 git rebase -i $MATCHING_BRANCH
+else
+    git rebase -i $MATCHING_BRANCH
+fi
+
+if [[ $? != 0 ]]; then
+    log-error "Rebase failed with exit code $?. You may need to resolve conflicts manually."
+else
+    log-success "Successfully rebased onto \"${MATCHING_BRANCH}\""
+fi
+
+if [[ $STASHED_CURRENT_CHANGES == true ]]; then
+    log-info "Would you like to apply the changes you stashed?"
+    read -p "Enter y/Y or anything else to skip: " apply_stash
+    case "$apply_stash" in
+        [yY]*) 
+            git stash pop
+            if [[ $? != 0 ]]; then
+                log-error "Failed to apply stashed changes. You may need to resolve conflicts manually."
+            else
+                log-info "Stashed changes applied successfully."
+            fi
+            ;;
+        *) log-info "You can apply your stashed changes later with 'git stash pop'.";; 
+    esac
+fi

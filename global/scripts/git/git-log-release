@@ -15,7 +15,9 @@
 # $ git-log-release Grid_3.0.60.0 HEAD
 # To see the total progress of a release that has been branched
 # $ git-log-release Grid_3.0.60.0 origin/release/3.0.61 
-
+#
+# Depends on:
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
 
 source $logging_utils_path
 

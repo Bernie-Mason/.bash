@@ -4,10 +4,10 @@
 # Author: Bernie
 # Date: 2025-05-04
 #
-# Dependencies:
-# - scripts
-# - gchu
-# - git-base-update
+# Depends on:
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
+# -> repo_path_checker script. Requires it to be in the same directory as this script.
+# -> gchu script. Optional but recommended for branch selection.
 
 COLOR_BLUE="\033[1;34m"
 COLOR_GREEN="\033[1;32m"

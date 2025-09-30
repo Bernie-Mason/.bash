@@ -7,7 +7,9 @@
 #
 # By default the script searches all tags (local and remote).
 #
-# Depends on format-branches script
+# Depends on:
+# -> format-branches script. Required on path
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
 
 NC='\033[0m'              # Text Reset
 Red='\033[0;31m'

@@ -2,6 +2,8 @@
 #
 # Repo path checker script
 #
+# Depends on:
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
 
 COLOR_BLUE="\033[1;34m"
 COLOR_GREEN="\033[1;32m"

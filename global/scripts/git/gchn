@@ -7,7 +7,9 @@
 # By default the script only searches local branches. However it can also search remotes by 
 # providing the all or remotes action.
 #
-# Depends on format-branches script
+# Depends on:
+# -> format-branches script. Required on path
+# -> logging_utils script. Requires sourcing by setting the logging_utils_path environment variable
 
 NC='\033[0m'              # Text Reset
 Red='\033[0;31m'
