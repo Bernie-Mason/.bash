@@ -37,7 +37,7 @@ def fetch_repos(project_key, auth_header):
         return []
 
 def clear_terminal():
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system('cls' if os.name == 'nt' else 'clear') # Clear terminal for Windows and Unix-based systems
 
 def project_menu(project_keys, auth_header):
     clear_terminal()
@@ -143,6 +143,8 @@ def set_auth_key():
             data = json.loads(json_string)
             # Access the AUTH_KEY_NAME value
             auth_key =  data.get(AUTH_KEY_NAME, "")
+            if not auth_key:
+                return None
             return {
         'Authorization': f"Bearer {auth_key}"
     }
@@ -151,7 +153,6 @@ def set_auth_key():
             exit()
 
 def main():
-
     auth_header = set_auth_key()
     if not auth_header:
         print(f"{COLOR_RED_BOLD}Please set the AUTH_KEY variable to your Bitbucket password base64 encoded.{COLOR_RESET}")
