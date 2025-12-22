@@ -6,4 +6,6 @@ echo "removing 'bin' directories";
 find . -type d -name bin | xargs -I{} rm -rf "{}";
 echo "removing 'build' directories";
 find . -type d -name build | xargs -I{} rm -rf "{}";
+echo "removing 'artifacts' directories";
+find . -type d -name artifacts | xargs -I{} rm -rf "{}";
 echo "done.";
