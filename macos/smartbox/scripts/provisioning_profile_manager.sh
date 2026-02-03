@@ -18,14 +18,12 @@ NC='\033[0m' # No Color
 PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
 BACKUP_DIR="$HOME/Provisioning Profiles Backup"
 
-# Function to print colored output
 print_color() {
     local color=$1
     local message=$2
     echo -e "${color}${message}${NC}"
 }
 
-# Function to print header
 print_header() {
     echo
     print_color $CYAN "================================================================="
@@ -34,7 +32,6 @@ print_header() {
     echo
 }
 
-# Function to create backup directory if it doesn't exist
 ensure_backup_directory() {
     if [ ! -d "$BACKUP_DIR" ]; then
         mkdir -p "$BACKUP_DIR"
@@ -42,7 +39,6 @@ ensure_backup_directory() {
     fi
 }
 
-# Function to check if profiles directory exists
 check_profiles_directory() {
     if [ ! -d "$PROFILES_DIR" ]; then
         print_color $YELLOW "Warning: Xcode 16 provisioning profiles directory not found!"
@@ -70,7 +66,6 @@ check_profiles_directory() {
     fi
 }
 
-# Function to migrate from legacy location
 migrate_legacy_profiles() {
     local legacy_dir=$1
     
@@ -104,7 +99,6 @@ migrate_legacy_profiles() {
     print_color $GREEN "Migrated $count profiles to Xcode 16 location"
 }
 
-# Function to check if a date is expired
 is_expired() {
     local expiration_date=$1
     local current_date=$(date +%s)
@@ -126,7 +120,6 @@ is_expired() {
     fi
 }
 
-# Function to format date for display
 format_date() {
     local date_string=$1
     # Convert to readable format (YYYY-MM-DD)
@@ -137,7 +130,6 @@ format_date() {
     fi
 }
 
-# Function to extract profile information
 extract_profile_info() {
     local profile_path=$1
     local temp_plist="/tmp/profile_$$.plist"
@@ -164,7 +156,6 @@ extract_profile_info() {
     echo -e "$name\t$uuid\t$formatted_expiration\t$expired\t$team_name\t$app_id\t$team_id\t$expiration"
 }
 
-# Function to backup a profile
 backup_profile() {
     local profile_path=$1
     local reason=$2
@@ -187,7 +178,6 @@ backup_profile() {
     fi
 }
 
-# Function to list all profiles in table format
 list_profiles() {
     print_color $BLUE "Scanning Xcode 16 provisioning profiles..."
     echo
@@ -334,7 +324,6 @@ list_profiles() {
     print_color $PURPLE "Teams found: ${#team_profiles[@]}"
 }
 
-# Function to remove all expired profiles
 remove_expired_profiles() {
     print_color $BLUE "Scanning for expired profiles..."
     echo
@@ -408,7 +397,6 @@ remove_expired_profiles() {
     fi
 }
 
-# Function to install a profile to Xcode 16 location
 install_profile() {
     print_color $CYAN "Install Provisioning Profile to Xcode 16"
     echo
@@ -502,7 +490,6 @@ install_profile() {
     fi
 }
 
-# Function to show profile details
 show_profile_details() {
     print_color $BLUE "Scanning profiles for detailed view..."
     echo
@@ -679,7 +666,6 @@ show_profile_details() {
     fi
 }
 
-# Function to show backup directory contents
 show_backup_directory() {
     ensure_backup_directory
     
@@ -699,7 +685,6 @@ show_backup_directory() {
     fi
 }
 
-# Function to restore a profile from backup
 restore_from_backup() {
     ensure_backup_directory
     
@@ -773,7 +758,6 @@ restore_from_backup() {
     fi
 }
 
-# Function to show main menu
 show_menu() {
     echo
     print_color $PURPLE "Choose an option:"

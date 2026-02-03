@@ -8,3 +8,32 @@ alias clear-eyegaze-cache="clear-package-cache 'sensorysoftware.eyegaze' 'sensor
 
 alias dotnet-upgrade="python ~/.bash/global/scripts/python/dotnet_migrate.py"
 alias clone-helper="python ~/.bash/global/smartbox/scripts/python/bitbucket_clone_helper.py"
+
+
+function pack-shared-local() {
+    powershell "~/.bash/global/scripts/nuget-pack-local.ps1 \
+        -Projects @('C:/Dev/shared/Source/SensorySoftware.Shared/Source/SensorySoftware.Shared.csproj','C:/Dev/shared/Source/SensorySoftware.Symbols.MetafileReader.Desktop/SensorySoftware.Symbols.MetafileReader.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.Desktop/SensorySoftware.Shared.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.FluentUI/SensorySoftware.Shared.FluentUI.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.HardwareLicensingServiceClient/SensorySoftware.Shared.HardwareLicensingServiceClient.csproj') \
+        -LocalPackageCache 'C:/Dev/Packages' \
+        -BuildPropsPath 'C:/Dev/Grid/Source/Directory.Build.Props' \
+        -VersionElement 'SharedVersion'"
+}
+
+function pack-eyegaze-local() {
+    powershell "~/.bash/global/scripts/nuget-pack-local.ps1 \
+        -Projects @('C:/Dev/eyegaze/Source/SensorySoftware.EyeGaze/SensorySoftware.EyeGaze.csproj', 'C:/Dev/eyegaze/Source/SensorySoftware.EyeGaze.Desktop/SensorySoftware.EyeGaze.Desktop.csproj') \
+        -LocalPackageCache 'C:/Dev/Packages' \
+        -BuildPropsPath 'C:/Dev/Grid/Source/Directory.Build.Props' \
+        -VersionElement 'EyeGazeVersion'"
+}
+# Pack Shared libraries locally and update Grid to use local version
+# alias pack-shared-local="powershell ~/.bash/global/scripts/nuget-pack-local.ps1 \
+#     -Projects @('C:/Dev/shared/Source/SensorySoftware.Shared/Source/SensorySoftware.Shared.csproj','C:/Dev/shared/Source/SensorySoftware.Symbols.MetafileReader.Desktop/SensorySoftware.Symbols.MetafileReader.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.Desktop/SensorySoftware.Shared.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.FluentUI/SensorySoftware.Shared.FluentUI.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.HardwareLicensingServiceClient/SensorySoftware.Shared.HardwareLicensingServiceClient.csproj') \
+#     -LocalPackageCache 'C:/Dev/Packages' \
+#     -BuildPropsPath 'C:/Dev/Grid/Source/Directory.Build.Props' \
+#     -VersionElement 'SharedVersion'"
+
+# alias pack-eyegaze-local="powershell ~/.bash/global/scripts/nuget-pack-local.ps1 \
+#     -Projects @('C:/Dev/Source/SensorySoftware.EyeGaze/Source/SensorySoftware.EyeGaze.csproj', 'C:/Dev/Source/SensorySoftware.EyeGaze.Desktop/Source/SensorySoftware.EyeGaze.Desktop.csproj') \
+#     -LocalPackageCache 'C:/Dev/Packages' \
+#     -BuildPropsPath 'C:/Dev/Grid/Source/Directory.Build.Props' \
+#     -VersionElement 'EyeGazeVersion'"
