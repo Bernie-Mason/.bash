@@ -12,7 +12,7 @@ alias clone-helper="python ~/.bash/global/smartbox/scripts/python/bitbucket_clon
 
 function pack-shared-local() {
     powershell "~/.bash/global/scripts/nuget-pack-local.ps1 \
-        -Projects @('C:/Dev/shared/Source/SensorySoftware.Shared/Source/SensorySoftware.Shared.csproj','C:/Dev/shared/Source/SensorySoftware.Symbols.MetafileReader.Desktop/SensorySoftware.Symbols.MetafileReader.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.Desktop/SensorySoftware.Shared.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.FluentUI/SensorySoftware.Shared.FluentUI.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.HardwareLicensingServiceClient/SensorySoftware.Shared.HardwareLicensingServiceClient.csproj') \
+        -Projects @('C:/Dev/shared/Source/SensorySoftware.Shared/SensorySoftware.Shared.csproj','C:/Dev/shared/Source/SensorySoftware.Symbols.MetafileReader.Desktop/SensorySoftware.Symbols.MetafileReader.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.Desktop/SensorySoftware.Shared.Desktop.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.FluentUI/SensorySoftware.Shared.FluentUI.csproj','C:/Dev/shared/Source/SensorySoftware.Shared.HardwareLicensingServiceClient/SensorySoftware.Shared.HardwareLicensingServiceClient.csproj') \
         -LocalPackageCache 'C:/Dev/Packages' \
         -BuildPropsPath 'C:/Dev/Grid/Source/Directory.Build.Props' \
         -VersionElement 'SharedVersion'"
