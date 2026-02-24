@@ -1,5 +1,22 @@
 #!/bin/bash
 
+alias cd-grid="cd ${grid_repository_dir}/Source"
+alias cd-resources="cd ~/dev/gridresources"
+alias cd-inventory="cd ~/dev/published-inventory"
+alias cd-text="cd ~/dev/text"
+alias cd-speech="cd ~/dev/speech"
+alias cd-symbols="cd ~/dev/symbols"
+alias cd-eriskay="cd ~/dev/eriskay"
+alias cd-looklab="cd ~/dev/looklab"
+alias cd-eyegaze="cd ${eyegaze_repository_dir}"
+alias cd-shared="cd ${shared_repository_dir}"
+alias cd-dev="cd ~/dev"
+alias cd-web="cd ${web_repository_dir}"
+alias cd-javascript="cd ${smartbox_js_repository_dir}"
+alias cd-activate="cd ${web_repository_dir}/activate"
+alias cd-tools="cd ~/dev/tools"
+alias cd-sublime='cd ~/appdata/roaming/sublime\ text\ 3/packages/user'
+
 #nuget
 alias teamcity-package-list="nuget list -source https://teamcity.thinksmartbox.com/httpAuth/app/nuget/v1/FeedService.svc -AllVersions -Prerelease"
 alias nuget-restore="nuget restore -nocache"
