@@ -29,3 +29,20 @@ alias clear-shared-cache="clear-package-cache 'sensorysoftware.shared' 'sensorys
 alias clear-speech-cache="clear-package-cache 'sensorysoftware.speechlib'"
 alias clear-text-cache="clear-package-cache 'sensorysoftware.text' 'sensorysoftware.text.desktop'"
 alias clear-eyegaze-cache="clear-package-cache 'sensorysoftware.eyegaze' 'sensorysoftware.eyegaze.desktop'"
+
+function pack-shared-local() {
+    echo "Packing shared projects and placing the output nupkgs in the local store at ${local_package_store}"
+    pwsh -NoProfile -Command "& \"$HOME/.bash/global/scripts/nuget-pack-local.ps1\" -Projects @(
+        \"$HOME/dev/shared/Source/SensorySoftware.Shared/SensorySoftware.Shared.csproj\",
+        \"$HOME/dev/shared/Source/SensorySoftware.Symbols.MetafileReader.iOS/SensorySoftware.Symbols.MetafileReader.iOS.csproj\",
+        \"$HOME/dev/shared/Source/SensorySoftware.Shared.iOS/SensorySoftware.Shared.iOS.csproj\"
+    ) -LocalPackageCache \"$HOME/dev/Packages\" -BuildPropsPath \"$HOME/dev/Grid/Source/Directory.Build.Props\" -VersionElement \"SharedVersion\""
+}
+
+# function pack-eyegaze-local() {
+#     pwsh ~/.bash/global/scripts/nuget-pack-local.ps1 \
+#         -Projects @('~/dev/eyegaze/Source/SensorySoftware.EyeGaze/SensorySoftware.EyeGaze.csproj', '~/dev/eyegaze/Source/SensorySoftware.EyeGaze.Desktop/SensorySoftware.EyeGaze.Desktop.csproj') \
+#         -LocalPackageCache '~/dev/Packages' \
+#         -BuildPropsPath '~/dev/Grid/Source/Directory.Build.Props' \
+#         -VersionElement 'EyeGazeVersion'
+# }
