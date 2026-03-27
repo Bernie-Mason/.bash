@@ -132,39 +132,22 @@ function Set-LocalVersion {
     Write-Info "Updating $ElementName to [$NewVersion] in Directory.Build.Props..."
     
     try {
-        [xml]$xml = Get-Content $PropsPath -Raw
+        $content = Get-Content $PropsPath -Raw
         
-        # Find and update the element
-        $propertyGroups = $xml.Project.PropertyGroup
-        $updated = $false
+        # Build regex pattern to match the element with any existing value
+        # Matches: <ElementName>value</ElementName> or <ElementName>[value]</ElementName>
+        $pattern = "(<$ElementName>)(\[?[^\]<]+\]?)(</$ElementName>)"
         
-        foreach ($group in $propertyGroups) {
-            if ($group.$ElementName) {
-                $group.$ElementName = "[$NewVersion]"
-                $updated = $true
-                break
-            }
+        if ($content -notmatch $pattern) {
+            throw "Could not find element '$ElementName' in $PropsPath"
         }
         
-        if (-not $updated) {
-            throw "Could not find element '$ElementName' to update"
-        }
+        # Replace with new version wrapped in brackets
+        $newContent = $content -replace $pattern, "`$1[$NewVersion]`$3"
         
-        # Save with proper formatting
-        $settings = New-Object System.Xml.XmlWriterSettings
-        $settings.Indent = $true
-        $settings.IndentChars = "  "
-        $settings.NewLineChars = "`r`n"
-        $settings.Encoding = [System.Text.UTF8Encoding]::new($false) # UTF-8 without BOM
+        [System.IO.File]::WriteAllText($PropsPath, $newContent)
         
-        $writer = [System.Xml.XmlWriter]::Create($PropsPath, $settings)
-        try {
-            $xml.Save($writer)
-            Write-Success "Updated $ElementName to [$NewVersion]"
-        }
-        finally {
-            $writer.Close()
-        }
+        Write-Success "Updated $ElementName to [$NewVersion]"
     }
     catch {
         throw "Failed to update Directory.Build.Props: $_"
@@ -174,12 +157,13 @@ function Set-LocalVersion {
 function Build-Project {
     param(
         [string]$ProjectPath,
-        [string]$Config
+        [string]$Config,
+        [string]$AssemblyVersion
     )
     
     Write-Info "Building $ProjectPath..."
     
-    $result = dotnet build $ProjectPath --configuration $Config 2>&1
+    $result = dotnet build $ProjectPath -p:Version=$AssemblyVersion --configuration $Config 2>&1 
     
     if ($LASTEXITCODE -ne 0) {
         Write-Error "Build failed for $ProjectPath"
@@ -275,12 +259,15 @@ try {
             $suffix = $matches[4]  # Any additional suffix like -beta, -alpha
             
             $patch++
-            $localVersion = "$major.$minor.$patch$suffix-local"
+            $assemblyVersion = "$major.$minor.$patch$suffix"
+            $localVersion = "$assemblyVersion-local"
         } else {
             Write-Warning "Unexpected version format: $baseVersion. Appending -local.2"
             $localVersion = "$currentVersion.2"
+            $assemblyVersion = $currentVersion
         }
     } else {
+        $assemblyVersion = $currentVersion
         $localVersion = "$currentVersion-local"
     }
     
@@ -302,7 +289,7 @@ try {
     
     Write-Info "Building projects..."
     foreach ($project in $resolvedProjects) {
-        Build-Project -ProjectPath $project -Config $Configuration
+        Build-Project -ProjectPath $project -Config $Configuration -AssemblyVersion $assemblyVersion
     }
     Write-Host ""
     
