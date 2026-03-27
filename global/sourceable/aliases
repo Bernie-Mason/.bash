@@ -97,7 +97,7 @@ alias grec='git rebase --continue'
 alias grea='git rebase --abort'
 alias gitkba='gitk --all --remotes &'
 alias gitkb='gitk &'
-alias gclx='git clean -fxd -e "*.vscode" -e "*.idea"'
+alias gclx='git clean -fxd -e "*.vscode" -e "*.idea" -e "*.DotSettings.*"'
 alias grpu='git rev-parse --abbrev-ref --symbolic-full-name HEAD@{upstream}'
 alias ggc='git fsck && git gc --prune=now'
 
