@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Takes resources from the grid resources repository and copies them into in the grid repository. 
+# 
+# Copies the contents of the following folders:
+# - Resources 
+# - Locale 
+#
+# Takes the following arguments:
+# - If no arguments are provided, copies all resources
+# - -r, --resources only copy resource files
+# - -l, --locales only copy locale files
+# - -h, --help show help message
+
+get_abs_filename() {
+  # $1 : relative filename
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
+
+GRID_REPOSITORY_DIR=$(get_abs_filename "${grid_repository_dir}")
+GRID_RESOURCES_REPOSITORY_DIR=$(get_abs_filename "${grid_resources_repository_dir}")
+
+# Handle arguments
+COPY_RESOURCES=true
+COPY_LOCALES=true
+while test $# -gt 0; do
+  case "$1" in
+    -r|--resources)
+      COPY_LOCALES=false
+      shift
+      ;;
+    -l|--locales)
+      COPY_RESOURCES=false
+      shift
+      ;;
+    -h|--help)
+      echo "Usage: $0 [options]"
+      echo "Options:"
+      echo "  -r, --resources   Only copy resource files"
+      echo "  -l, --locales     Only copy locale files"
+      echo "  -h, --help        Show this help message"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Use -h or --help for usage information."
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$COPY_RESOURCES" = true ]; then
+  cp -r "$GRID_RESOURCES_REPOSITORY_DIR/Resources"  "$GRID_REPOSITORY_DIR/Source/SensorySoftware.Grids.Grid3.iOS"
+fi
+
+if [ "$COPY_LOCALES" = true ]; then
+    if [ ! -d "$GRID_REPOSITORY_DIR/Source/SensorySoftware.Grids.Grid3.iOS/Resources" ]; then
+        mkdir "$GRID_REPOSITORY_DIR/Source/SensorySoftware.Grids.Grid3.iOS/Resources"
+    fi
+  cp -r "$GRID_RESOURCES_REPOSITORY_DIR/Locale"  "$GRID_REPOSITORY_DIR/Source/SensorySoftware.Grids.Grid3.iOS/Resources"
+fi
